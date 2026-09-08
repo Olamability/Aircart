@@ -1,16 +1,28 @@
 import React from "react";
+import { Title } from "@/components/text";
+import ProductCard from "@/components/ProductCard";
+import Container from "@/components/Container";
+import { getCategories } from "@/sanity/queries";
+import CategoryProducts from "@/components/CategoryProducts";
 
 const CategoryPage = async ({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: promise<{ slug: string }>;
 }) => {
+  const categories = await getCategories();
   const { slug } = await params;
-
   return (
-    <div>
-      <h1>Category Page</h1>
-      <p>{slug}</p>
+    <div className="py-10">
+      <Container>
+        <Title>
+          Products by Category:{" "}
+          <span className="font-bold text-green-600 capitalize tracking-wide">
+            {slug && slug}
+          </span>
+        </Title>
+        <CategoryProducts categories={categories} slug={slug} />
+      </Container>
     </div>
   );
 };

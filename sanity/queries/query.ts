@@ -20,4 +20,31 @@ const DEAL_PRODUCTS = defineQuery(`
   }
 `);
 
-export { BRAND_QUERY, BLOG_QUERY, DEAL_PRODUCTS };
+const PRODUCT_BY_SLUG_QUERY = defineQuery(`
+  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {
+    ...,
+    "categories": categories[]->{
+      _id,
+      title,
+      slug
+    },
+    "brand": brand->{
+      _id,
+      title,
+      slug
+    }
+  }
+`);
+
+const BRANDQ = defineQuery(`
+  *[
+    _type == "product" &&
+    slug.current == $slug
+  ][0].brand->{
+    _id,
+    title,
+    slug
+  }
+`);
+
+export { BRAND_QUERY, BLOG_QUERY, DEAL_PRODUCTS, PRODUCT_BY_SLUG_QUERY, BRANDQ };

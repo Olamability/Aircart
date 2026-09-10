@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import NoProductAvailable from "./NoProductAvailable";
-import { checkServerIdentity } from "tls";
 
 interface Props {
   categories: Category[];
@@ -29,12 +28,11 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   const fetchProducts = async (categorySlug: string) => {
     setLoading(true);
     try {
-      const query = `*[_type=='product' && references(*[_type == "category" && slug.current == 
+      const query = `*[_type=="product" && references(*[_type == "category" && slug.current == 
       $categorySlug]._id)] | order(title asc){
-      ...,"category": categories[]->title}
+      ...,"categories": categories[]->title}
       `;
       const data = await client.fetch(query, { categorySlug });
-      console.log(data);
       setProducts(data);
     } catch (error) {
       console.error("error fetching products:", error);
@@ -45,7 +43,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   };
   useEffect(() => {
     fetchProducts(currentSlug);
-  }, [router]);
+  }, [currentSlug]);
 
   return (
     <div className="py-5 flex flex-col md:flex-row items-start gap-5">

@@ -8,7 +8,7 @@ import CategoryProducts from "@/components/CategoryProducts";
 const CategoryPage = async ({
   params,
 }: {
-  params: promise<{ slug: string }>;
+  params: Promise<{ slug: string }>;
 }) => {
   const categories = await getCategories();
   const { slug } = await params;
@@ -18,7 +18,7 @@ const CategoryPage = async ({
         <Title>
           Products by Category:{" "}
           <span className="font-bold text-green-600 capitalize tracking-wide">
-            {slug && slug}
+            {slug}
           </span>
         </Title>
         <CategoryProducts categories={categories} slug={slug} />

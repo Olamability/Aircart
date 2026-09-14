@@ -1,8 +1,8 @@
 import Logo from "@/components/Logo";
 import Link from "next/link";
-import React from "react";
+import { Button } from "@/components/ui/button";
 
-const NotFoundPage = () => {
+const NotFound = () => {
   return (
     <div className="bg-white flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-10 md:py-32">
       <div className="max-w-md w-full space-y-8">
@@ -60,4 +60,4 @@ const NotFoundPage = () => {
   );
 };
 
-export default NotFoundPage;
+export default NotFound;

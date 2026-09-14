@@ -1827,6 +1827,13 @@
           "type": "string"
         }
       },
+      "clerkUserId": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "fullName": {
         "type": "objectAttribute",
         "value": {

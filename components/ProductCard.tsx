@@ -9,9 +9,9 @@ import { Title } from "./text";
 import PriceView from "./PriceView";
 import { Button } from "./ui/button";
 import AddToCartButton from "./AddToCartButton";
+import FavoriteIcon from "./FavoriteIcon";
 
 const ProductCard = ({ product }: { product: Product }) => {
-  console.log(product);
   return (
     <div className=" text-sm border-[1px] border-dark-blue/50 rounde-md bg-white group">
       <div className="relative group overflow-hidden bg-shop-light-bg">
@@ -29,7 +29,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             />
           </Link>
         )}
-        <WishListIcon product={product} />
+        <FavoriteIcon product={product} />
         {product?.status === "new" && (
           <p
             className="absolute top-2 left-2 z-10 text-sm border 
@@ -105,7 +105,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           </p>
         </div>
         <PriceView price={product.price} discount={product.discount} />
-        <AddToCartButton product={product} className="w-36 rounded-full" />
+        <AddToCartButton product={product} className="w-36 rounded-md" />
       </div>
     </div>
   );

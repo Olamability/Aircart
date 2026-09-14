@@ -308,6 +308,7 @@ export type Address = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  clerkUserId?: string;
   fullName?: string;
   phone?: string;
   email?: string;
@@ -332,11 +333,10 @@ export type Category = {
   description?: string;
   range?: number;
   featured?: boolean;
-  productCount?: number;
   image?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
-    hotspot?: SanityImageHotspot;    
+    hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     _type: "image";
   };
@@ -556,6 +556,82 @@ export type DEAL_PRODUCTS_RESULT = Array<{
   isfeatured?: boolean;
 }>;
 
+// Source: sanity/queries/query.ts
+// Variable: PRODUCT_BY_SLUG_QUERY
+// Query: *[_type == "product" && slug.current == $slug] | order(title asc) [0] {    ...,    "categories": categories[]->{      _id,      title,      slug    },    "brand": brand->{      _id,      title,      slug    }  }
+export type PRODUCT_BY_SLUG_QUERY_RESULT = {
+  _id: string;
+  _type: "product";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  image?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+    _key: string;
+  }>;
+  description?: string;
+  price?: number;
+  discount?: number;
+  categories: Array<{
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+  }> | null;
+  stock?: number;
+  brand: {
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+  } | null;
+  status?: "available" | "hot" | "new" | "sale";
+  images?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+    _key: string;
+  }>;
+  isNew?: boolean;
+  variant?:
+    "appliances" | "food & beverages" | "gadget" | "others" | "refrigerator";
+  isfeatured?: boolean;
+} | null;
+
+// Source: sanity/queries/query.ts
+// Variable: BRANDQ
+// Query: *[    _type == "product" &&    slug.current == $slug  ][0].brand->{    _id,    title,    slug  }
+export type BRANDQ_RESULT = {
+  _id: string;
+  title: string | null;
+  slug: Slug | null;
+} | null;
+
+// Source: sanity/queries/query.ts
+// Variable: ADDRESS_QUERY
+// Query: *[    _type == "address" &&    clerkUserId == $userId  ] | order(Default desc, CreatedAT desc) {    _id,    fullName,    phone,    email,    street,    city,    state,    country,    postalCode,    zip,    Default,    CreatedAT,    clerkUserId  }
+export type ADDRESS_QUERY_RESULT = Array<{
+  _id: string;
+  fullName: string | null;
+  phone: string | null;
+  email: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  postalCode: string | null;
+  zip: string | null;
+  Default: boolean | null;
+  CreatedAT: string | null;
+  clerkUserId: string | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -563,5 +639,8 @@ declare module "@sanity/client" {
     '\n  *[_type == "brand"] | order(title desc)\n': BRAND_QUERY_RESULT;
     '\n  *[_type == "blog"]\n| order(publishedAt desc) {\n  ...,\n  "category": category->title\n}\n': BLOG_QUERY_RESULT;
     '\n  *[_type == "product" && status == "hot"]\n  | order(_createdAt desc) {\n    ...,\n    "categories": categories[]->title,\n    "brand": brand->title\n  }\n': DEAL_PRODUCTS_RESULT;
+    '\n  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {\n    ...,\n    "categories": categories[]->{\n      _id,\n      title,\n      slug\n    },\n    "brand": brand->{\n      _id,\n      title,\n      slug\n    }\n  }\n': PRODUCT_BY_SLUG_QUERY_RESULT;
+    '\n  *[\n    _type == "product" &&\n    slug.current == $slug\n  ][0].brand->{\n    _id,\n    title,\n    slug\n  }\n': BRANDQ_RESULT;
+    '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
   }
 }

@@ -47,4 +47,32 @@ const BRANDQ = defineQuery(`
   }
 `);
 
-export { BRAND_QUERY, BLOG_QUERY, DEAL_PRODUCTS, PRODUCT_BY_SLUG_QUERY, BRANDQ };
+const ADDRESS_QUERY = defineQuery(`
+  *[
+    _type == "address" &&
+    clerkUserId == $userId
+  ] | order(Default desc, CreatedAT desc) {
+    _id,
+    fullName,
+    phone,
+    email,
+    street,
+    city,
+    state,
+    country,
+    postalCode,
+    zip,
+    Default,
+    CreatedAT,
+    clerkUserId
+  }
+`);
+
+export {
+  BRAND_QUERY,
+  BLOG_QUERY,
+  DEAL_PRODUCTS,
+  PRODUCT_BY_SLUG_QUERY,
+  BRANDQ,
+  ADDRESS_QUERY,
+};

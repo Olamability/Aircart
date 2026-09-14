@@ -4,7 +4,7 @@ import { getProductBySlug } from "@/sanity/queries";
 import { Title } from "@/components/text";
 import PriceView from "@/components/PriceView";
 import AddToCartButton from "@/components/AddToCartButton";
-import WishListIcon from "@/components/WishListIcon";
+import FavoriteIcon from "@/components/FavoriteIcon";
 import Container from "@/components/Container";
 import ImageView from "@/components/ImageView";
 import { StarIcon, RotateCcw } from "lucide-react";
@@ -25,14 +25,13 @@ const SingleProductPage = async ({
   if (!product) {
     notFound();
   }
-  console.log("SINGLE PRODUCT:", product);
 
   return (
     <Container className="flex flex-col md:flex-row gap-5 pb-10 pt-5">
       {/* Product image */}
       <div className="w-full md:w-1/2 relative bg-shop-light-bg rounded-lg overflow-hidden">
         <ImageView images={product.image} isStock={product.stock} />
-        <WishListIcon product={product} />
+        {/* <FavoriteIcon product={product} /> */}
       </div>
 
       {/* Product details */}
@@ -81,7 +80,7 @@ const SingleProductPage = async ({
             className="w-full sm:w-72 rounded-md"
           />
 
-          <WishListIcon
+          <FavoriteIcon
             showProduct={true}
             product={product}
             className="static"

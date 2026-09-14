@@ -1,21 +1,27 @@
 import { defineField, defineType } from "sanity";
 import { HomeIcon } from "@sanity/icons/Home";
 
-
 export const addressType = defineType({
   name: "address",
   title: "Addresses",
   type: "document",
   icon: HomeIcon,
-  
 
   fields: [
+    defineField({
+      name: "clerkUserId",
+      title: "Clerk User ID",
+      type: "string",
+      description: "The Clerk user ID this address belongs to.",
+      validation: (Rule) => Rule.required(),
+    }),
+
     defineField({
       name: "fullName",
       title: "Full Name",
       type: "string",
       description: "A friendly name for this address (e.g. Home, Work, Shop)",
-      validation: (Rule) => Rule.required() .max(50),
+      validation: (Rule) => Rule.required().max(50),
     }),
 
     defineField({
@@ -29,7 +35,6 @@ export const addressType = defineType({
       name: "email",
       title: "User Email",
       type: "email",
-      
     }),
 
     defineField({
@@ -37,7 +42,7 @@ export const addressType = defineType({
       title: "Street Address",
       type: "string",
       description: "The street address including apartment/unit/house number",
-      validation: (Rule) => Rule.required() .min(5) .max(100),
+      validation: (Rule) => Rule.required().min(5).max(100),
     }),
 
     defineField({
@@ -74,21 +79,22 @@ export const addressType = defineType({
       description: "Format: 12345 or 12345-6789",
       validation: (Rule) =>
         Rule.required()
-      .regex(/^\{5}(-\d{4})?$/, {
-        invert: false,
-        name: "zipcode", 
-        
-      })
-    .custom((zip: string | undefined) => {
-      if(!zip) {
-        return "ZIP code is required";
-      }
-      if(!zip.match(/^\{5}(-\d{4})?$/)) {
-        return "Please enter a valid ZIP code (e.g. 12345 or 12345-6789)";
-      }
-      return true;
+          .regex(/^\d{5}(-\d{4})?$/, {
+            invert: false,
+            name: "zipcode",
+          })
+          .custom((zip: string | undefined) => {
+            if (!zip) {
+              return "ZIP code is required";
+            }
+
+            if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+              return "Please enter a valid ZIP code (e.g. 12345 or 12345-6789)";
+            }
+
+            return true;
+          }),
     }),
-  }),
 
     defineField({
       name: "Default",
@@ -98,7 +104,21 @@ export const addressType = defineType({
       initialValue: false,
     }),
 
-        defineField({
+    defineField({
+      name: "label",
+      title: "Address Label",
+      type: "string",
+      options: {
+        list: [
+          { title: "Home", value: "home" },
+          { title: "Office", value: "office" },
+          { title: "Other", value: "other" },
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+
+    defineField({
       name: "CreatedAT",
       title: "Created At",
       type: "datetime",

@@ -16,19 +16,23 @@ const QuantityButtons = ({ product, className }: Props) => {
   const isOutOfStock = product?.stock === 0;
 
   const handleIncrease = () => {
-    if (itemCount < product.stock) {
+    if ((product?.stock as number) > itemCount) {
       addItem(product);
-      toast.success(`${product.title}...Added to cart`);
+      toast.success("Quantity Increased Successfully!");
     } else {
       toast.error(
-        `Cannot add more ${product.title}. Only ${product.stock} available.`,
+        `Cannot add more than only ${product.stock} available ${product.title}.`,
       );
     }
   };
   const handleDecrease = () => {
-    if (itemCount > 0) {
-      removeItem(product._id);
-      toast.success(`${product.title}...Removed from cart`);
+    removeItem(product?._id);
+    if (itemCount > 1) {
+      toast.success("Quantity Decreased Successfully");
+    } else {
+      toast.success(
+        `${product?.title?.substring(0, 12)} removed successfully!`,
+      );
     }
   };
 
@@ -38,18 +42,19 @@ const QuantityButtons = ({ product, className }: Props) => {
   return (
     <div className={cn("flex items-center gap-1 pb-1 text-base", className)}>
       <Button
-        type="button"
         onClick={handleDecrease}
-        className="border border-2 border-shop-orange"
+        className="border-[1px] border-shop-orange/50 hover:bg-shop-dark-green/20 hoverEffect"
       >
         <Minus className="w-4 h-4" />
       </Button>
-      <span className=" text-sm">{itemCount}</span>
+      <span className="font-semibold text-sm w-6 text-center text-darkColor">
+        {itemCount}
+      </span>
       <Button
         type="button"
         onClick={handleIncrease}
 
-        className="border border-2 border-shop-orange"
+        className="border-[1px] border-shop-orange/50 hover:bg-shop-dark-green/20 hoverEffect"
       >
         <Plus className="w-4 h-4" />
       </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
@@ -28,6 +28,11 @@ import {
 import QuantityButtons from "@/components/QuantityButtons";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  createCheckoutSession,
+  type Metadata,
+} from "@/actions/createCheckoutSession";
+import type { ADDRESS_QUERY_RESULT } from "@/sanity.types";
 
 const CartPage = () => {
   const router = useRouter();
@@ -51,10 +56,10 @@ const CartPage = () => {
   const { openSignIn } = useClerk();
   const { user } = useUser();
 
-  const [addresses, setAddresses] = useState<Address[] | null>(null);
-  const [selectedAddresses, setSelectedAddresses] = useState<Address | null>(
-    null,
-  );
+  const [addresses, setAddresses] = useState<ADDRESS_QUERY_RESULT | null>(null);
+  const [selectedAddresses, setSelectedAddresses] = useState<
+    ADDRESS_QUERY_RESULT[number] | null
+  >(null);
 
   const fetchAddresses = async () => {
     if (!user?.id) return;
@@ -70,7 +75,7 @@ const CartPage = () => {
       setAddresses(data);
 
       const defaultAddress = data.find(
-        (addr: Address) => addr.Default === true,
+        (addr: ADDRESS_QUERY_RESULT[number]) => addr.Default === true,
       );
 
       if (defaultAddress) {
@@ -87,7 +92,11 @@ const CartPage = () => {
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.id) {
-      fetchAddresses();
+      const timeoutId = window.setTimeout(() => {
+        void fetchAddresses();
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
     }
   }, [isLoaded, isSignedIn, user?.id]);
 
@@ -100,6 +109,43 @@ const CartPage = () => {
 
     resetCart();
     toast.success("Cart cleared successfully");
+  };
+
+  const handleCheckout = async () => {
+    if (!isLoaded || !isSignedIn || !user?.id) {
+      toast.error("Please sign in before checkout");
+    }
+    if (!selectedAddresses) {
+      toast.error("Please select a delivery address");
+      return;
+    }
+    setLoading(true);
+    try {
+      const metadata: Metadata = {
+        orderNumber: crypto.randomUUID(),
+        customerName: user?.fullName ?? "Unknown",
+        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
+        clerkUserId: user?.id ?? "",
+        address: selectedAddresses
+          ? {
+              label: selectedAddresses.label ?? "",
+              name: selectedAddresses.fullName ?? "",
+              address: selectedAddresses.street ?? "",
+              city: selectedAddresses.city ?? "",
+              state: selectedAddresses.state ?? "",
+              zip: selectedAddresses.zip ?? "",
+            }
+          : null,
+      };
+      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -259,6 +305,8 @@ const CartPage = () => {
                           <Button
                             className="w-full rounded-full font-semibold tracking-wide hoverEffect"
                             size="lg"
+                            disabled={loading}
+                            onClick={handleCheckout}
                           >
                             {loading
                               ? "Please wait......"
@@ -383,8 +431,13 @@ const CartPage = () => {
                     </div>
 
                     {/* Checkout */}
-                    <Button className="mt-3 h-10 w-full rounded-md bg-shop-dark-green font-semibold text-white hover:bg-shop-dark-green/90">
-                      Proceed to Checkout
+                    <Button
+                      className="mt-3 h-10 w-full rounded-md bg-shop-dark-green font-semibold text-white hover:bg-shop-dark-green/90"
+                      size="lg"
+                      disabled={loading}
+                      onClick={handleCheckout}
+                    >
+                      {loading ? "Please wait..." : "Proceed to Checkout"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>

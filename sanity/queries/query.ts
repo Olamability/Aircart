@@ -63,6 +63,7 @@ const ADDRESS_QUERY = defineQuery(`
     postalCode,
     zip,
     Default,
+    label,
     CreatedAT,
     clerkUserId
   }

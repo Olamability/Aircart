@@ -22,13 +22,6 @@ export type ProductReference = {
   [internalGroqTypeReferenceTo]?: "product";
 };
 
-export type AddressReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "address";
-};
-
 export type Order = {
   _id: string;
   _type: "order";
@@ -36,44 +29,42 @@ export type Order = {
   _updatedAt: string;
   _rev: string;
   orderNumber?: string;
+  stripeCheckoutSessionId?: string;
+  stripeCustomerId?: string;
+  stripePaymentIntentId?: string;
+  paymentReference?: string;
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
   invoice?: {
     id?: string;
     number?: string;
     hosted_invoice_url?: string;
   };
-  stripeCheckoutSessionId?: string;
-  stripeCCustomerId?: string;
   clerkUserId?: string;
   customerName?: string;
   customerEmail?: string;
-  striptPaymentIntentId?: string;
-  items?: Array<{
+  products?: Array<{
     product?: ProductReference;
     quantity?: number;
     price?: number;
     _key: string;
   }>;
-  totalprice?: number;
+  totalPrice?: number;
   currency?: string;
   amountDiscount?: number;
   address?: {
+    name?: string;
+    address?: string;
+    city?: string;
     state?: string;
     zip?: string;
-    city?: string;
-    address?: string;
-    name?: string;
   };
   status?:
     | "pending"
     | "processing"
-    | "paid"
     | "shipped"
     | "out_for_delivery"
     | "delivered"
     | "cancelled";
-  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
-  paymentReference?: string;
-  shippingAddress?: AddressReference;
   orderDate?: string;
   createdAt?: string;
 };
@@ -319,6 +310,7 @@ export type Address = {
   postalCode?: string;
   zip?: string;
   Default?: boolean;
+  label?: "home" | "office" | "other";
   CreatedAT?: string;
 };
 
@@ -441,7 +433,6 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | ProductReference
-  | AddressReference
   | Order
   | SanityImageAssetReference
   | CategoryReference
@@ -615,7 +606,7 @@ export type BRANDQ_RESULT = {
 
 // Source: sanity/queries/query.ts
 // Variable: ADDRESS_QUERY
-// Query: *[    _type == "address" &&    clerkUserId == $userId  ] | order(Default desc, CreatedAT desc) {    _id,    fullName,    phone,    email,    street,    city,    state,    country,    postalCode,    zip,    Default,    CreatedAT,    clerkUserId  }
+// Query: *[    _type == "address" &&    clerkUserId == $userId  ] | order(Default desc, CreatedAT desc) {    _id,    fullName,    phone,    email,    street,    city,    state,    country,    postalCode,    zip,    Default,    label,    CreatedAT,    clerkUserId  }
 export type ADDRESS_QUERY_RESULT = Array<{
   _id: string;
   fullName: string | null;
@@ -628,6 +619,7 @@ export type ADDRESS_QUERY_RESULT = Array<{
   postalCode: string | null;
   zip: string | null;
   Default: boolean | null;
+  label: "home" | "office" | "other" | null;
   CreatedAT: string | null;
   clerkUserId: string | null;
 }>;
@@ -641,6 +633,6 @@ declare module "@sanity/client" {
     '\n  *[_type == "product" && status == "hot"]\n  | order(_createdAt desc) {\n    ...,\n    "categories": categories[]->title,\n    "brand": brand->title\n  }\n': DEAL_PRODUCTS_RESULT;
     '\n  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {\n    ...,\n    "categories": categories[]->{\n      _id,\n      title,\n      slug\n    },\n    "brand": brand->{\n      _id,\n      title,\n      slug\n    }\n  }\n': PRODUCT_BY_SLUG_QUERY_RESULT;
     '\n  *[\n    _type == "product" &&\n    slug.current == $slug\n  ][0].brand->{\n    _id,\n    title,\n    slug\n  }\n': BRANDQ_RESULT;
-    '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
+    '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    label,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
   }
 }

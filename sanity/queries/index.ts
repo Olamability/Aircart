@@ -96,8 +96,7 @@ const getBrandQ = async (slug: string) => {
   }
 };
 
-const fetcAddresses = async (userId: string) => {
-  setLoading(true);
+const getAddresses = async (userId: string) => {
   try {
     const { data } = await sanityFetch({
       query: ADDRESS_QUERY,

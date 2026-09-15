@@ -8,7 +8,10 @@ const ShopPage = async () => {
   const brands = await getBrands();
   return (
     <div>
-      <Shop categories={categories} brands={brands} />
+      <Shop
+        categories={Array.isArray(categories) ? categories : []}
+        brands={Array.isArray(brands) ? brands : []}
+      />
     </div>
   );
 };

@@ -46,6 +46,16 @@ const BRANDQ = defineQuery(`
     slug
   }
 `);
+export const PRODUCT_BY_VARIANT_QUERY = defineQuery(`
+  *[
+    _type == "product" &&
+    variant == $variant
+  ]
+  | order(title desc) {
+    ...,
+    "categories": categories[]->title
+  }
+`);
 
 const ADDRESS_QUERY = defineQuery(`
   *[
@@ -68,6 +78,11 @@ const ADDRESS_QUERY = defineQuery(`
     clerkUserId
   }
 `);
+const MY_ORDERS_QUERY = defineQuery(
+  `*[_type == "order" && clerkUserId == 
+  $userId] | order(orderDate desc)
+  {...,products[]{...,product->}}`,
+);
 
 export {
   BRAND_QUERY,
@@ -76,4 +91,5 @@ export {
   PRODUCT_BY_SLUG_QUERY,
   BRANDQ,
   ADDRESS_QUERY,
+  MY_ORDERS_QUERY,
 };

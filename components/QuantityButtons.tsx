@@ -4,6 +4,7 @@ import { Button } from "@base-ui/react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import type { Product } from "@/sanity.types";
 
 interface Props {
   product: Product;

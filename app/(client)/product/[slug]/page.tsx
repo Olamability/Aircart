@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/sanity/queries";
+import type { Product } from "@/sanity.types";
 import { Title } from "@/components/text";
 import PriceView from "@/components/PriceView";
 import AddToCartButton from "@/components/AddToCartButton";
@@ -76,17 +77,16 @@ const SingleProductPage = async ({
         </div>
         <div className="flex items-center gap-3">
           <AddToCartButton
-            product={product}
+            product={product as unknown as Product}
             className="w-full sm:w-72 rounded-md"
           />
 
           <FavoriteIcon
-            showProduct={true}
-            product={product}
+            product={product as unknown as Product}
             className="static"
           />
         </div>
-        <ProductCharacteristics product={product} />
+        <ProductCharacteristics product={product as unknown as Product} />
         <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-b-gray-200 py-5 -mt-2">
           <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
             <RxBorderSplit className="text-lg" />

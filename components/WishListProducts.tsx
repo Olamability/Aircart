@@ -12,6 +12,7 @@ import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import PriceFormat from "./PriceFormat";
 import AddToCartButton from "./AddToCartButton";
+import type { Product } from "@/sanity.types";
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
 
@@ -21,6 +22,9 @@ const WishListProducts = () => {
 
   const loadMore = () => {
     setVisibleProducts((prev) => Math.min(prev + 5, favoriteProduct.length));
+  };
+  const loadLess = () => {
+    setVisibleProducts((prev) => Math.max(prev - 5, 7));
   };
   const handleResetWishlist = () => {
     const confirmReset = window.confirm(
@@ -73,7 +77,7 @@ const WishListProducts = () => {
                           >
                             <Image
                               src={urlFor(product?.image[0]).url()}
-                              alt={product?.title}
+                              alt={product?.title || "Product image"}
                               width={80}
                               height={80}
                               className="rounded-md h-14 w-14 md:h-20 md:w-20 object-contain group-hover:scale-105 hoverEffect"
@@ -85,7 +89,7 @@ const WishListProducts = () => {
                       <td className="p-2 capitalize hidden md:table-cell">
                         {product?.categories && (
                           <p className="uppercase line-clamp-1 text-xs font-medium">
-                            {product.categories.map((cat) => cat).join(", ")}
+                            {product.categories?.map((cat) => cat._ref).join(", ")}
                           </p>
                         )}
                       </td>
@@ -94,11 +98,10 @@ const WishListProducts = () => {
                       </td>
                       <td className="px-2 py-4 hidden">
                         <span
-                          className={`p-2 w-15 ${
-                            (product?.stock as number) > 0
-                              ? "rounded-md bg-shop-light-green/40 px-2 py-1 text-xs text-shop-dark-green"
-                              : "rounded-md bg-red-600/30 px-2 py-1 text-sm text-red-600"
-                          } font-medium text-sm hidden md:table-cell`}
+                          className={`p-2 w-15 ${(product?.stock as number) > 0
+                            ? "rounded-md bg-shop-light-green/40 px-2 py-1 text-xs text-shop-dark-green"
+                            : "rounded-md bg-red-600/30 px-2 py-1 text-sm text-red-600"
+                            } font-medium text-sm hidden md:table-cell`}
                         >
                           {(product?.stock as number) > 0
                             ? "In Stock"

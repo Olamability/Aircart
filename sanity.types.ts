@@ -605,6 +605,46 @@ export type BRANDQ_RESULT = {
 } | null;
 
 // Source: sanity/queries/query.ts
+// Variable: PRODUCT_BY_VARIANT_QUERY
+// Query: *[    _type == "product" &&    variant == $variant  ]  | order(title desc) {    ...,    "categories": categories[]->title  }
+export type PRODUCT_BY_VARIANT_QUERY_RESULT = Array<{
+  _id: string;
+  _type: "product";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  image?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+    _key: string;
+  }>;
+  description?: string;
+  price?: number;
+  discount?: number;
+  categories: Array<string | null> | null;
+  stock?: number;
+  brand?: BrandReference;
+  status?: "available" | "hot" | "new" | "sale";
+  images?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+    _key: string;
+  }>;
+  isNew?: boolean;
+  variant?:
+    "appliances" | "food & beverages" | "gadget" | "others" | "refrigerator";
+  isfeatured?: boolean;
+}>;
+
+// Source: sanity/queries/query.ts
 // Variable: ADDRESS_QUERY
 // Query: *[    _type == "address" &&    clerkUserId == $userId  ] | order(Default desc, CreatedAT desc) {    _id,    fullName,    phone,    email,    street,    city,    state,    country,    postalCode,    zip,    Default,    label,    CreatedAT,    clerkUserId  }
 export type ADDRESS_QUERY_RESULT = Array<{
@@ -633,6 +673,7 @@ declare module "@sanity/client" {
     '\n  *[_type == "product" && status == "hot"]\n  | order(_createdAt desc) {\n    ...,\n    "categories": categories[]->title,\n    "brand": brand->title\n  }\n': DEAL_PRODUCTS_RESULT;
     '\n  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {\n    ...,\n    "categories": categories[]->{\n      _id,\n      title,\n      slug\n    },\n    "brand": brand->{\n      _id,\n      title,\n      slug\n    }\n  }\n': PRODUCT_BY_SLUG_QUERY_RESULT;
     '\n  *[\n    _type == "product" &&\n    slug.current == $slug\n  ][0].brand->{\n    _id,\n    title,\n    slug\n  }\n': BRANDQ_RESULT;
+    '\n  *[\n    _type == "product" &&\n    variant == $variant\n  ]\n  | order(title desc) {\n    ...,\n    "categories": categories[]->title\n  }\n': PRODUCT_BY_VARIANT_QUERY_RESULT;
     '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    label,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
   }
 }

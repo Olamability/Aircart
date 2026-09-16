@@ -18,7 +18,7 @@ const ProductCharacteristics = async ({
     : [];
 
   return (
-    <Accordion type="single">
+    <Accordion>
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-start text-left">
           Characteristics

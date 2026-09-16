@@ -23,7 +23,7 @@ interface Props {
     _type: "image";
     _key: string;
   }>;
-  isStock?: boolean;
+  isStock?: number;
 }
 
 const ImageView = ({ images = [], isStock }: Props) => {
@@ -52,9 +52,8 @@ const ImageView = ({ images = [], isStock }: Props) => {
               width={700}
               height={700}
               priority
-              className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain rounded-md hoverEffect group-hover:scale-110 ${
-                isStock === 0 ? "opacity-50" : ""
-              }`}
+              className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain rounded-md hoverEffect group-hover:scale-110 ${isStock === 0 ? "opacity-50" : ""
+                }`}
             />
           </motion.div>
         </AnimatePresence>
@@ -100,11 +99,10 @@ const ImageView = ({ images = [], isStock }: Props) => {
             type="button"
             onClick={() => setActive(index)}
             aria-label={`View product image ${index + 1}`}
-            className={`shrink-0 w-20 h-20 rounded-md border p-1 bg-white transition-all ${
-              active === index
-                ? "border-shop-orange"
-                : "border-gray-200 hover:border-shop-orange/50"
-            }`}
+            className={`shrink-0 w-20 h-20 rounded-md border p-1 bg-white transition-all ${active === index
+              ? "border-shop-orange"
+              : "border-gray-200 hover:border-shop-orange/50"
+              }`}
           >
             <Image
               src={urlFor(image).url()}

@@ -4,8 +4,15 @@ import type { Category } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import Image from "next/image";
+type CategoryWithProductCount = Category & {
+  productCount: number;
+};
 
-const HomeCategories = ({ categories }: { categories: Category[] }) => {
+const HomeCategories = ({
+  categories,
+}: {
+  categories: CategoryWithProductCount[];
+}) => {
   return (
     <div className="bg-white border border-shop-light-green/20 my-10 md:my-20 p-5 lg:p-7 rounded-md">
       <Title className="border-b pb-3"> Popular Categories</Title>
@@ -17,7 +24,7 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
           >
             {category?.image && (
               <div className="overflow-hidden border border-shop-orange/30 hover:border-shop-orange hoverEffect w-20 h-20 p-1">
-                <Link href={`/category/${category?.slug.current}`}>
+                <Link href={`/category/${category?.slug?.current}`}>
                   <Image
                     src={urlFor(category?.image).url()}
                     alt="categoryImage"
@@ -33,7 +40,7 @@ const HomeCategories = ({ categories }: { categories: Category[] }) => {
               <h3 className="text-base font-semibold">{category?.title}</h3>
               <p className="text-sm">
                 <span className="font-bold text-shop-dark-green">
-                  {`(${category?.productCount as number})`}
+                  {`(${category?.productCount})`}
                 </span>{" "}
                 items Available
               </p>

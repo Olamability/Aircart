@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Category } from "@/sanity.types";
+import { Category, Product } from "@/sanity.types";
 import { client } from "@/sanity/lib/client";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "motion/react";

@@ -9,7 +9,8 @@ import { AnimatePresence, motion } from "motion/react";
 import ProductCard from "./ProductCard";
 
 const ProductGrid = () => {
-  const [products, setProducts] = useState([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
 
@@ -23,7 +24,8 @@ const ProductGrid = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await client.fetch(query, params);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await (client as any).fetch(query, params);
         setProducts(response);
       } catch (error) {
         console.error("Error fetching products:", error);

@@ -12,7 +12,7 @@ const FavouriteButton = ({
   className,
 }: {
   showProduct?: boolean;
-  product: Product | null | undefined;
+  product?: Product | null | undefined;
   className?: string;
 }) => {
   const { favoriteProduct, addToFavorite } = useStore();
@@ -28,7 +28,7 @@ const FavouriteButton = ({
   const handleFavorite = (e: React.MouseEvent<HTMLSpanElement>) => {
     // window.alert("Fav button tapped");
     e.preventDefault();
-    if (product._id) {
+    if (product?._id) {
       addToFavorite(product).then(() => {
         toast.success(
           existingProduct

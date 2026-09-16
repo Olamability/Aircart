@@ -4,10 +4,8 @@ import Image from "next/image";
 import { Product } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import { Flame, StarIcon } from "lucide-react";
-import WishListIcon from "./WishListIcon";
 import { Title } from "./text";
 import PriceView from "./PriceView";
-import { Button } from "./ui/button";
 import AddToCartButton from "./AddToCartButton";
 import FavoriteIcon from "./FavoriteIcon";
 
@@ -95,11 +93,10 @@ const ProductCard = ({ product }: { product: Product }) => {
         <div className="flex items-center gap-2.5">
           <p className="font-medium">In Stock</p>
           <p
-            className={`${
-              product?.stock === 0
+            className={`${product?.stock === 0
                 ? "text-red-600"
                 : "text-shop-light-green/80 font-semibold"
-            }`}
+              }`}
           >
             {(product?.stock as number) > 0 ? product?.stock : "Out of Stock"}
           </p>

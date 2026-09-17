@@ -6,6 +6,8 @@ import React, { FC } from "react";
 import { useOutsideClick } from "@/hooks";
 import { usePathname } from "next/navigation";
 import SocialMedia from "./SocialMedia";
+import { useUser } from "@clerk/nextjs";
+import SignIn from "./SignIn";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +16,7 @@ interface SidebarProps {
 const SideMenu: FC<SidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
   const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
+  const { isSignedIn } = useUser();
   return (
     <div
       className={`fixed inset-y-0 h-screen left-0 z-50 w-full
@@ -47,6 +50,34 @@ const SideMenu: FC<SidebarProps> = ({ isOpen, onClose }) => {
               {item?.title}
             </Link>
           ))}
+          <hr className="border-gray-800 my-2" />
+          {isSignedIn ? (
+            <>
+              <Link
+                href="/account"
+                onClick={onClose}
+                className="hover:text-shop-light-green hoverEffect"
+              >
+                My Account
+              </Link>
+              <Link
+                href="/orders"
+                onClick={onClose}
+                className="hover:text-shop-light-green hoverEffect"
+              >
+                My Orders
+              </Link>
+              <Link
+                href="/account"
+                onClick={onClose}
+                className="hover:text-shop-light-green hoverEffect"
+              >
+                Delivery Addresses
+              </Link>
+            </>
+          ) : (
+            <SignIn />
+          )}
         </div>
         <SocialMedia />
       </div>

@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import stripe from "@/lib/stripe";
 import { backendClient } from "@/sanity/lib/backendClient";
 import { headers } from "next/headers";
@@ -106,7 +107,12 @@ async function createOrderInSanity(
       address?: string;
     };
 
-  const parsedAddress = address ? JSON.parse(address) : null;
+  let parsedAddress = null;
+  try {
+    parsedAddress = address && address !== "undefined" ? JSON.parse(address) : null;
+  } catch (error) {
+    console.error("Failed to parse address from metadata:", error);
+  }
 
   // Get Stripe line items and expand the Stripe products
   const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(

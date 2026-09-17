@@ -310,7 +310,7 @@ const CartPage = () => {
                             onClick={handleCheckout}
                           >
                             {loading
-                              ? "Please wait......"
+                              ? "Processing, please wait..."
                               : "Proceed to Checkout"}
                           </Button>
                         </div>
@@ -440,7 +440,7 @@ const CartPage = () => {
                       disabled={loading}
                       onClick={handleCheckout}
                     >
-                      {loading ? "Please wait..." : "Proceed to Checkout"}
+                      {loading ? "Processing, please wait..." : "Proceed to Checkout"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>

@@ -6,10 +6,11 @@ import CartIcon from "./CartIcon";
 import FavoriteButton from "./FavoriteButton";
 import MobileMenu from "./MobileMenu";
 import SignIn from "./SignIn";
-import { ClerkLoaded, UserButton } from "@clerk/nextjs";
+import { ClerkLoaded } from "@clerk/nextjs";
+import CustomUserButton from "./CustomUserButton";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { Logs } from "lucide-react";
+import { Logs, User, Package, MapPin } from "lucide-react";
 import { getMyOrders } from "@/sanity/queries";
 
 const Header = async () => {
@@ -43,7 +44,7 @@ const Header = async () => {
                     {orders?.length ? orders?.length : 0}
                   </span>
                 </Link>
-                <UserButton />
+                <CustomUserButton />
               </>
             ) : (
               <SignIn />

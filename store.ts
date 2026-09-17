@@ -40,6 +40,11 @@ const useStore = create<StoreState>()(
           const existingItem = state.items.find(
             (item) => item.product._id === product._id,
           );
+          const currentQuantity = existingItem ? existingItem.quantity : 0;
+          if ((product.stock as number) <= currentQuantity) {
+            return state;
+          }
+
           if (existingItem) {
             return {
               items: state.items.map((item) =>

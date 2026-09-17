@@ -33,6 +33,7 @@ import {
   type Metadata,
 } from "@/actions/createCheckoutSession";
 import type { ADDRESS_QUERY_RESULT } from "@/sanity.types";
+import AddressDialog from "@/components/AddressDialog";
 
 const CartPage = () => {
   const router = useRouter();
@@ -382,9 +383,11 @@ const CartPage = () => {
                               ))}
                             </RadioGroup>
 
-                            <Button variant="outline" className="w-full mt-4">
-                              Add New Address
-                            </Button>
+                            <AddressDialog onSuccess={fetchAddresses}>
+                              <Button variant="outline" className="w-full mt-4">
+                                Add New Address
+                              </Button>
+                            </AddressDialog>
                           </CardContent>
                         </Card>
                       </div>

@@ -91,18 +91,21 @@ const ProductCard = ({ product }: { product: Product }) => {
           <p className="shop-light-text text-xs tracking-wide">5 Reviews</p>
         </div>
         <div className="flex items-center gap-2.5">
-          <p className="font-medium">In Stock</p>
-          <p
-            className={`${product?.stock === 0
-                ? "text-red-600"
-                : "text-shop-light-green/80 font-semibold"
-              }`}
-          >
-            {(product?.stock as number) > 0 ? product?.stock : "Out of Stock"}
-          </p>
+          {(product?.stock as number) > 0 ? (
+            <>
+              <p className="font-medium">In Stock</p>
+              <p className="text-shop-light-green/80 font-semibold">
+                {product?.stock}
+              </p>
+            </>
+          ) : (
+            <p className="text-red-600 font-semibold">
+              Out of Stock
+            </p>
+          )}
         </div>
         <PriceView price={product.price} discount={product.discount} />
-        <AddToCartButton product={product} className="w-36 rounded-md" />
+        <AddToCartButton product={product} className="w-full md:w-36 rounded-md" />
       </div>
     </div>
   );

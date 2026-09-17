@@ -14,7 +14,7 @@ export async function deleteOrder(orderId: string) {
       };
     }
 
-    const role = sessionClaims?.metadata?.role;
+    const role = (sessionClaims as any)?.metadata?.role;
 
     if (role !== "admin") {
       return {

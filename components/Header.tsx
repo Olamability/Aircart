@@ -20,7 +20,7 @@ const Header = async () => {
     orders = await getMyOrders(userId);
   }
   return (
-    <header className="sticky top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
+    <header className="sticky border border-b-shop-light-green top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
       <Container className="flex items-center justify-between text-lightColor">
         <div className="w-auto md:w-1/3 flex items-center justify-start gap-2.5 md:gap-0">
           <MobileMenu />

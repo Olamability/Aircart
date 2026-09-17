@@ -16,11 +16,11 @@ const HomeCategories = ({
   return (
     <div className="bg-white border border-shop-light-green/20 my-10 md:my-20 p-5 lg:p-7 rounded-md">
       <Title className="border-b pb-3"> Popular Categories</Title>
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="mt-5 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 pb-4 scrollbar-hide">
         {categories?.map((category) => (
           <div
             key={category?._id}
-            className="bg-shop-light-bg p-5 flex items-center gap-3 group"
+            className="bg-shop-light-bg p-5 flex items-center gap-3 group min-w-[250px] md:min-w-0 snap-start shrink-0 rounded-md"
           >
             {category?.image && (
               <div className="overflow-hidden border border-shop-orange/30 hover:border-shop-orange hoverEffect w-20 h-20 p-1">

@@ -8,8 +8,8 @@ const HomeBanner = () => {
   return (
     <div className="py-16 md:py-0 bg-shop-light-pink rounded-lg px-10 lg:px-24 flex items-center justify-between">
       <div className="space-y-5">
-        <Title className="text-xl md:text-3xl font-bold">
-          Grab upto 50% off on <br />
+        <Title className="text-xl md:text-2xl font-bold">
+          Grab upto 50%  <br /> off on
           selected Headphones
         </Title>
         <Link
@@ -21,9 +21,9 @@ const HomeBanner = () => {
           Buy Now
         </Link>
       </div>
-      <div className="py-3">
+      <div className="py-4 md:pt-6 md:-mr-12 lg:-mr-16 relative">
         <Image
-          className="hidden md:inline-flex rounded-lg"
+          className=" md:inline-flex rounded-lg object-cover scale-110 -translate-y-2"
           src={Ryan}
           alt="Headphones"
           width={200}

@@ -7,6 +7,7 @@ import type {
   DEAL_PRODUCTS_RESULT,
   PRODUCT_BY_SLUG_QUERY_RESULT,
   ADDRESS_QUERY_RESULT,
+  MY_ORDERS_QUERY_RESULT,
 } from "@/sanity.types";
 import {
   BRAND_QUERY,
@@ -118,14 +119,14 @@ const getAddresses = async (userId: string) => {
     return [];
   }
 };
-const getMyOrders = async (userId: string) => {
+const getMyOrders = async (userId: string): Promise<MY_ORDERS_QUERY_RESULT> => {
   try {
     const data = await client.fetch(MY_ORDERS_QUERY, { userId });
 
-    return data || null;
+    return data;
   } catch (error) {
-    console.error("Error fetching products by ID:", error);
-    return null;
+    console.error("Error fetching orders:", error);
+    return [];
   }
 };
 

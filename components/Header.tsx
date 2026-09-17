@@ -6,7 +6,7 @@ import CartIcon from "./CartIcon";
 import FavoriteButton from "./FavoriteButton";
 import MobileMenu from "./MobileMenu";
 import SignIn from "./SignIn";
-import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
+import { ClerkLoaded, UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { Logs } from "lucide-react";
@@ -36,7 +36,7 @@ const Header = async () => {
               <>
                 <Link
                   href={"/orders"}
-                  className="group relative hover:text-sho-light-green hoverEffect"
+                  className="group relative hover:text-shop-light-green hoverEffect"
                 >
                   <Logs />
                   <span className="absolute -top-1 -right-1 bg-red-600 text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">

@@ -664,6 +664,99 @@ export type ADDRESS_QUERY_RESULT = Array<{
   clerkUserId: string | null;
 }>;
 
+// Source: sanity/queries/query.ts
+// Variable: MY_ORDERS_QUERY
+// Query: *[_type == "order" && clerkUserId ==   $userId] | order(orderDate desc)  {...,products[]{...,product->}}
+export type MY_ORDERS_QUERY_RESULT = Array<{
+  _id: string;
+  _type: "order";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  orderNumber?: string;
+  stripeCheckoutSessionId?: string;
+  stripeCustomerId?: string;
+  stripePaymentIntentId?: string;
+  paymentReference?: string;
+  paymentStatus?: "failed" | "paid" | "pending" | "refunded";
+  invoice?: {
+    id?: string;
+    number?: string;
+    hosted_invoice_url?: string;
+  };
+  clerkUserId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  products: Array<{
+    product: {
+      _id: string;
+      _type: "product";
+      _createdAt: string;
+      _updatedAt: string;
+      _rev: string;
+      title?: string;
+      slug?: Slug;
+      image?: Array<{
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+        _key: string;
+      }>;
+      description?: string;
+      price?: number;
+      discount?: number;
+      categories?: Array<
+        {
+          _key: string;
+        } & CategoryReference
+      >;
+      stock?: number;
+      brand?: BrandReference;
+      status?: "available" | "hot" | "new" | "sale";
+      images?: Array<{
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: "image";
+        _key: string;
+      }>;
+      isNew?: boolean;
+      variant?:
+        | "appliances"
+        | "food & beverages"
+        | "gadget"
+        | "others"
+        | "refrigerator";
+      isfeatured?: boolean;
+    } | null;
+    quantity?: number;
+    price?: number;
+    _key: string;
+  }> | null;
+  totalPrice?: number;
+  currency?: string;
+  amountDiscount?: number;
+  address?: {
+    name?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+  };
+  status?:
+    | "cancelled"
+    | "delivered"
+    | "out_for_delivery"
+    | "pending"
+    | "processing"
+    | "shipped";
+  orderDate?: string;
+  createdAt?: string;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -675,5 +768,6 @@ declare module "@sanity/client" {
     '\n  *[\n    _type == "product" &&\n    slug.current == $slug\n  ][0].brand->{\n    _id,\n    title,\n    slug\n  }\n': BRANDQ_RESULT;
     '\n  *[\n    _type == "product" &&\n    variant == $variant\n  ]\n  | order(title desc) {\n    ...,\n    "categories": categories[]->title\n  }\n': PRODUCT_BY_VARIANT_QUERY_RESULT;
     '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    label,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
+    '*[_type == "order" && clerkUserId == \n  $userId] | order(orderDate desc)\n  {...,products[]{...,product->}}': MY_ORDERS_QUERY_RESULT;
   }
 }

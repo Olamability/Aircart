@@ -10,11 +10,12 @@ import { ClerkLoaded } from "@clerk/nextjs";
 import CustomUserButton from "./CustomUserButton";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { Logs, User, Package, MapPin } from "lucide-react";
+import { Logs } from "lucide-react";
 import { getMyOrders } from "@/sanity/queries";
 
 const Header = async () => {
   const user = await currentUser();
+
   const { userId } = await auth();
   let orders = null;
   if (userId) {

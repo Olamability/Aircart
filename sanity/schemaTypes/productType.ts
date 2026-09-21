@@ -1,14 +1,11 @@
 import { defineField, defineType } from "sanity";
 import { TrolleyIcon } from "@sanity/icons/Trolley";
 
-
 export const productType = defineType({
-
   name: "product",
   title: "Product",
   type: "document",
   icon: TrolleyIcon,
-  
 
   fields: [
     defineField({
@@ -33,7 +30,7 @@ export const productType = defineType({
       name: "image",
       title: "Product Image",
       type: "array",
-      of: [{type: "image", options: {hotspot: true}}],
+      of: [{ type: "image", options: { hotspot: true } }],
     }),
 
     defineField({
@@ -56,16 +53,19 @@ export const productType = defineType({
       validation: (Rule) => Rule.min(0).max(100),
     }),
 
-       defineField({
+    defineField({
       name: "categories",
       title: "Categories",
       type: "array",
       of: [
-        { 
-        type: "reference", to: [{ type: "category" }] }],
+        {
+          type: "reference",
+          to: [{ type: "category" }],
+        },
+      ],
     }),
 
-     defineField({
+    defineField({
       name: "stock",
       title: "Stock Quantity",
       type: "number",
@@ -81,7 +81,7 @@ export const productType = defineType({
 
     defineField({
       name: "status",
-      title: "Produt Status",
+      title: "Product Status",
       type: "string",
       options: {
         list: [
@@ -89,13 +89,11 @@ export const productType = defineType({
           { title: "Hot", value: "hot" },
           { title: "Sale", value: "sale" },
           { title: "Available", value: "available" },
-
-
         ],
       },
     }),
 
-      defineField({
+    defineField({
       name: "images",
       title: "Additional Images",
       type: "array",
@@ -116,20 +114,17 @@ export const productType = defineType({
       initialValue: false,
     }),
 
-    
-
     defineField({
       name: "variant",
-      title: "Produt Type",
+      title: "Product Type",
       type: "string",
       options: {
         list: [
           { title: "Gadget", value: "gadget" },
           { title: "Appliances", value: "appliances" },
           { title: "Refrigerator", value: "refrigerator" },
-          { title: "Others", value: "others"},
-          {title: "Food & Beverages", value: "food & beverages" },
-
+          { title: "Others", value: "others" },
+          { title: "Food & Beverages", value: "food & beverages" },
         ],
       },
     }),
@@ -141,6 +136,14 @@ export const productType = defineType({
       description: "Toggle to feature on or off",
       initialValue: false,
     }),
+
+    defineField({
+      name: "vendor",
+      title: "Vendor",
+      type: "reference",
+      to: [{ type: "vendor" }],
+      validation: (Rule) => Rule.required(),
+    }),
   ],
 
   preview: {
@@ -150,13 +153,13 @@ export const productType = defineType({
       media: "image",
     },
     prepare(selection) {
-      const { title, subtitle, media} = selection;
+      const { title, subtitle, media } = selection;
       const image = media && media[0];
       return {
         title: title,
         subtitle: subtitle ? `₦${subtitle}` : "",
         media: image,
-      }
-    }
+      };
+    },
   },
 });

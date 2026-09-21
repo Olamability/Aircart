@@ -14,6 +14,9 @@ import { FaRegQuestionCircle } from "react-icons/fa";
 import { RxBorderSplit } from "react-icons/rx";
 import { TbTruckDelivery } from "react-icons/tb";
 import { FiShare2 } from "react-icons/fi";
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
+import Link from "next/link";
 
 const SingleProductPage = async ({
   params,
@@ -60,6 +63,41 @@ const SingleProductPage = async ({
                 />
               ))}
               <p className="font-semibold">(`(120)`)</p>
+            </div>
+          </div>
+        )}
+        {product?.vendor && (
+          <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
+            <div className="h-12 w-12 overflow-hidden rounded-full border bg-white">
+              {product.vendor.logo ? (
+                <Image
+                  src={urlFor(product.vendor.logo).width(100).height(100).url()}
+                  alt={product.vendor.businessName}
+                  width={100}
+                  height={100}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-shop-dark-green">
+                  {product.vendor.businessName.charAt(0)}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="text-xs text-shop-light-text">Sold by</p>
+              {product.vendor.slug?.current ? (
+                <Link
+                  href={`/vendor/${product.vendor.slug.current}`}
+                  className="font-semibold text-shop-dark-green hover:text-shop-light-green hoverEffect"
+                >
+                  {product.vendor.businessName}
+                </Link>
+              ) : (
+                <p className="font-semibold text-shop-dark-green">
+                  {product.vendor.businessName}
+                </p>
+              )}
             </div>
           </div>
         )}

@@ -90,6 +90,13 @@ export type BrandReference = {
   [internalGroqTypeReferenceTo]?: "brand";
 };
 
+export type VendorReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "vendor";
+};
+
 export type Product = {
   _id: string;
   _type: "product";
@@ -129,6 +136,29 @@ export type Product = {
   variant?:
     "gadget" | "appliances" | "refrigerator" | "others" | "food & beverages";
   isfeatured?: boolean;
+  vendor?: VendorReference;
+};
+
+export type Vendor = {
+  _id: string;
+  _type: "vendor";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  businessName?: string;
+  slug?: Slug;
+  logo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  description?: string;
+  clerkUserId?: string;
+  email?: string;
+  status?: "pending" | "approved" | "suspended";
+  createdAt?: string;
 };
 
 export type SanityImageCrop = {
@@ -145,6 +175,12 @@ export type SanityImageHotspot = {
   y?: number;
   height?: number;
   width?: number;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
 };
 
 export type Brand = {
@@ -164,12 +200,6 @@ export type Brand = {
     _type: "image";
   };
   featured?: boolean;
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
 };
 
 export type AuthorReference = {
@@ -437,11 +467,13 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | CategoryReference
   | BrandReference
+  | VendorReference
   | Product
+  | Vendor
   | SanityImageCrop
   | SanityImageHotspot
-  | Brand
   | Slug
+  | Brand
   | AuthorReference
   | BlogCategoryReference
   | Blog
@@ -545,11 +577,12 @@ export type DEAL_PRODUCTS_RESULT = Array<{
   variant?:
     "appliances" | "food & beverages" | "gadget" | "others" | "refrigerator";
   isfeatured?: boolean;
+  vendor?: VendorReference;
 }>;
 
 // Source: sanity/queries/query.ts
 // Variable: PRODUCT_BY_SLUG_QUERY
-// Query: *[_type == "product" && slug.current == $slug] | order(title asc) [0] {    ...,    "categories": categories[]->{      _id,      title,      slug    },    "brand": brand->{      _id,      title,      slug    }  }
+// Query: *[_type == "product" && slug.current == $slug] | order(title asc) [0] { ..., "categories": categories[]->{ _id, title, slug }, "brand": brand->{ _id, title, slug }, "vendor": vendor->{ _id, businessName, logo, description, status } }
 export type PRODUCT_BY_SLUG_QUERY_RESULT = {
   _id: string;
   _type: "product";
@@ -593,6 +626,19 @@ export type PRODUCT_BY_SLUG_QUERY_RESULT = {
   variant?:
     "appliances" | "food & beverages" | "gadget" | "others" | "refrigerator";
   isfeatured?: boolean;
+  vendor: {
+    _id: string;
+    businessName: string | null;
+    logo: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    } | null;
+    description: string | null;
+    status: "approved" | "pending" | "suspended" | null;
+  } | null;
 } | null;
 
 // Source: sanity/queries/query.ts
@@ -642,6 +688,7 @@ export type PRODUCT_BY_VARIANT_QUERY_RESULT = Array<{
   variant?:
     "appliances" | "food & beverages" | "gadget" | "others" | "refrigerator";
   isfeatured?: boolean;
+  vendor?: VendorReference;
 }>;
 
 // Source: sanity/queries/query.ts
@@ -731,6 +778,7 @@ export type MY_ORDERS_QUERY_RESULT = Array<{
         | "others"
         | "refrigerator";
       isfeatured?: boolean;
+      vendor?: VendorReference;
     } | null;
     quantity?: number;
     price?: number;
@@ -757,6 +805,15 @@ export type MY_ORDERS_QUERY_RESULT = Array<{
   createdAt?: string;
 }>;
 
+// Source: sanity/queries/query.ts
+// Variable: BRAND_SEARCH_QUERY
+// Query: *[ _type == "brand" && lower(title) match $search ] | order(title asc)[0...20] { _id, title, slug }
+export type BRAND_SEARCH_QUERY_RESULT = Array<{
+  _id: string;
+  title: string | null;
+  slug: Slug | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -764,10 +821,11 @@ declare module "@sanity/client" {
     '\n  *[_type == "brand"] | order(title desc)\n': BRAND_QUERY_RESULT;
     '\n  *[_type == "blog"]\n| order(publishedAt desc) {\n  ...,\n  "category": category->title\n}\n': BLOG_QUERY_RESULT;
     '\n  *[_type == "product" && status == "hot"]\n  | order(_createdAt desc) {\n    ...,\n    "categories": categories[]->title,\n    "brand": brand->title\n  }\n': DEAL_PRODUCTS_RESULT;
-    '\n  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {\n    ...,\n    "categories": categories[]->{\n      _id,\n      title,\n      slug\n    },\n    "brand": brand->{\n      _id,\n      title,\n      slug\n    }\n  }\n': PRODUCT_BY_SLUG_QUERY_RESULT;
+    ' *[_type == "product" && slug.current == $slug] | order(title asc) [0] { ..., "categories": categories[]->{ _id, title, slug }, "brand": brand->{ _id, title, slug }, "vendor": vendor->{ _id, businessName, logo, description, status } } ': PRODUCT_BY_SLUG_QUERY_RESULT;
     '\n  *[\n    _type == "product" &&\n    slug.current == $slug\n  ][0].brand->{\n    _id,\n    title,\n    slug\n  }\n': BRANDQ_RESULT;
     '\n  *[\n    _type == "product" &&\n    variant == $variant\n  ]\n  | order(title desc) {\n    ...,\n    "categories": categories[]->title\n  }\n': PRODUCT_BY_VARIANT_QUERY_RESULT;
     '\n  *[\n    _type == "address" &&\n    clerkUserId == $userId\n  ] | order(Default desc, CreatedAT desc) {\n    _id,\n    fullName,\n    phone,\n    email,\n    street,\n    city,\n    state,\n    country,\n    postalCode,\n    zip,\n    Default,\n    label,\n    CreatedAT,\n    clerkUserId\n  }\n': ADDRESS_QUERY_RESULT;
     '*[_type == "order" && clerkUserId == \n  $userId] | order(orderDate desc)\n  {...,products[]{...,product->}}': MY_ORDERS_QUERY_RESULT;
+    ' *[ _type == "brand" && lower(title) match $search ] | order(title asc)[0...20] { _id, title, slug } ': BRAND_SEARCH_QUERY_RESULT;
   }
 }

@@ -8,18 +8,14 @@ import useStore from "@/store";
 import toast from "react-hot-toast";
 import PriceFormat from "./PriceFormat";
 import QuantityButtons from "./QuantityButtons";
-
 interface Props {
   product: Product;
   className?: string;
 }
-
 const AddToCartButton = ({ product, className }: Props) => {
-  const { addItem, getItemCount } = useStore();
-
-  const itemCount = getItemCount(product?._id);
+  const { addItem, getItemCount, hasHydrated } = useStore();
+  const itemCount = hasHydrated ? getItemCount(product?._id) : 0;
   const isOutOfStock = (product?.stock as number) <= 0;
-
   const handleAddToCart = () => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
@@ -28,21 +24,26 @@ const AddToCartButton = ({ product, className }: Props) => {
       toast.error("Can not add more than available stock");
     }
   };
-
   return (
     <div className="w-full h-12 flex items-center">
+      {" "}
       {itemCount ? (
         <div className="text-sm w-full">
+          {" "}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-shop-dark-green/80">Quantity</span>
-            <QuantityButtons product={product} />
-          </div>
+            {" "}
+            <span className="text-xs text-shop-dark-green/80">
+              Quantity
+            </span>{" "}
+            <QuantityButtons product={product} />{" "}
+          </div>{" "}
           <div className="flex items-center justify-between border-t pt-1">
-            <span className="text-xs font-semibold">Subtotal</span>
+            {" "}
+            <span className="text-xs font-semibold">Subtotal</span>{" "}
             <PriceFormat
               amount={product?.price ? product?.price * itemCount : 0}
-            />
-          </div>
+            />{" "}
+          </div>{" "}
         </div>
       ) : (
         <Button
@@ -53,12 +54,12 @@ const AddToCartButton = ({ product, className }: Props) => {
             className,
           )}
         >
-          <ShoppingBag className="w-5 h-5" />
-          {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+          {" "}
+          <ShoppingBag className="w-5 h-5" />{" "}
+          {isOutOfStock ? "Out of Stock" : "Add to Cart"}{" "}
         </Button>
-      )}
+      )}{" "}
     </div>
   );
 };
-
 export default AddToCartButton;

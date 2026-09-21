@@ -20,21 +20,9 @@ const DEAL_PRODUCTS = defineQuery(`
   }
 `);
 
-const PRODUCT_BY_SLUG_QUERY = defineQuery(`
-  *[_type == "product" && slug.current == $slug] | order(title asc) [0] {
-    ...,
-    "categories": categories[]->{
-      _id,
-      title,
-      slug
-    },
-    "brand": brand->{
-      _id,
-      title,
-      slug
-    }
-  }
-`);
+const PRODUCT_BY_SLUG_QUERY = defineQuery(
+  ` *[_type == "product" && slug.current == $slug] | order(title asc) [0] { ..., "categories": categories[]->{ _id, title, slug }, "brand": brand->{ _id, title, slug }, "vendor": vendor->{ _id, businessName, slug, logo, description, status } } `,
+);
 
 const BRANDQ = defineQuery(`
   *[
@@ -83,6 +71,12 @@ const MY_ORDERS_QUERY = defineQuery(
   $userId] | order(orderDate desc)
   {...,products[]{...,product->}}`,
 );
+const BRAND_SEARCH_QUERY = defineQuery(
+  ` *[ _type == "brand" && lower(title) match $search ] | order(title asc)[0...20] { _id, title, slug } `,
+);
+const VENDOR_BY_SLUG_QUERY = defineQuery(
+  ` *[_type == "vendor" && slug.current == $slug][0]{ _id, businessName, slug, logo, description, status, createdAt, "products": *[ _type == "product" && vendor._ref == ^._id ]{ _id, _type, _createdAt, _updatedAt, _rev, title, slug, image, description, price, discount, "categories": coalesce(categories, []), stock, brand, status, images, isNew, variant, isfeatured, vendor } } `,
+);
 
 export {
   BRAND_QUERY,
@@ -92,4 +86,6 @@ export {
   BRANDQ,
   ADDRESS_QUERY,
   MY_ORDERS_QUERY,
+  BRAND_SEARCH_QUERY,
+  VENDOR_BY_SLUG_QUERY,
 };

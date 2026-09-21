@@ -1,7 +1,9 @@
 import { sanityFetch } from "../lib/live";
 import { client } from "../lib/client";
+
 import type {
   Category,
+  Product,
   BRAND_QUERY_RESULT,
   BLOG_QUERY_RESULT,
   DEAL_PRODUCTS_RESULT,
@@ -17,7 +19,28 @@ import {
   BRANDQ,
   ADDRESS_QUERY,
   MY_ORDERS_QUERY,
+  BRAND_SEARCH_QUERY,
+  VENDOR_BY_SLUG_QUERY,
 } from "./query";
+type ProductBySlug = NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
+
+type ProductBySlugWithVendor = Omit<ProductBySlug, "vendor"> & {
+  vendor?: {
+    _id: string;
+    businessName: string;
+    slug?: {
+      current?: string;
+    };
+    logo?: {
+      asset?: {
+        _ref: string;
+        _type: "reference";
+      };
+    };
+    description?: string;
+    status?: string;
+  };
+};
 
 const getCategories = async (quantity?: number) => {
   try {
@@ -88,9 +111,31 @@ const getProductBySlug = async (slug: string) => {
       params: { slug },
     });
 
-    return (data as PRODUCT_BY_SLUG_QUERY_RESULT) ?? null;
+    return (data as ProductBySlugWithVendor) ?? null;
   } catch (error) {
     console.log("Error fetching product by ID:", error);
+    return null;
+  }
+};
+type VendorBySlug = {
+  _id: string;
+  businessName: string;
+  slug?: { current?: string };
+  logo?: { asset?: { _ref: string; _type: "reference" } };
+  description?: string;
+  status?: string;
+  createdAt?: string;
+  products?: Product[];
+};
+const getVendorBySlug = async (slug: string): Promise<VendorBySlug | null> => {
+  try {
+    const { data } = await sanityFetch({
+      query: VENDOR_BY_SLUG_QUERY,
+      params: { slug },
+    });
+    return (data as VendorBySlug) ?? null;
+  } catch (error) {
+    console.log("Error fetching vendor by slug:", error);
     return null;
   }
 };
@@ -136,7 +181,9 @@ export {
   getBlogs,
   getDealProduct,
   getProductBySlug,
+  getVendorBySlug,
   getBrandQ,
   getAddresses,
   getMyOrders,
+  BRAND_SEARCH_QUERY,
 };

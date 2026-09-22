@@ -1,50 +1,139 @@
+import React from "react";
 import Link from "next/link";
+import { PlusCircle, Package } from "lucide-react";
 import { getCurrentVendorProducts } from "@/lib/vendorProducts";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import FilterBar from "@/components/dashboard/FilterBar";
+import EmptyState from "@/components/dashboard/EmptyState";
+import VendorProductCard from "@/components/dashboard/VendorProductCard";
 
-const VendorProductsPage = async () => {
+interface VendorProductsPageProps {
+  searchParams: Promise<{
+    query?: string;
+    status?: string;
+    stock?: string;
+  }>;
+}
+
+const VendorProductsPage = async ({ searchParams }: VendorProductsPageProps) => {
+  const sp = await searchParams;
   const products = await getCurrentVendorProducts();
 
+  // In-memory filter based on URL searchParams
+  let filteredProducts = products;
+
+  if (sp.query && sp.query.trim()) {
+    const q = sp.query.trim().toLowerCase();
+    filteredProducts = filteredProducts.filter((p) => {
+      const matchTitle = p.title?.toLowerCase().includes(q);
+      const matchBrand = p.brand?.title?.toLowerCase().includes(q);
+      const matchCategory = p.categories?.some((c) =>
+        c.title.toLowerCase().includes(q)
+      );
+      return matchTitle || matchBrand || matchCategory;
+    });
+  }
+
+  if (sp.status && sp.status !== "all") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.status?.toLowerCase() === sp.status?.toLowerCase()
+    );
+  }
+
+  if (sp.stock && sp.stock !== "all") {
+    if (sp.stock === "low") {
+      filteredProducts = filteredProducts.filter(
+        (p) => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5
+      );
+    } else if (sp.stock === "out") {
+      filteredProducts = filteredProducts.filter((p) => (p.stock ?? 0) === 0);
+    } else if (sp.stock === "in") {
+      filteredProducts = filteredProducts.filter((p) => (p.stock ?? 0) > 5);
+    }
+  }
+
+  const filters = [
+    {
+      key: "status",
+      label: "Status",
+      options: [
+        { label: "Available", value: "available" },
+        { label: "New", value: "new" },
+        { label: "Hot", value: "hot" },
+        { label: "Sale", value: "sale" },
+      ],
+    },
+    {
+      key: "stock",
+      label: "Stock Level",
+      options: [
+        { label: "In Stock (> 5)", value: "in" },
+        { label: "Low Stock (1–5)", value: "low" },
+        { label: "Out of Stock (0)", value: "out" },
+      ],
+    },
+  ];
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-shop-dark-green">My Products</h1>
-
-      <p className="mt-2 text-lightColor">Manage your products from here.</p>
-      <Link
-        href="/vendor/products/new"
-        className="mt-4 inline-block rounded-md bg-shop-light-green px-5 py-3 font-semibold text-white hover:bg-shop-dark-green hoverEffect"
+    <div className="space-y-6 pb-12">
+      {/* Page Header with Action */}
+      <DashboardHeader
+        title="My Products"
+        description="Manage your marketplace products from here."
       >
-        Add Product
-      </Link>
+        <Link
+          href="/vendor/products/new"
+          className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-shop-light-green hoverEffect transition"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Add Product
+        </Link>
+      </DashboardHeader>
 
-      <div className="mt-6">
-        {products.length === 0 ? (
-          <p className="text-lightColor">You have no products yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {products.map((product) => (
-              <div
-                key={product._id}
-                className="rounded-md border border-shop-light-green p-4"
-              >
-                <h2 className="font-semibold text-shop-dark-green">
-                  {product.title}
-                </h2>
-
-                <p className="mt-1">Price: ₦{product.price}</p>
-
-                <p className="mt-1">Stock: {product.stock}</p>
-
-                <Link
-                  href={`/vendor/products/${product._id}/edit`}
-                  className="mt-3 inline-block rounded-md bg-shop-light-green px-4 py-2 font-medium text-white hover:bg-shop-dark-green hoverEffect"
-                >
-                  Edit Product
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Product Summary Counter */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-slate-700">
+          {products.length === 0 ? "0 Products" : `${filteredProducts.length} of ${products.length} Products`}
+        </p>
       </div>
+
+      {/* Filter and Search Bar */}
+      {products.length > 0 && (
+        <FilterBar
+          searchPlaceholder="Search products by title, brand, or category..."
+          filters={filters}
+        />
+      )}
+
+      {/* Empty States & Product Card Grid */}
+      {products.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title="No products yet"
+          description="You haven't listed any products in your store yet. Start selling by adding your first product to the marketplace catalog."
+          action={
+            <Link
+              href="/vendor/products/new"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green hoverEffect transition"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Add Product
+            </Link>
+          }
+        />
+      ) : filteredProducts.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title="No matching products"
+          description="No store products matched your active search or filter criteria. Try clearing or modifying your filters."
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredProducts.map((product) => (
+            <VendorProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

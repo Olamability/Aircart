@@ -1,19 +1,25 @@
 import { RoleGuard } from "@/lib/roleGuard";
 import { getVisibleNavigation } from "@/lib/dashboardNavigation";
 import { vendorNavigation } from "@/constants/dashboard";
-import DashboardSidebar from "@/components/DashboardSidebar";
+import DashboardLayoutShell from "@/components/dashboard/DashboardLayoutShell";
 import type { ReactNode } from "react";
+
 const VendorLayout = async ({ children }: { children: ReactNode }) => {
   const navigation = await getVisibleNavigation(vendorNavigation);
+
   return (
     <RoleGuard allowedRoles={["vendor"]}>
-      {" "}
-      <div className="flex min-h-screen">
-        {" "}
-        <DashboardSidebar navigation={navigation} />{" "}
-        <main className="flex-1 p-6">{children}</main>{" "}
-      </div>{" "}
+      <DashboardLayoutShell
+        navigation={navigation}
+        roleTitle="Merchant"
+        dashboardRoot="/vendor"
+        badgeLabel="Vendor Portal"
+        badgeColor="bg-sky-50 text-sky-700 border-sky-200"
+      >
+        {children}
+      </DashboardLayoutShell>
     </RoleGuard>
   );
 };
+
 export default VendorLayout;

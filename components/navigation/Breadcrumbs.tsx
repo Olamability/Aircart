@@ -67,7 +67,11 @@ const Breadcrumbs: React.FC = () => {
 
     if (!label) {
       // Check if this looks like a Sanity ID or slug
-      if (segment.length > 15 || segment.includes("-") || segment.includes("_")) {
+      if (
+        segment.length > 15 ||
+        segment.includes("-") ||
+        segment.includes("_")
+      ) {
         // If next segment is 'edit', this is an ID, label as 'Item'
         if (rawSegments[index + 1] === "edit") {
           label = "Item Details";
@@ -75,7 +79,8 @@ const Breadcrumbs: React.FC = () => {
           label = "Details";
         }
       } else {
-        label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+        label =
+          segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
       }
     }
 
@@ -87,7 +92,10 @@ const Breadcrumbs: React.FC = () => {
   });
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center text-xs text-slate-500 overflow-x-auto py-1">
+    <nav
+      aria-label="Breadcrumb"
+      className="flex items-center text-xs text-slate-500 overflow-x-auto py-1"
+    >
       <ol className="flex items-center gap-1.5 whitespace-nowrap">
         {items.map((item, idx) => {
           const isFirst = idx === 0;
@@ -95,7 +103,10 @@ const Breadcrumbs: React.FC = () => {
           return (
             <li key={item.href} className="flex items-center gap-1.5">
               {!isFirst && (
-                <ChevronRight className="h-3.5 w-3.5 text-slate-300 shrink-0" aria-hidden="true" />
+                <ChevronRight
+                  className="h-3.5 w-3.5 text-slate-300 shrink-0"
+                  aria-hidden="true"
+                />
               )}
 
               {item.isCurrent ? (

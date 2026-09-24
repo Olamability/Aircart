@@ -1,6 +1,4 @@
 "use client";
-import toast from "react-hot-toast";
-import { deleteOrder } from "@/actions/deleteOrders";
 import { useState } from "react";
 import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import { TableBody, TableCell, TableRow } from "./ui/table";
@@ -12,19 +10,17 @@ import {
 } from "./ui/tooltip";
 import PriceFormat from "./PriceFormat";
 import { format } from "date-fns";
-import { X } from "lucide-react";
 import OrderDetailDialog from "./OrderDetailDialog";
 
 const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
   const [selectedOrder, setSelectedOrder] = useState<
     MY_ORDERS_QUERY_RESULT[number] | null
   >(null);
-  const [orderList, setOrderList] = useState(orders);
 
   return (
     <>
       <TableBody>
-        {orderList.map((order, index) => {
+        {orders.map((order, index) => {
           return (
             <TableRow
               key={order?._id}
@@ -103,33 +99,6 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                 <span className="whitespace-nowrap">
                   {order?.invoice?.number ?? "N/A"}
                 </span>
-              </TableCell>
-
-              {/* Action */}
-              <TableCell className="text-center">
-                <button
-                  type="button"
-                  onClick={async (event) => {
-                    event.stopPropagation();
-
-                    const result = await deleteOrder(order._id);
-
-                    if (!result.success) {
-                      toast.error(result.message);
-                      return;
-                    }
-
-                    setOrderList((currentOrders) =>
-                      currentOrders.filter((item) => item._id !== order._id),
-                    );
-
-                    toast.success(result.message);
-                  }}
-                  className="inline-flex items-center justify-center rounded-full p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
-                  aria-label={`Delete order ${order?.orderNumber ?? ""}`}
-                >
-                  <X className="h-4 w-4" />
-                </button>
               </TableCell>
             </TableRow>
           );

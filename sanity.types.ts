@@ -340,7 +340,7 @@ export type Address = {
   postalCode?: string;
   zip?: string;
   Default?: boolean;
-  label?: "home" | "office" | "other";
+  label?: "Home Address" | "Office Address" | "Other";
   CreatedAT?: string;
 };
 
@@ -706,7 +706,7 @@ export type ADDRESS_QUERY_RESULT = Array<{
   postalCode: string | null;
   zip: string | null;
   Default: boolean | null;
-  label: "home" | "office" | "other" | null;
+  label: "Home Address" | "Office Address" | "Other" | null;
   CreatedAT: string | null;
   clerkUserId: string | null;
 }>;

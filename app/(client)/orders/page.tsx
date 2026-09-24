@@ -45,12 +45,9 @@ const OrdersPage = async () => {
                         Email
                       </TableHead>
                       <TableHead className="text-gray-500/50">Total</TableHead>
-                      <TableHead className="text-gray-500/50">Staus</TableHead>
+                      <TableHead className="text-gray-500/50">Status</TableHead>
                       <TableHead className="hidden sm:table-cell text-gray-500/50">
                         Invoice Number
-                      </TableHead>
-                      <TableHead className="text-center text-gray-500/50">
-                        Action
                       </TableHead>
                     </TableRow>
                   </TableHeader>

@@ -13,7 +13,7 @@ interface AddressData {
   country: string;
   postalCode?: string;
   zip: string;
-  label: "home" | "office" | "other";
+  label: string;
   Default?: boolean;
 }
 

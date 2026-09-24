@@ -115,6 +115,7 @@ const CartPage = () => {
   const handleCheckout = async () => {
     if (!isLoaded || !isSignedIn || !user?.id) {
       toast.error("Please sign in before checkout");
+      return;
     }
     if (!selectedAddresses) {
       toast.error("Please select a delivery address");
@@ -126,7 +127,6 @@ const CartPage = () => {
         orderNumber: crypto.randomUUID(),
         customerName: user?.fullName ?? "Unknown",
         customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
-        clerkUserId: user?.id ?? "",
         address: selectedAddresses
           ? {
               label: selectedAddresses.label ?? "",
@@ -144,6 +144,11 @@ const CartPage = () => {
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to create checkout session. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

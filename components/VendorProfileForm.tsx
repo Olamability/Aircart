@@ -11,16 +11,19 @@ interface VendorProfileFormProps {
     businessName?: string;
     description?: string;
     logo?: { asset?: { _ref: string; _type: "reference" } };
-  };
+  } | null;
 }
+
 const VendorProfileForm: React.FC<VendorProfileFormProps> = ({ vendor }) => {
   const router = useRouter();
-  const [businessName, setBusinessName] = useState(vendor.businessName ?? "");
-  const [description, setDescription] = useState(vendor.description ?? "");
+  const isNewVendor = !vendor;
+  const [businessName, setBusinessName] = useState(vendor?.businessName ?? "");
+  const [description, setDescription] = useState(vendor?.description ?? "");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoAssetId, setLogoAssetId] = useState<string>();
   const [logoLoading, setLogoLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const handleLogoUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -43,12 +46,21 @@ const VendorProfileForm: React.FC<VendorProfileFormProps> = ({ vendor }) => {
       setLogoLoading(false);
     }
   };
+
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!businessName.trim()) {
+      toast.error("Business name is required");
+      return;
+    }
     setSaving(true);
     try {
       await updateVendorProfile({ businessName, description, logoAssetId });
-      toast.success("Vendor profile updated successfully");
+      toast.success(
+        isNewVendor
+          ? "Store profile created successfully!"
+          : "Vendor profile updated successfully",
+      );
       setTimeout(() => {
         router.push("/vendor");
       }, 800);
@@ -62,68 +74,74 @@ const VendorProfileForm: React.FC<VendorProfileFormProps> = ({ vendor }) => {
       setSaving(false);
     }
   };
+
   return (
     <form onSubmit={handleSubmit} className="mt-6 max-w-2xl space-y-5">
-      {" "}
       <div>
-        {" "}
-        <label className="block font-medium">Vendor Logo</label>{" "}
-        {vendor.logo?.asset?._ref && (
+        <label className="block font-medium">Vendor Logo</label>
+        {vendor?.logo?.asset?._ref && (
           <div className="mt-2 flex h-32 w-32 items-center justify-center overflow-hidden rounded-md border bg-white">
-            {" "}
             <Image
               src={urlFor(vendor.logo).width(200).height(200).url()}
               alt={`${vendor.businessName ?? "Vendor"} logo`}
               width={200}
               height={200}
               className="h-full w-full object-contain"
-            />{" "}
+            />
           </div>
-        )}{" "}
+        )}
         <input
           type="file"
           accept="image/*"
           onChange={handleLogoUpload}
           className="mt-3 w-full rounded-md border p-3"
-        />{" "}
+        />
         {logoLoading && (
-          <p className="mt-2 text-sm text-lightColor"> Uploading logo... </p>
-        )}{" "}
+          <p className="mt-2 text-sm text-lightColor">Uploading logo...</p>
+        )}
         {logoFile && !logoLoading && (
-          <p className="mt-2 text-sm text-shop-dark-green"> {logoFile.name} </p>
-        )}{" "}
-      </div>{" "}
+          <p className="mt-2 text-sm text-shop-dark-green">{logoFile.name}</p>
+        )}
+      </div>
+
       <div>
-        {" "}
-        <label className="block font-medium">Business Name</label>{" "}
+        <label className="block font-medium">Business Name</label>
         <input
           type="text"
           value={businessName}
           onChange={(event) => setBusinessName(event.target.value)}
           className="mt-1 w-full rounded-md border p-3"
           placeholder="Enter your business name"
-        />{" "}
-      </div>{" "}
+          required
+        />
+      </div>
+
       <div>
-        {" "}
-        <label className="block font-medium">Business Description</label>{" "}
+        <label className="block font-medium">Business Description</label>
         <textarea
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           className="mt-1 w-full rounded-md border p-3"
           rows={5}
           placeholder="Tell customers about your business"
-        />{" "}
-      </div>{" "}
+        />
+      </div>
+
       <button
         type="submit"
         disabled={saving || logoLoading}
         className="rounded-md bg-shop-light-green px-5 py-3 font-semibold text-white hover:bg-shop-dark-green hoverEffect disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {" "}
-        {saving ? "Saving..." : "Save Changes"}{" "}
-      </button>{" "}
+        {saving
+          ? isNewVendor
+            ? "Creating Profile..."
+            : "Saving..."
+          : isNewVendor
+            ? "Complete Store Profile"
+            : "Save Changes"}
+      </button>
     </form>
   );
 };
+
 export default VendorProfileForm;

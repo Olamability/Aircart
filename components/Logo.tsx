@@ -5,12 +5,16 @@ import React from "react";
 const Logo = ({
   className,
   spanDesign,
+  href = "/",
+  onClick,
 }: {
   className?: string;
   spanDesign?: string;
+  href?: string;
+  onClick?: () => void;
 }) => {
   return (
-    <Link href={"/"}>
+    <Link href={href} onClick={onClick}>
       <h2
         className={cn(
           "text-2xl text-shop-dark-green font-black tracking-wider hover:text-shop-light-green uppercase hoverEffect group font-sans",

@@ -11,7 +11,7 @@ import StatusBadge from "@/components/dashboard/StatusBadge";
 interface InventoryProduct {
   _id: string;
   title: string;
-  price: number;
+  price?: number;
   stock: number;
   status?: string;
   image?: any;

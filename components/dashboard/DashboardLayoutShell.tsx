@@ -108,28 +108,16 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         <div>
           {" "}
           <div className="flex items-center justify-between">
-            {" "}
-            <Link
-              href={dashboardRoot}
-              onClick={onNavigate}
-              className="text-xl font-bold tracking-tight text-shop-dark-green flex items-center gap-2"
-            >
-              {" "}
-              <span>
-                {" "}
-                <Logo />{" "}
-              </span>{" "}
-              {onNavigate && (
-                <button
-                  type="button"
-                  onClick={onNavigate}
-                  className="lg:hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                >
-                  {" "}
-                  <X className="h-5 w-5" />{" "}
-                </button>
-              )}{" "}
-            </Link>{" "}
+            <Logo href={dashboardRoot} onClick={onNavigate} />
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={onNavigate}
+                className="lg:hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
           </div>{" "}
           <div className="mt-2.5 flex items-center gap-2">
             {" "}

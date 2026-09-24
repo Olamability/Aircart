@@ -24,10 +24,10 @@ const Header = async () => {
 
   if (role === "vendor") {
     dashboardHref = "/vendor";
-    dashboardLabel = "Vendor Portal";
+    dashboardLabel = "Vendor";
   } else if (role === "admin" || role === "product_manager") {
     dashboardHref = "/admin";
-    dashboardLabel = "Admin Console";
+    dashboardLabel = "Admin";
   } else if (role === "super_admin") {
     dashboardHref = "/super-admin";
     dashboardLabel = "Super Admin";

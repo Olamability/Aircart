@@ -13,7 +13,7 @@ const VendorLayout = async ({ children }: { children: ReactNode }) => {
         navigation={navigation}
         roleTitle="Merchant"
         dashboardRoot="/vendor"
-        badgeLabel="Vendor Portal"
+        badgeLabel="Vendor"
         badgeColor="bg-sky-50 text-sky-700 border-sky-200"
       >
         {children}

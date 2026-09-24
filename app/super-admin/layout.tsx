@@ -13,7 +13,7 @@ const SuperAdminLayout = async ({ children }: { children: ReactNode }) => {
         navigation={navigation}
         roleTitle="Platform"
         dashboardRoot="/super-admin"
-        badgeLabel="Super Admin"
+        badgeLabel="Admin"
         badgeColor="bg-purple-50 text-purple-700 border-purple-200"
       >
         {children}

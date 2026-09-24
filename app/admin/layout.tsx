@@ -13,7 +13,7 @@ const AdminLayout = async ({ children }: { children: ReactNode }) => {
         navigation={navigation}
         roleTitle="Admin"
         dashboardRoot="/admin"
-        badgeLabel="Admin Console"
+        badgeLabel="Admin"
         badgeColor="bg-emerald-50 text-shop-dark-green border-emerald-200"
       >
         {children}

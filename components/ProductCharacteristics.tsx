@@ -17,58 +17,63 @@ const ProductCharacteristics = async ({
     ? await getBrandQ(product.slug.current)
     : [];
 
+  const isAvailable = (product?.stock as number) > 0;
+
   return (
-    <Accordion>
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="justify-start text-left">
-          Characteristics
-        </AccordionTrigger>
+    <div className="w-full border border-slate-200/80 rounded-2xl bg-white overflow-hidden shadow-2xs">
+      <Accordion className="w-full">
+        <AccordionItem value="item-1" className="border-none">
+          <AccordionTrigger className="px-4 py-3.5 hover:no-underline font-semibold text-sm text-slate-900 flex justify-between items-center w-full">
+            <span>Product Specifications</span>
+          </AccordionTrigger>
 
-        <AccordionContent>
-          <div className="space-y-3">
-            {/* Brand */}
-            <p className="flex items-center justify-between gap-5">
-              <span>Brand:</span>
+          <AccordionContent className="px-4 pb-4 pt-1">
+            <div className="divide-y divide-slate-100 text-xs sm:text-sm">
+              {/* Brand */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500">Brand</span>
+                <span className="font-semibold text-slate-800 tracking-tight">
+                  {brand?.title || "Airmart Marketplace"}
+                </span>
+              </div>
 
-              <span className="font-semibold tracking-wide">
-                {brand?.title || "N/A"}
-              </span>
-            </p>
+              {/* Collection */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500">Collection</span>
+                <span className="font-semibold text-slate-800">2025 Series</span>
+              </div>
 
-            {/* Collection */}
-            <p className="flex items-center justify-between gap-5">
-              <span>Collection:</span>
+              {/* Type / Variant */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500">Variant / Edition</span>
+                <span className="font-semibold text-slate-800 capitalize">
+                  {product?.variant || "Standard"}
+                </span>
+              </div>
 
-              <span className="font-semibold tracking-wide">2025</span>
-            </p>
-
-            {/* Type */}
-            <p className="flex items-center justify-between gap-5">
-              <span>Type:</span>
-
-              <span className="font-semibold tracking-wide">
-                {product?.variant || "N/A"}
-              </span>
-            </p>
-
-            {/* Stock */}
-            <p className="flex items-center justify-between gap-5">
-              <span>Stock:</span>
-
-              <span
-                className={
-                  product?.stock
-                    ? "font-semibold tracking-wide text-shop-light-green"
-                    : "font-semibold tracking-wide text-red-600"
-                }
-              >
-                {product?.stock ? "Available" : "Out of Stock"}
-              </span>
-            </p>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+              {/* Stock */}
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-slate-500">Inventory Status</span>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    isAvailable
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                      : "bg-rose-50 text-rose-700 border border-rose-200/70"
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isAvailable ? "bg-emerald-500" : "bg-rose-500"
+                    }`}
+                  />
+                  {isAvailable ? "In Stock" : "Out of Stock"}
+                </span>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 };
 

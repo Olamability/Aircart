@@ -46,48 +46,63 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   }, [currentSlug]);
 
   return (
-    <div className="py-5 flex flex-col md:flex-row items-start gap-5">
-      <div className="flex md:flex-col gap-2 md:min-w-40 border overflow-x-auto md:overflow-x-visible md:max-h-[500px] md:overflow-y-auto">
-        {categories?.map((item) => (
-          <Button
-            onClick={() => handleCategoryChange(item?.slug?.current as string)}
-            key={item?._id}
-            className={`bg-transparent border-1 border-shop-btn-dark-green/30 p-0 rounded-none 
-            text-darkColor shadow-none hover:bg-shop-orange 
-            hover:text-white font-semibold hoverEffect 
-            border-b last:border-b-0 transition-colors capitalize 
-            ${item?.slug?.current === currentSlug && "bg-shop-orange text-white border-shop-orange"}`}
-          >
-            <p className="w-full text-left px-2">{item?.title}</p>
-          </Button>
-        ))}
-      </div>
-      <div className="flex-1">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center        bg-gray-100 rounded-lg w-full">
-            <div
-              className="flex items-center space-x-2
-          text-blue-600"
+    <div className="py-6 flex flex-col md:flex-row items-start gap-6 lg:gap-8">
+      {/* Category Navigation Sidebar */}
+      <div className="w-full md:w-56 shrink-0 bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-xs flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible md:max-h-[calc(100vh-200px)] md:overflow-y-auto scrollbar-hide md:sticky md:top-24">
+        {categories?.map((item) => {
+          const isActive = item?.slug?.current === currentSlug;
+          return (
+            <button
+              type="button"
+              onClick={() => handleCategoryChange(item?.slug?.current as string)}
+              key={item?._id}
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap md:whitespace-normal cursor-pointer ${
+                isActive
+                  ? "bg-shop-dark-green text-white shadow-xs"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
             >
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Product is loading...</span>
-            </div>
+              {item?.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Products Grid */}
+      <div className="flex-1 w-full min-w-0">
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-slate-100 bg-white p-3.5 sm:p-4 flex flex-col gap-3 animate-pulse shadow-xs"
+              >
+                <div className="w-full aspect-square rounded-xl bg-slate-100" />
+                <div className="h-3 w-1/3 rounded bg-slate-100" />
+                <div className="h-4 w-4/5 rounded bg-slate-100" />
+                <div className="h-3 w-1/2 rounded bg-slate-100" />
+                <div className="h-9 w-full rounded-xl bg-slate-100 mt-2" />
+              </div>
+            ))}
           </div>
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
             {products.map((product: Product) => (
               <AnimatePresence key={product._id}>
-                <motion.div>
+                <motion.div
+                  layout
+                  initial={{ opacity: 0.2 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="h-full"
+                >
                   <ProductCard key={product._id} product={product} />
                 </motion.div>
               </AnimatePresence>
             ))}
           </div>
         ) : (
-          <NoProductAvailable
-            selectedTab={currentSlug}
-            className="mt-0 w-full"
-          />
+          <NoProductAvailable selectedTab={currentSlug} className="mt-0 w-full" />
         )}
       </div>
     </div>

@@ -26,7 +26,16 @@ const AddressDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<span>{children}</span>} />
+      <DialogTrigger
+        nativeButton={false}
+        render={
+          React.isValidElement(children) ? (
+            children
+          ) : (
+            <span>{children}</span>
+          )
+        }
+      />
 
       <DialogContent className="w-[calc(100%-1rem)] max-w-[650px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

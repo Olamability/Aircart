@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import HomeTabBar from "@/components/HomeTabBar";
 import { productType } from "@/constants/data";
 import { client } from "@/sanity/lib/client";
-import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import ProductCard from "./ProductCard";
 
@@ -35,18 +34,27 @@ const ProductGrid = () => {
     };
     fetchData();
   }, [selectedTab]);
+
   return (
-    <div>
+    <div className="w-full">
       <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-10 min-h-80 gap-4 bg-gray-100 w-full mt-10">
-          <div className="space-x-2 flex items-center text-blue-600">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Product is Loading...</span>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 mt-6 sm:mt-8">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-slate-100 bg-white p-3.5 sm:p-4 flex flex-col gap-3 animate-pulse shadow-xs"
+            >
+              <div className="w-full aspect-square rounded-xl bg-slate-100" />
+              <div className="h-3 w-1/3 rounded bg-slate-100" />
+              <div className="h-4 w-4/5 rounded bg-slate-100" />
+              <div className="h-3 w-1/2 rounded bg-slate-100" />
+              <div className="h-9 w-full rounded-xl bg-slate-100 mt-2" />
+            </div>
+          ))}
         </div>
       ) : products?.length ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 mt-6 sm:mt-8">
           {products?.map((product) => (
             <AnimatePresence key={product?._id}>
               <motion.div
@@ -54,6 +62,7 @@ const ProductGrid = () => {
                 initial={{ opacity: 0.2 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                className="h-full"
               >
                 <ProductCard product={product} />
               </motion.div>
@@ -61,7 +70,7 @@ const ProductGrid = () => {
           ))}
         </div>
       ) : (
-        <NoProductAvailable selectedTab={selectedTab} className="mt-10" />
+        <NoProductAvailable selectedTab={selectedTab} className="mt-8" />
       )}
     </div>
   );

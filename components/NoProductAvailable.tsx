@@ -1,60 +1,36 @@
-"use client"
+"use client";
+import React from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
-import { Loader2 } from "lucide-react"; 
+import { PackageOpen } from "lucide-react";
 
-const NoProductAvailable = ({
-  selectedTab, 
-  className,
-}:{
+interface Props {
   selectedTab?: string;
   className?: string;
-}) => {
+}
+
+const NoProductAvailable = ({ selectedTab, className }: Props) => {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-10 min-h-80 space-y-4 bg-gray-100 w-full mt-10", className)}>
-    <motion.div
-    initial={{ opacity: 0, y: -20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center p-8 sm:p-12 min-h-72 rounded-2xl border border-slate-200/70 bg-slate-50/60 text-center w-full",
+        className,
+      )}
     >
-      <h2 className="text-lg font-medium text-gray-500">
-      No products available for <span className="font-bold">{selectedTab}</span>
-      </h2>
-    </motion.div>
+      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
+        <PackageOpen className="w-6 h-6 stroke-1.5" />
+      </div>
 
-    <motion.p
-    initial={{ opacity: 0}}
-    animate={{ opacity: 1}}
-    transition={{ duration: 0.5, delay: 0.5 }}
-    className="text-gray-600"
-    >
-      We&apos;re sorry, but there are currently no products available in this {" "}
-      <span className="text-base font-semibold text-darkColor">
-        {selectedTab} category.
-        </span>{" "}
-        Please check back later or explore other categories.
-      </motion.p>
-    
-      <motion.div
-      animate={{ scale:  [1, 1.1, 1] }}
-      transition={{ repeat: Infinity, duration: 1.5 }}
-      className="flex items-center space-x-2 text-shop-dark-green font-bold"
-        >
-          <Loader2 className="w-5 h-5 animate-spin"/>
-          <span>We&apos;re restocking shortly...</span>
-      </motion.div>
+      <h3 className="text-base sm:text-lg font-bold text-slate-900">
+        {selectedTab
+          ? `No products found in "${selectedTab}"`
+          : "No products match your criteria"}
+      </h3>
 
-  <motion.p
-    initial={{ opacity: 0}}
-    animate={{ opacity: 1}}
-    transition={{ duration: 0.4, delay: 0.5 }}
-    className="text-sm text-gray-600"
-    >
-      Please check back later or explore other categories for available products.
-  </motion.p>
-
-        
+      <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1.5 leading-relaxed">
+        We couldn&apos;t find any items matching your selected criteria. Try adjusting or clearing your filters to explore our full catalog.
+      </p>
     </div>
   );
 };
+
 export default NoProductAvailable;

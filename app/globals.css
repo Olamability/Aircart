@@ -32,6 +32,7 @@
   --color-shop-light-text: #686e7d;
   --color-shop-lighter-text: #ababab;
   --color-deal-bg: #f1f3f8;
+  --color-shop-light-offwhite: #fafaf6;
 }
 
 @theme inline {
@@ -148,19 +149,24 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
+
   .hoverEffect {
     @apply transition-all duration-500 ease-in-out;
   }
+
   button {
     cursor: pointer;
   }
 }
+
 body {
   font-family: var(--font-poppins);
 }

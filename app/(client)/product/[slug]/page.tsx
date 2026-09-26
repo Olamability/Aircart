@@ -273,7 +273,7 @@ const SingleProductPage = async ({
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">
-                    Free Express Delivery
+                    Express Delivery
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Fast courier delivery nationwide. Enter your postal code during checkout for exact delivery timeframe.

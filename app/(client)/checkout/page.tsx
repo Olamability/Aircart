@@ -18,6 +18,8 @@ import {
   ChevronRight,
   Lock,
   Edit3,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
@@ -47,6 +49,7 @@ const CheckoutPage = () => {
   } = useStore();
 
   const [loading, setLoading] = useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(true);
   const groupedItems = useStore((state) => state.getGroupedItems());
 
   const { isLoaded, isSignedIn } = useAuth();
@@ -143,7 +146,7 @@ const CheckoutPage = () => {
   const discountAmount = getSubTotalPrice() - getTotalPrice();
 
   return (
-    <div className="bg-slate-50/50 min-h-screen py-6 sm:py-8 lg:py-12 pb-36 md:pb-12">
+    <div className="bg-slate-50/50 min-h-screen py-6 sm:py-8 lg:py-12 pb-60 md:pb-12">
       {isSignedIn ? (
         <Container>
           {groupedItems?.length ? (
@@ -423,12 +426,6 @@ const CheckoutPage = () => {
                         </div>
                       )}
 
-                      {/* Delivery note */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                        <span>Delivery</span>
-                        <span className="text-emerald-700 font-semibold">Free Express</span>
-                      </div>
-
                       <Separator className="my-2 bg-slate-100" />
 
                       {/* Total */}
@@ -470,27 +467,77 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              {/* Mobile Sticky Payment CTA Bar */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/95 backdrop-blur-md px-4 py-3.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:hidden">
-                <div className="mx-auto w-full max-w-lg flex items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
-                      Total ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})
-                    </span>
-                    <PriceFormat
-                      amount={getTotalPrice()}
-                      className="text-lg font-black text-shop-dark-green tracking-tight"
-                    />
-                  </div>
-
-                  <Button
-                    className="h-11 px-6 rounded-xl bg-shop-dark-green font-semibold text-sm text-white hover:bg-shop-dark-green/90 shadow-xs cursor-pointer"
-                    disabled={loading}
-                    onClick={handlePayment}
+              {/* Mobile Sticky Complete Payment Summary */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/98 backdrop-blur-md px-4 pt-3.5 pb-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] md:hidden">
+                <div className="mx-auto w-full max-w-lg space-y-3">
+                  {/* Collapsible Summary Header */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+                    className="w-full flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
                   >
-                    {loading ? "Connecting..." : "Proceed to Payment"}
-                    <ArrowRight className="ml-1.5 h-4 w-4" />
-                  </Button>
+                    <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
+                      <span>Payment Summary</span>
+                      <span className="text-xs font-normal text-slate-500">
+                        ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-shop-dark-green bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                      <span>{mobileSummaryOpen ? "Hide breakdown" : "View breakdown"}</span>
+                      {mobileSummaryOpen ? (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Complete Breakdown */}
+                  {mobileSummaryOpen && (
+                    <div className="space-y-2 text-xs pt-2 border-t border-slate-100 animate-in fade-in-50 duration-200">
+                      <div className="flex items-center justify-between text-slate-600">
+                        <span>Items Subtotal</span>
+                        <PriceFormat
+                          amount={getSubTotalPrice()}
+                          className="font-semibold text-slate-800"
+                        />
+                      </div>
+
+                      {discountAmount > 0 && (
+                        <div className="flex items-center justify-between text-emerald-700">
+                          <span className="font-medium">Marketplace Savings</span>
+                          <span className="font-bold">
+                            -<PriceFormat
+                              amount={discountAmount}
+                              className="text-emerald-700 font-bold"
+                            />
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Total Row & CTA */}
+                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div>
+                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block">
+                        Total Payable
+                      </span>
+                      <PriceFormat
+                        amount={getTotalPrice()}
+                        className="text-lg font-black text-shop-dark-green tracking-tight"
+                      />
+                    </div>
+
+                    <Button
+                      className="flex-1 max-w-[200px] h-11 px-5 rounded-xl bg-shop-dark-green font-semibold text-sm text-white hover:bg-shop-dark-green/90 shadow-xs cursor-pointer"
+                      disabled={loading}
+                      onClick={handlePayment}
+                    >
+                      {loading ? "Connecting..." : "Proceed to Payment"}
+                      <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </>

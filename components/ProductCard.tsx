@@ -18,19 +18,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Format category string safely whether passed as array of strings or references
   const categoryText = Array.isArray(product?.categories)
     ? product.categories
-        .map((cat: unknown) =>
-          typeof cat === "string"
-            ? cat
-            : typeof cat === "object" && cat && "title" in cat
-              ? (cat as { title?: string }).title
-              : "",
-        )
-        .filter(Boolean)
-        .join(" • ")
+      .map((cat: unknown) =>
+        typeof cat === "string"
+          ? cat
+          : typeof cat === "object" && cat && "title" in cat
+            ? (cat as { title?: string }).title
+            : "",
+      )
+      .filter(Boolean)
+      .join(" • ")
     : "";
 
   return (
-    <article className="group relative flex flex-col h-full bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)] hover:border-emerald-200/70 transition-all duration-300 ease-out overflow-hidden">
+    <article className="group relative flex flex-col h-full bg-[#FDFBF7] rounded-2xl border border-slate-200 shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)] hover:border-emerald-300 transition-all duration-300 ease-out overflow-hidden">
       {/* 1. HERO IMAGE STAGE */}
       <div className="relative w-full aspect-square bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-3.5 sm:p-5 flex items-center justify-center overflow-hidden shrink-0">
         {product?.image?.[0] ? (
@@ -45,9 +45,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               loading="lazy"
               width={500}
               height={500}
-              className={`w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 ${
-                isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
-              }`}
+              className={`w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 ${isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
+                }`}
             />
           </Link>
         ) : (

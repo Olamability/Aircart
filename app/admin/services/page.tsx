@@ -2,6 +2,8 @@ import React from "react";
 import { Sparkles, Briefcase, Wrench, Shield, PlusCircle } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import EmptyState from "@/components/dashboard/EmptyState";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 const AdminServicesPage = () => {
   const serviceCategories = [
@@ -29,7 +31,8 @@ const AdminServicesPage = () => {
   ];
 
   return (
-    <div className="space-y-8 pb-12">
+    <PermissionGuard permission={permissions.services_view}>
+      <div className="space-y-8 pb-12">
       <DashboardHeader
         title="Services Marketplace Management"
         description="Configure on-demand local services, certified artisan providers, booking slots, and service categories."
@@ -80,6 +83,7 @@ const AdminServicesPage = () => {
         />
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

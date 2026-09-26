@@ -2,14 +2,14 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getAdminVendors } from "@/sanity/queries/adminQueries";
-import { createAdminProduct } from "@/actions/adminProductActions";
+import { createAdminProduct, type AdminProductInput } from "@/actions/adminProductActions";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AdminProductForm from "@/components/dashboard/AdminProductForm";
 
 const AdminNewProductPage = async () => {
   const vendors = await getAdminVendors({ status: "approved" });
 
-  const handleCreateProduct = async (data: any) => {
+  const handleCreateProduct = async (data: AdminProductInput) => {
     "use server";
     await createAdminProduct(data);
   };

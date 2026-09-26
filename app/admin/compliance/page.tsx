@@ -6,6 +6,8 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import VendorStatusActions from "@/components/dashboard/VendorStatusActions";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 const AdminCompliancePage = async () => {
   const [allVendors] = await Promise.all([getAdminVendors()]);
@@ -15,7 +17,8 @@ const AdminCompliancePage = async () => {
   const approvedVendors = allVendors.filter((v: any) => v.status === "approved");
 
   return (
-    <div className="space-y-8 pb-12">
+    <PermissionGuard permission={permissions.compliance_view}>
+      <div className="space-y-8 pb-12">
       <DashboardHeader
         title="Seller Compliance & Risk Monitoring"
         description="Enforce seller code of conduct, track account flags, manage suspension policies, and audit vendor KYC credentials."
@@ -96,6 +99,7 @@ const AdminCompliancePage = async () => {
         </p>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

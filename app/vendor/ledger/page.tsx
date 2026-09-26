@@ -5,17 +5,17 @@ import { getVendorLedger } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 import StatusBadge from "@/components/dashboard/StatusBadge";
-import EmptyState from "@/components/dashboard/EmptyState";
+import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 const VendorLedgerPage = async () => {
   const vendor = await getCurrentVendor();
 
   if (!vendor) {
     return (
-      <EmptyState
+      <VendorMissingProfileState
         icon={Wallet}
-        title="Merchant account not found"
-        description="Please complete your merchant profile."
+        title="Merchant profile required"
+        description="Please complete your merchant profile to view earnings, commission deductions, and payout history."
       />
     );
   }

@@ -5,10 +5,21 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Upload, X, Check, Search, Plus } from "lucide-react";
 import { searchBrands } from "@/actions/searchBrands";
-import { createVendorBrand } from "@/actions/createVendorBrand";
+import { createBrand } from "@/actions/adminTaxonomyActions";
 import { searchCategories } from "@/actions/searchCategories";
 import { uploadVendorProductImage } from "@/actions/uploadVendorProductImage";
 import { urlFor } from "@/sanity/lib/image";
+import type { AdminProductInput } from "@/actions/adminProductActions";
+import type { Product } from "@/sanity.types";
+
+type ProductStatus = NonNullable<AdminProductInput["status"]>;
+type ProductVariant = NonNullable<AdminProductInput["variant"]>;
+
+const isValidStatus = (val: string): val is ProductStatus =>
+  ["available", "new", "hot", "sale"].includes(val);
+
+const isValidVariant = (val: string): val is ProductVariant =>
+  ["gadget", "appliances", "refrigerator", "food & beverages", "others"].includes(val);
 
 interface AdminProductFormProps {
   initialData?: {
@@ -18,17 +29,17 @@ interface AdminProductFormProps {
     price?: number;
     discount?: number;
     stock?: number;
-    status?: "new" | "hot" | "sale" | "available";
+    status?: ProductStatus;
     isNew?: boolean;
-    variant?: "gadget" | "appliances" | "refrigerator" | "others" | "food & beverages";
+    variant?: ProductVariant;
     isfeatured?: boolean;
     vendorId?: string;
     brandId?: string;
     categoryIds?: string[];
-    image?: any;
+    image?: Product["image"];
   };
   vendors: Array<{ _id: string; businessName: string }>;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: AdminProductInput) => Promise<void>;
   submitLabel?: string;
 }
 
@@ -47,9 +58,13 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
   const [price, setPrice] = useState(initialData?.price ?? 0);
   const [discount, setDiscount] = useState(initialData?.discount ?? 0);
   const [stock, setStock] = useState(initialData?.stock ?? 0);
-  const [status, setStatus] = useState<any>(initialData?.status || "available");
+  const [status, setStatus] = useState<ProductStatus>(
+    initialData?.status && isValidStatus(initialData.status) ? initialData.status : "available"
+  );
   const [isNew, setIsNew] = useState(initialData?.isNew || false);
-  const [variant, setVariant] = useState<any>(initialData?.variant || "others");
+  const [variant, setVariant] = useState<ProductVariant>(
+    initialData?.variant && isValidVariant(initialData.variant) ? initialData.variant : "others"
+  );
   const [isfeatured, setIsfeatured] = useState(initialData?.isfeatured || false);
   const [vendorId, setVendorId] = useState(initialData?.vendorId || vendors[0]?._id || "");
 
@@ -116,7 +131,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
     if (!val) return;
     setCreatingBrand(true);
     try {
-      const res = await createVendorBrand(val);
+      const res = await createBrand(val);
       setBrandId(res.brand._id);
       setBrandSearch(res.brand.title);
       setBrands([]);
@@ -239,7 +254,11 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
             <label className="block text-sm font-medium text-slate-700">Product Type / Variant</label>
             <select
               value={variant}
-              onChange={(e) => setVariant(e.target.value)}
+              onChange={(e) => {
+                if (isValidVariant(e.target.value)) {
+                  setVariant(e.target.value);
+                }
+              }}
               className="mt-1.5 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
             >
               <option value="gadget">Gadget</option>
@@ -456,7 +475,11 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
             <label className="block text-sm font-medium text-slate-700">Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => {
+                if (isValidStatus(e.target.value)) {
+                  setStatus(e.target.value);
+                }
+              }}
               className="mt-1.5 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm"
             >
               <option value="available">Available</option>

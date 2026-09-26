@@ -2,8 +2,8 @@ import { getCurrentVendor } from "./vendor";
 import { client } from "@/sanity/lib/client";
 import type { Product } from "@/sanity.types";
 export type VendorProductWithBrand = Omit<Product, "brand" | "categories"> & {
-  brand?: { _id: string; title: string; slug?: { current?: string } };
-  categories?: { _id: string; title: string }[];
+  brand?: { _id: string; title: string; slug?: { current?: string } } | null;
+  categories?: { _id: string; title: string }[] | null;
 };
 export const getCurrentVendorProduct = async (
   productId: string,

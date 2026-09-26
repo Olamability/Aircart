@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Package, Edit, ExternalLink, Star, AlertTriangle } from "lucide-react";
-import type { VendorProductWithBrand } from "@/lib/vendorProducts";
+import type { VendorProductWithBrand } from "@/lib/vendorProduct";
 import { urlFor } from "@/sanity/lib/image";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import PriceView from "@/components/PriceView";

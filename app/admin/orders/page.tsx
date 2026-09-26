@@ -6,6 +6,8 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import EmptyState from "@/components/dashboard/EmptyState";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminOrdersPageProps {
   searchParams: Promise<{
@@ -53,7 +55,8 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <PermissionGuard permission={permissions.orders_view}>
+      <div className="space-y-6 pb-12">
       <DashboardHeader
         title="Orders Management"
         description="Monitor marketplace orders across all merchants, track shipments, and oversee payment states."
@@ -212,7 +215,8 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

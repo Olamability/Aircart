@@ -1,14 +1,20 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Package, Truck, ArrowRight } from "lucide-react";
+import { ShoppingBag, Package, Truck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
-import { getVendorOrders } from "@/sanity/queries/vendorQueries";
+import {
+  getVendorOrders,
+  type VendorOrder,
+  type VendorOrderStoreItem,
+} from "@/sanity/queries/vendorQueries";
 import { urlFor } from "@/sanity/lib/image";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import EmptyState from "@/components/dashboard/EmptyState";
+import VendorFulfillmentControl from "@/components/dashboard/VendorFulfillmentControl";
+import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 interface VendorOrdersPageProps {
   searchParams: Promise<{
@@ -17,15 +23,20 @@ interface VendorOrdersPageProps {
   }>;
 }
 
+interface OrderAddress {
+  city?: string;
+  state?: string;
+}
+
 const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
   const vendor = await getCurrentVendor();
 
   if (!vendor) {
     return (
-      <EmptyState
+      <VendorMissingProfileState
         icon={ShoppingBag}
-        title="Merchant account not found"
-        description="Please complete your merchant onboarding profile to receive customer orders."
+        title="Merchant profile required"
+        description="Please complete your store profile to begin receiving and fulfilling customer orders."
       />
     );
   }
@@ -75,11 +86,13 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
         />
       ) : (
         <div className="space-y-4">
-          {orders.map((ord: any) => {
+          {orders.map((ord: VendorOrder) => {
             const orderTotal = (ord.storeItems || []).reduce(
-              (acc: number, it: any) => acc + (it.price || 0) * (it.quantity || 1),
+              (acc: number, it: VendorOrderStoreItem) =>
+                acc + (it.price || 0) * (it.quantity || 1),
               0
             );
+            const address = ord.address as OrderAddress | undefined;
 
             return (
               <div
@@ -103,9 +116,12 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge status={ord.paymentStatus || "pending"} />
-                    <StatusBadge status={ord.status || "pending"} />
+                    <VendorFulfillmentControl
+                      orderId={ord._id}
+                      currentStatus={ord.status || "pending"}
+                    />
                   </div>
                 </div>
 
@@ -116,13 +132,15 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
                   </div>
                   <div>
                     <span className="font-medium text-slate-900">Ship To:</span>{" "}
-                    {ord.address ? `${ord.address.city}, ${ord.address.state}` : "Direct Dispatch"}
+                    {address?.city && address?.state
+                      ? `${address.city}, ${address.state}`
+                      : "Direct Dispatch"}
                   </div>
                 </div>
 
                 {/* Vendor's Line Items */}
                 <div className="divide-y divide-slate-100 bg-slate-50/50 rounded-lg p-3">
-                  {(ord.storeItems || []).map((it: any, idx: number) => {
+                  {(ord.storeItems || []).map((it: VendorOrderStoreItem, idx: number) => {
                     const img =
                       it.product?.image && it.product.image[0]
                         ? urlFor(it.product.image[0]).width(48).height(48).url()
@@ -176,3 +194,4 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
 };
 
 export default VendorOrdersPage;
+

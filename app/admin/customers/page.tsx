@@ -5,6 +5,8 @@ import { getAdminCustomers } from "@/sanity/queries/adminQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import EmptyState from "@/components/dashboard/EmptyState";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminCustomersPageProps {
   searchParams: Promise<{ query?: string }>;
@@ -15,7 +17,8 @@ const AdminCustomersPage = async ({ searchParams }: AdminCustomersPageProps) => 
   const customers = await getAdminCustomers({ query: sp.query });
 
   return (
-    <div className="space-y-6 pb-12">
+    <PermissionGuard permission={permissions.customers_view}>
+      <div className="space-y-6 pb-12">
       <DashboardHeader
         title="Customer Directory"
         description="Buyer accounts, purchasing volumes, and transaction histories across the marketplace."
@@ -132,7 +135,8 @@ const AdminCustomersPage = async ({ searchParams }: AdminCustomersPageProps) => 
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

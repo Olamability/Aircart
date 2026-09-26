@@ -4,17 +4,17 @@ import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorTelemetry } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
-import EmptyState from "@/components/dashboard/EmptyState";
+import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 const VendorTelemetryPage = async () => {
   const vendor = await getCurrentVendor();
 
   if (!vendor) {
     return (
-      <EmptyState
+      <VendorMissingProfileState
         icon={TrendingUp}
-        title="Merchant account not found"
-        description="Please complete your merchant onboarding profile."
+        title="Merchant profile required"
+        description="Please complete your merchant onboarding profile to view store analytics and telemetry."
       />
     );
   }

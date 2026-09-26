@@ -9,6 +9,8 @@ import FilterBar from "@/components/dashboard/FilterBar";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import EmptyState from "@/components/dashboard/EmptyState";
 import VendorStatusActions from "@/components/dashboard/VendorStatusActions";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminVendorsPageProps {
   searchParams: Promise<{
@@ -37,7 +39,8 @@ const AdminVendorsPage = async ({ searchParams }: AdminVendorsPageProps) => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <PermissionGuard permission={permissions.vendors_view}>
+      <div className="space-y-6 pb-12">
       <DashboardHeader
         title="Vendors Management"
         description="Verify seller documentation, track merchant catalog sizes, and oversee platform merchant status."
@@ -177,7 +180,8 @@ const AdminVendorsPage = async ({ searchParams }: AdminVendorsPageProps) => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

@@ -3,10 +3,13 @@ import { MessageSquareWarning, RefreshCcw, Truck, AlertCircle, CheckCircle2 } fr
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 import EmptyState from "@/components/dashboard/EmptyState";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 const AdminDisputesPage = () => {
   return (
-    <div className="space-y-8 pb-12">
+    <PermissionGuard permission={permissions.disputes_view}>
+      <div className="space-y-8 pb-12">
       <DashboardHeader
         title="Disputes & Claims Center"
         description="Mediate buyer-seller claims, oversee refund chargebacks, and resolve order delivery issues."
@@ -53,6 +56,7 @@ const AdminDisputesPage = () => {
         />
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { getAdminVendors } from "@/sanity/queries/adminQueries";
-import { updateAdminProduct } from "@/actions/adminProductActions";
+import { updateAdminProduct, type AdminProductInput } from "@/actions/adminProductActions";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AdminProductForm from "@/components/dashboard/AdminProductForm";
 
@@ -42,7 +42,7 @@ const AdminProductEditPage = async ({ params }: AdminProductEditPageProps) => {
     notFound();
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: AdminProductInput) => {
     "use server";
     await updateAdminProduct(productId, data);
   };

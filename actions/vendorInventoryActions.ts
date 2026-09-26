@@ -3,8 +3,10 @@
 import { writeClient } from "@/sanity/lib/writeClient";
 import { requirePermission } from "@/lib/guards";
 import { permissions } from "@/lib/permissions";
-import { requireVendorProductOwnership } from "@/lib/vendorOwnershipGuard";
-import { getCurrentVendor } from "@/lib/vendor";
+import {
+  requireVendorProductOwnership,
+  requireVendorOrderOwnership,
+} from "@/lib/vendorOwnershipGuard";
 import { revalidatePath } from "next/cache";
 
 export const updateVendorStock = async (productId: string, newStock: number) => {
@@ -27,9 +29,17 @@ export const updateVendorShippingStatus = async (
   newStatus: "processing" | "shipped" | "out_for_delivery" | "delivered"
 ) => {
   await requirePermission(permissions.shipping_manage);
-  const vendor = await getCurrentVendor();
-  if (!vendor) {
-    throw new Error("Unauthorized merchant");
+  await requireVendorOrderOwnership(orderId);
+
+  const validStatuses = [
+    "processing",
+    "shipped",
+    "out_for_delivery",
+    "delivered",
+  ] as const;
+
+  if (!validStatuses.includes(newStatus)) {
+    throw new Error("Invalid shipping status");
   }
 
   await writeClient.patch(orderId).set({ status: newStatus }).commit();

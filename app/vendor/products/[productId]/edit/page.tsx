@@ -2,6 +2,8 @@ import { getCurrentVendorProduct } from "@/lib/vendorProduct";
 import { notFound } from "next/navigation";
 import VendorProductForm from "@/components/VendorProductForm";
 import { updateVendorProduct } from "@/actions/updateVendorProduct";
+import type { VendorProductInput } from "@/lib/validators/product";
+
 interface VendorProductEditPageProps {
   params: Promise<{ productId: string }>;
 }
@@ -13,19 +15,7 @@ const VendorProductEditPage = async ({
   if (!product) {
     notFound();
   }
-  const handleSubmit = async (data: {
-    title: string;
-    description?: string;
-    price: number;
-    discount?: number;
-    stock: number;
-    status?: typeof product.status;
-    isNew?: boolean;
-    variant?: typeof product.variant;
-    isfeatured?: boolean;
-    imageAssetId?: string;
-    categoryIds: string[];
-  }) => {
+  const handleSubmit = async (data: VendorProductInput) => {
     "use server";
     await updateVendorProduct(productId, data);
   };

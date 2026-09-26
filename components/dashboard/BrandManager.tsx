@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from "react";
 import Image from "next/image";
 import { Tag, Plus, Trash2, Package } from "lucide-react";
-import { createAdminBrand, deleteAdminBrand } from "@/actions/adminTaxonomyActions";
+import { createBrand, deleteAdminBrand } from "@/actions/adminTaxonomyActions";
 import { urlFor } from "@/sanity/lib/image";
 
 interface BrandItem {
@@ -37,7 +37,7 @@ const BrandManager: React.FC<BrandManagerProps> = ({ initialBrands }) => {
     setError(null);
     startTransition(async () => {
       try {
-        const res = await createAdminBrand(title);
+        const res = await createBrand(title);
         if (res.brand) {
           setBrands((prev) => [
             ...prev,

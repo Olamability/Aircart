@@ -8,6 +8,8 @@ import { urlFor } from "@/sanity/lib/image";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import OrderStatusSelect from "@/components/dashboard/OrderStatusSelect";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminOrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -22,7 +24,8 @@ const AdminOrderDetailPage = async ({ params }: AdminOrderDetailPageProps) => {
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <PermissionGuard permission={permissions.orders_view}>
+      <div className="space-y-8 pb-12">
       <div className="mb-2">
         <Link
           href="/admin/orders"
@@ -180,6 +183,7 @@ const AdminOrderDetailPage = async ({ params }: AdminOrderDetailPageProps) => {
         </div>
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

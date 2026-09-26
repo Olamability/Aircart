@@ -1,4 +1,8 @@
-import { isVendorProductOwner } from "./vendorOwnership";
+import {
+  isVendorProductOwner,
+  isVendorOrderOwner,
+} from "./vendorOwnership";
+
 export const requireVendorProductOwnership = async (
   productId: string,
 ): Promise<void> => {
@@ -7,3 +11,13 @@ export const requireVendorProductOwnership = async (
     throw new Error("Unauthorized");
   }
 };
+
+export const requireVendorOrderOwnership = async (
+  orderId: string,
+): Promise<void> => {
+  const allowed = await isVendorOrderOwner(orderId);
+  if (!allowed) {
+    throw new Error("Unauthorized");
+  }
+};
+

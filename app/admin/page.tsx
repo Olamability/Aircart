@@ -17,8 +17,15 @@ import { getAdminDashboardStats } from "@/sanity/queries/adminQueries";
 import StatsCard from "@/components/dashboard/StatsCard";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatusBadge from "@/components/dashboard/StatusBadge";
+import { getUserRole } from "@/lib/roles";
+import { redirect } from "next/navigation";
 
 const AdminDashboardPage = async () => {
+  const role = await getUserRole();
+  if (role === "product_manager") {
+    redirect("/admin/products");
+  }
+
   const stats = await getAdminDashboardStats();
 
   return (

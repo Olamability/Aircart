@@ -18,6 +18,8 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import StatsCard from "@/components/dashboard/StatsCard";
 import VendorStatusActions from "@/components/dashboard/VendorStatusActions";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminVendorDetailPageProps {
   params: Promise<{ vendorId: string }>;
@@ -38,7 +40,8 @@ const AdminVendorDetailPage = async ({ params }: AdminVendorDetailPageProps) => 
       : null;
 
   return (
-    <div className="space-y-8 pb-12">
+    <PermissionGuard permission={permissions.vendors_view}>
+      <div className="space-y-8 pb-12">
       <div className="mb-2">
         <Link
           href="/admin/vendors"
@@ -222,6 +225,7 @@ const AdminVendorDetailPage = async ({ params }: AdminVendorDetailPageProps) => 
         )}
       </div>
     </div>
+    </PermissionGuard>
   );
 };
 

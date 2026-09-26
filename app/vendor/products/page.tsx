@@ -1,11 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import { PlusCircle, Package } from "lucide-react";
-import { getCurrentVendorProducts } from "@/lib/vendorProducts";
+import { getCurrentVendor } from "@/lib/vendor";
+import { getCurrentVendorProducts } from "@/lib/vendorProduct";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import EmptyState from "@/components/dashboard/EmptyState";
 import VendorProductCard from "@/components/dashboard/VendorProductCard";
+import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 interface VendorProductsPageProps {
   searchParams: Promise<{
@@ -16,6 +18,18 @@ interface VendorProductsPageProps {
 }
 
 const VendorProductsPage = async ({ searchParams }: VendorProductsPageProps) => {
+  const vendor = await getCurrentVendor();
+
+  if (!vendor) {
+    return (
+      <VendorMissingProfileState
+        icon={Package}
+        title="Merchant profile required"
+        description="Your merchant profile has not been configured yet. Set up your store profile to begin listing and managing products."
+      />
+    );
+  }
+
   const sp = await searchParams;
   const products = await getCurrentVendorProducts();
 

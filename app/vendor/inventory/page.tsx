@@ -6,6 +6,7 @@ import { getVendorInventory } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import EmptyState from "@/components/dashboard/EmptyState";
+import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 import VendorInventoryTable from "@/components/dashboard/VendorInventoryTable";
 
 interface VendorInventoryPageProps {
@@ -20,10 +21,10 @@ const VendorInventoryPage = async ({ searchParams }: VendorInventoryPageProps) =
 
   if (!vendor) {
     return (
-      <EmptyState
+      <VendorMissingProfileState
         icon={Warehouse}
-        title="Merchant account not found"
-        description="Please configure your vendor store profile first."
+        title="Merchant profile required"
+        description="Please configure your vendor store profile first to track and manage product inventory."
       />
     );
   }

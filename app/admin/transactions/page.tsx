@@ -6,6 +6,8 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FilterBar from "@/components/dashboard/FilterBar";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import EmptyState from "@/components/dashboard/EmptyState";
+import { PermissionGuard } from "@/lib/permissionGuard";
+import { permissions } from "@/lib/permissions";
 
 interface AdminTransactionsPageProps {
   searchParams: Promise<{
@@ -45,7 +47,8 @@ const AdminTransactionsPage = async ({ searchParams }: AdminTransactionsPageProp
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <PermissionGuard permission={permissions.transactions_view}>
+      <div className="space-y-6 pb-12">
       <DashboardHeader
         title="Payment Transactions"
         description="Audit payment gateway transactions, settlement verification, and payment reference reconciliation."
@@ -167,7 +170,8 @@ const AdminTransactionsPage = async ({ searchParams }: AdminTransactionsPageProp
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PermissionGuard>
   );
 };
 

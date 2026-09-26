@@ -35,7 +35,10 @@ const SideMenu: FC<SidebarProps> = ({
     if (role === "vendor") {
       effectiveDashboardHref = "/vendor";
       effectiveDashboardLabel = "Vendor Dashboard";
-    } else if (role === "admin" || role === "product_manager") {
+    } else if (role === "product_manager") {
+      effectiveDashboardHref = "/admin/products";
+      effectiveDashboardLabel = "Product Manager Dashboard";
+    } else if (role === "admin") {
       effectiveDashboardHref = "/admin";
       effectiveDashboardLabel = "Admin Dashboard";
     } else if (role === "super_admin") {

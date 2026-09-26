@@ -14,6 +14,9 @@ export const createVendorProduct = async (data: VendorProductInput) => {
   if (!vendor) {
     throw new Error("Vendor not found");
   }
+  if (vendor.status !== "approved") {
+    throw new Error("Unauthorized");
+  }
   const isValid = validateVendorProductInput(data);
   if (!isValid) {
     throw new Error("Invalid product data");
@@ -45,6 +48,25 @@ export const createVendorProduct = async (data: VendorProductInput) => {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+  let imageArray;
+  if (data.imageAssetId) {
+    const asset = await client.fetch(
+      `*[_type == "sanity.imageAsset" && _id == $assetId][0]{ _id }`,
+      { assetId: data.imageAssetId },
+    );
+    if (!asset) {
+      throw new Error("Invalid image asset");
+    }
+    imageArray = [
+      {
+        _key: crypto.randomUUID(),
+        _type: "image",
+        asset: { _type: "reference", _ref: asset._id },
+      },
+    ];
+  }
+
   const product = await writeClient.create({
     _type: "product",
     title: data.title,
@@ -60,6 +82,7 @@ export const createVendorProduct = async (data: VendorProductInput) => {
     brand: brandReference,
     categories: categoryReferences,
     vendor: { _type: "reference", _ref: vendor._id },
+    ...(imageArray ? { image: imageArray } : {}),
   });
   return { success: true, productId: product._id };
 };

@@ -23,7 +23,12 @@ const PriceView = ({
     : price;
 
   return (
-    <div className={cn("flex items-baseline gap-2 flex-wrap min-h-7", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-baseline gap-0.5 sm:flex-row sm:items-baseline sm:gap-2 min-h-7",
+        className,
+      )}
+    >
       <PriceFormat
         amount={discountedPrice}
         className={cn(

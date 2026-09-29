@@ -18,15 +18,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Format category string safely whether passed as array of strings or references
   const categoryText = Array.isArray(product?.categories)
     ? product.categories
-      .map((cat: unknown) =>
-        typeof cat === "string"
-          ? cat
-          : typeof cat === "object" && cat && "title" in cat
-            ? (cat as { title?: string }).title
-            : "",
-      )
-      .filter(Boolean)
-      .join(" • ")
+        .map((cat: unknown) =>
+          typeof cat === "string"
+            ? cat
+            : typeof cat === "object" && cat && "title" in cat
+              ? (cat as { title?: string }).title
+              : "",
+        )
+        .filter(Boolean)
+        .join(" • ")
     : "";
 
   return (
@@ -37,7 +37,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Link
             href={`/product/${product?.slug?.current}`}
             className="relative flex items-center justify-center w-full h-full"
-            aria-label={product.title ? `View ${product.title}` : "View product"}
+            aria-label={
+              product.title ? `View ${product.title}` : "View product"
+            }
           >
             <Image
               src={urlFor(product.image[0]).url()}
@@ -45,8 +47,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               loading="lazy"
               width={500}
               height={500}
-              className={`w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 ${isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
-                }`}
+              className={`w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 ${
+                isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
+              }`}
             />
           </Link>
         ) : (
@@ -124,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </Link>
 
           {/* Social Proof (Stars) & Live Inventory */}
-          <div className="flex items-center justify-between gap-1.5 pt-0.5 text-xs">
+          <div className="flex flex-col gap-1 pt-0.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-1.5">
             {/* Reviews */}
             <div className="flex items-center gap-1">
               <div className="flex items-center gap-0.5">
@@ -146,15 +149,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
 
             {/* Stock Indicator */}
-            <div>
+            <div className="min-w-0 shrink-0">
               {!isOutOfStock ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="inline-flex max-w-full shrink-0 items-center gap-1 whitespace-nowrap text-xs font-medium text-emerald-700">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                   <span>In Stock</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                <span className="inline-flex max-w-full shrink-0 items-center gap-1 whitespace-nowrap text-xs font-semibold text-rose-600">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
                   <span>Out of Stock</span>
                 </span>
               )}

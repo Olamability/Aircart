@@ -369,7 +369,7 @@ const CheckoutPage = () => {
                                   )}
 
                                   {product?.status && (
-                                    <span className="uppercase text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded">
+                                    <span className="uppercase text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
                                       {product.status}
                                     </span>
                                   )}

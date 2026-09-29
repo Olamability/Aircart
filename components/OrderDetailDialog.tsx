@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DialogHeader, Dialog, DialogContent, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { buttonVariants } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -42,10 +42,10 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
     w-[calc(100%-1rem)]
     max-w-none
     sm:w-[calc(100%-2rem)]
-    sm:max-width:560px;
-    md:max-width:600px;
-    lg:max-width:650px;
-    xl:max-width:700px;
+    sm:max-w-[560px]
+    md:max-w-[600px]
+    lg:max-w-[650px]
+    xl:max-w-[700px]
     max-h-[90vh]
     overflow-y-auto
     overflow-x-hidden
@@ -54,7 +54,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="font-bold text-center">
             Order Details
-            <span className="mt-2 block whitespace-nowrap text-gray-600/80 text-sm sm:text-base">
+            <span className="mt-2 block whitespace-nowrap text-slate-600/80 text-sm sm:text-base">
               {order.orderNumber}
             </span>
           </DialogTitle>
@@ -62,7 +62,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
         {/* Customer Information */}
         <div className="mt-4 space-y-2 text-sm sm:text-base">
-          <p className="wraps-break">
+          <p className="break-words">
             <strong>Customer:</strong> {order.customerName}
           </p>
 
@@ -79,7 +79,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
           <p>
             <strong>Payment Status:</strong>{" "}
-            <span className="capitalize font-medium text-green-600">
+            <span className="capitalize font-medium text-emerald-700">
               {order.paymentStatus ?? "N/A"}
             </span>
           </p>
@@ -97,15 +97,17 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
           {/* Invoice Button */}
           {order.invoice?.hosted_invoice_url && (
-            <Button variant="outline" className="mt-2 w-full sm:w-auto">
-              <Link
-                href={order.invoice.hosted_invoice_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download Invoice
-              </Link>
-            </Button>
+            <Link
+              href={order.invoice.hosted_invoice_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({
+                variant: "outline",
+                className: "mt-2 w-full sm:w-auto inline-flex",
+              })}
+            >
+              Download Invoice
+            </Link>
           )}
         </div>
 

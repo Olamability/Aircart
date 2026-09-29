@@ -45,7 +45,7 @@ const ShopByBrand = async () => {
           <Link
             key={brand?._id}
             href={{ pathname: "/shop", query: { brand: brand?.slug?.current } }}
-            className="bg-white w-34 h-24 flex items-center 
+            className="bg-white w-full h-24 flex items-center 
         justify-center rounded-md overflow-hidden hover:shadow-lg 
         shadow-shop-dark-green/20 hoverEffect"
           >
@@ -61,7 +61,7 @@ const ShopByBrand = async () => {
           </Link>
         ))}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-16 border-2 border-shop-light-green/30 bg-shop-light-green/20 p-2 shadow-sm inner hover:shadow-shop-light-green/50 py-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-16 border-2 border-shop-light-green/30 bg-shop-light-green/20 px-4 py-5 rounded-lg shadow-sm hover:shadow-shop-light-green/50">
         {serviceData?.map((item, index) => (
           <div
             key={index}

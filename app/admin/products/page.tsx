@@ -165,12 +165,12 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                             </span>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               {product.isfeatured && (
-                                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded">
+                                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
                                   <Star className="h-2.5 w-2.5 fill-current" /> Featured
                                 </span>
                               )}
                               {product.isNew && (
-                                <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.2 rounded">
+                                <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded">
                                   New
                                 </span>
                               )}

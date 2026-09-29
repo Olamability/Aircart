@@ -35,30 +35,30 @@ const SuccessPage = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="w-20 h-20 bg-black rounded-full flex items-center 
+          className="w-20 h-20 bg-shop-dark-green rounded-full flex items-center 
     justify-center mx-auto mb-4 shadow-lg"
         >
           <Check className="text-white w-10 h-10" />
         </motion.div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold text-slate-900 mb-4">
           Order Confirmed!
         </h1>
         <div className="space-y-4 mb-4 text-left">
-          <p className="text-gray-700">
+          <p className="text-slate-600">
             Thank you for your purchase. We&apos;re processing your order and
             will deliver it soon. A confirmation email with your order details
-            will be sent to you inbox shortly
+            will be sent to your inbox shortly
           </p>
-          <p className="text-gray-700">
+          <p className="text-slate-600">
             Order Number:{" "}
-            <span className="text-black font-semibold">{orderNumber}</span>
+            <span className="text-slate-900 font-semibold">{orderNumber}</span>
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             href="/"
-            className="flex items-center justify-center px-4 py-3 font-semibold bg-shop-dark-green text-white rounded-lg hover:bg-shop-dark-green/80 transition-all duration-300 shadow-md"
+            className="flex items-center justify-center px-4 py-3 font-semibold bg-shop-dark-green text-white rounded-lg hover:bg-shop-dark-green/90 transition-all duration-300 shadow-md"
           >
             <Home className="w-5 h-5 mr-2" />
             Home
@@ -66,7 +66,7 @@ const SuccessPage = () => {
           <Link
             href="/orders"
             className="flex items-center justify-center px-4 py-3 
-            font-semibold bg-white text-black border border-lightGreen rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-md"
+            font-semibold bg-white text-slate-800 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all duration-300 shadow-sm"
           >
             <Package className="w-5 h-5 mr-2" />
             Orders

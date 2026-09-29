@@ -56,8 +56,8 @@ const SideMenu: FC<SidebarProps> = ({
     >
       <div
         ref={sidebarRef}
-        className="min-w-72 max-w-96 bg-black text-white h-screen p-10
-      border-r border-r-shop-light-green flex flex-col gap-6 overflow-y-auto"
+        className="w-full max-w-xs sm:max-w-sm bg-black text-white h-screen p-6 sm:p-10
+      border-r border-shop-light-green flex flex-col gap-6 overflow-y-auto"
       >
         <div className="flex items-center justify-between gap-5">
           <Logo className="text-white" spanDesign="group-hover:text-white" />

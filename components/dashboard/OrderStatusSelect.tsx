@@ -3,6 +3,16 @@
 import React, { useTransition } from "react";
 import { updateOrderStatus, updatePaymentStatus } from "@/actions/adminOrderActions";
 
+type OrderFulfillmentStatus =
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "out_for_delivery"
+  | "delivered"
+  | "cancelled";
+
+type OrderPaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
 interface OrderStatusSelectProps {
   orderId: string;
   currentStatus: string;
@@ -16,7 +26,7 @@ const OrderStatusSelect: React.FC<OrderStatusSelectProps> = ({
 }) => {
   const [isPending, startTransition] = useTransition();
 
-  const handleStatusChange = (newStatus: any) => {
+  const handleStatusChange = (newStatus: OrderFulfillmentStatus) => {
     startTransition(async () => {
       try {
         await updateOrderStatus(orderId, newStatus);
@@ -26,7 +36,7 @@ const OrderStatusSelect: React.FC<OrderStatusSelectProps> = ({
     });
   };
 
-  const handlePaymentChange = (newPaymentStatus: any) => {
+  const handlePaymentChange = (newPaymentStatus: OrderPaymentStatus) => {
     startTransition(async () => {
       try {
         await updatePaymentStatus(orderId, newPaymentStatus);
@@ -39,13 +49,13 @@ const OrderStatusSelect: React.FC<OrderStatusSelectProps> = ({
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div>
-        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
           Fulfillment Status
         </label>
         <select
           disabled={isPending}
           value={currentStatus}
-          onChange={(e) => handleStatusChange(e.target.value)}
+          onChange={(e) => handleStatusChange(e.target.value as OrderFulfillmentStatus)}
           className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-emerald-500 focus:outline-hidden disabled:opacity-50"
         >
           <option value="pending">Pending</option>
@@ -58,13 +68,13 @@ const OrderStatusSelect: React.FC<OrderStatusSelectProps> = ({
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
           Payment Status
         </label>
         <select
           disabled={isPending}
           value={currentPaymentStatus}
-          onChange={(e) => handlePaymentChange(e.target.value)}
+          onChange={(e) => handlePaymentChange(e.target.value as OrderPaymentStatus)}
           className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-emerald-500 focus:outline-hidden disabled:opacity-50"
         >
           <option value="pending">Pending</option>

@@ -46,7 +46,7 @@ const ApprovalsHub: React.FC<ApprovalsHubProps> = ({
               <Icon className="h-4 w-4" />
               <span>{tab.label}</span>
               {tab.count > 0 && (
-                <span className="ml-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold px-2 py-0.2">
+                <span className="ml-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5">
                   {tab.count}
                 </span>
               )}

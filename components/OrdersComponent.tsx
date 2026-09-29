@@ -11,6 +11,7 @@ import {
 import PriceFormat from "./PriceFormat";
 import { format } from "date-fns";
 import OrderDetailDialog from "./OrderDetailDialog";
+import StatusBadge from "./dashboard/StatusBadge";
 
 const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
   const [selectedOrder, setSelectedOrder] = useState<
@@ -35,13 +36,13 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <span className="block max-width:120px; truncate cursor-pointer sm:max-width:150px;">
+                      <span className="block max-w-[120px] sm:max-w-[150px] truncate cursor-pointer">
                         {order?.orderNumber?.slice(-10) ?? "N/A"}...
                       </span>
                     </TooltipTrigger>
 
                     <TooltipContent>
-                      <p className="max-width:300px; break-all">
+                      <p className="max-w-[300px] break-all">
                         {order?.orderNumber ?? "N/A"}
                       </p>
                     </TooltipContent>
@@ -57,7 +58,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
               </TableCell>
 
               {/* Customer */}
-              <TableCell className="max-width:150px">
+              <TableCell className="max-w-[150px]">
                 <span className="block truncate">
                   {order?.customerName ?? "N/A"}
                 </span>
@@ -68,13 +69,13 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <span className="block max-width:180px truncate cursor-pointer">
+                      <span className="block max-w-[180px] truncate cursor-pointer">
                         {order?.customerEmail ?? "N/A"}
                       </span>
                     </TooltipTrigger>
 
                     <TooltipContent>
-                      <p className="max-width:300px; break-all">
+                      <p className="max-w-[300px] break-all">
                         {order?.customerEmail ?? "N/A"}
                       </p>
                     </TooltipContent>
@@ -89,9 +90,11 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
 
               {/* Status */}
               <TableCell className="whitespace-nowrap">
-                <span className="capitalize">
-                  {order?.status?.replaceAll("_", " ") ?? "N/A"}
-                </span>
+                {order?.status ? (
+                  <StatusBadge status={order.status} />
+                ) : (
+                  <span className="text-slate-400">N/A</span>
+                )}
               </TableCell>
 
               {/* Invoice Number */}

@@ -6,10 +6,10 @@ import { productType } from "@/constants/data";
 import { client } from "@/sanity/lib/client";
 import { AnimatePresence, motion } from "motion/react";
 import ProductCard from "./ProductCard";
+import type { Product } from "@/sanity.types";
 
 const ProductGrid = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
 
@@ -25,7 +25,7 @@ const ProductGrid = () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await (client as any).fetch(query, params);
-        setProducts(response);
+        setProducts(response || []);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {

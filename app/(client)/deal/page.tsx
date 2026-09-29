@@ -12,8 +12,8 @@ const DealPage = async () => {
       <Container>
         <div className="mb-6 sm:mb-8 pb-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100 mb-2">
-              <FlameIcon className="w-3.5 h-3.5 fill-red-500 text-red-500 animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 mb-2">
+              <FlameIcon className="w-3.5 h-3.5 fill-amber-500 text-amber-500 animate-pulse" />
               <span>Limited Time</span>
             </div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">

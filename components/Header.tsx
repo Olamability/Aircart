@@ -42,7 +42,7 @@ const Header = async () => {
   }
 
   return (
-    <header className="sticky border border-b-shop-light-green top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
+    <header className="sticky border-b border-shop-light-green top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
       <Container className="flex items-center justify-between text-lightColor">
         <div className="w-auto md:w-1/3 flex items-center justify-start gap-2.5 md:gap-0">
           <MobileMenu
@@ -76,7 +76,7 @@ const Header = async () => {
                   className="group relative hover:text-shop-light-green hoverEffect"
                 >
                   <Logs />
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2 bg-red-600 text-white min-w-4 h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center leading-none">
                     {orders?.length ? orders?.length : 0}
                   </span>
                 </Link>

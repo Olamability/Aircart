@@ -30,20 +30,25 @@ const AddToCartButton = ({ product, className }: Props) => {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center">
+    <div className="flex w-full min-w-0 flex-col justify-center">
       {itemCount ? (
-        <div className="w-full bg-slate-50/90 border border-slate-200/90 rounded-xl px-3 py-2 transition-all">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700">
+        <div className="w-full min-w-0 rounded-xl border border-slate-200/90 bg-slate-50/90 px-2 py-2 transition-all sm:px-3">
+          <div className="flex min-w-0 items-center justify-between gap-1 sm:gap-1.5">
+            <span className="min-w-0 shrink-0 whitespace-nowrap text-xs font-normal text-slate-700">
               In Cart
             </span>
-            <QuantityButtons product={product} />
+
+            <QuantityButtons product={product} className="shrink-0" />
           </div>
-          <div className="flex items-center justify-between border-t border-slate-200/70 pt-1.5 mt-1.5">
-            <span className="text-xs text-slate-500 font-medium">Subtotal</span>
+
+          <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2 border-t border-slate-200/70 pt-1.5">
+            <span className="shrink-0 text-xs font-medium text-slate-500">
+              Subtotal
+            </span>
+
             <PriceFormat
               amount={product?.price ? product?.price * itemCount : 0}
-              className="text-xs font-bold text-shop-dark-green"
+              className="min-w-0 truncate text-xs font-bold text-shop-dark-green"
             />
           </div>
         </div>
@@ -52,11 +57,11 @@ const AddToCartButton = ({ product, className }: Props) => {
           onClick={handleAddToCart}
           disabled={isOutOfStock}
           className={cn(
-            "w-full bg-shop-dark-green text-white shadow-xs font-semibold tracking-wide hover:bg-shop-dark-green/90 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none",
+            "w-full bg-shop-dark-green text-white shadow-xs font-semibold tracking-wide hover:bg-shop-dark-green/90 transition-all duration-200 disabled:pointer-events-none disabled:opacity-50",
             className,
           )}
         >
-          <ShoppingBag className="w-4 h-4 mr-2" />
+          <ShoppingBag className="mr-2 h-4 w-4" />
           {isOutOfStock ? "Out of Stock" : "Add to Cart"}
         </Button>
       )}

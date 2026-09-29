@@ -30,7 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : "";
 
   return (
-    <article className="group relative flex flex-col h-full bg-[#FDFBF7] rounded-2xl border border-slate-200 shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)] hover:border-emerald-300 transition-all duration-300 ease-out overflow-hidden">
+    <article className="group relative flex min-w-0 h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-[#FDFBF7] shadow-[0_4px_8px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-emerald-300 hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)]">
       {/* 1. HERO IMAGE STAGE */}
       <div className="relative w-full aspect-square bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-3.5 sm:p-5 flex items-center justify-center overflow-hidden shrink-0">
         {product?.image?.[0] ? (
@@ -101,7 +101,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* 2. PRODUCT DETAILS & ACTIONS */}
-      <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between gap-3">
+      <div className="flex flex-1 flex-col justify-between gap-2.5 p-2.5 sm:gap-3 sm:p-4">
         <div className="flex flex-col gap-1.5">
           {/* Category / Taxonomy */}
           <div className="h-4 flex items-center">
@@ -166,7 +166,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* 3. PRICING & PRIMARY ACTION */}
-        <div className="pt-2.5 border-t border-slate-100 flex flex-col gap-2.5 mt-auto">
+        <div className="mt-auto flex flex-col gap-2 border-t border-slate-100 pt-2 sm:gap-2.5 sm:pt-2.5">
           <PriceView
             price={product.price}
             discount={product.discount}

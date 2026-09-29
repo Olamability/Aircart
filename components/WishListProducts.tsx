@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import React from "react";
 import { Heart, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Container from "@/components/Container";
 import toast from "react-hot-toast";
 import { urlFor } from "@/sanity/lib/image";
@@ -96,17 +96,18 @@ const WishListProducts = () => {
                       <td className="p-2 capitalize hidden md:table-cell">
                         {product?.status}
                       </td>
-                      <td className="px-2 py-4 hidden">
-                        <span
-                          className={`p-2 w-15 ${(product?.stock as number) > 0
-                            ? "rounded-md bg-shop-light-green/40 px-2 py-1 text-xs text-shop-dark-green"
-                            : "rounded-md bg-red-600/30 px-2 py-1 text-sm text-red-600"
-                            } font-medium text-sm hidden md:table-cell`}
-                        >
-                          {(product?.stock as number) > 0
-                            ? "In Stock"
-                            : "Out of Stock"}
-                        </span>
+                      <td className="p-2 hidden md:table-cell">
+                        {(product?.stock as number) > 0 ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            In Stock
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            Out of Stock
+                          </span>
+                        )}
                       </td>
                       <td className="p-2">
                         <PriceFormat amount={product?.price} />
@@ -167,9 +168,9 @@ const WishListProducts = () => {
             </p>
           </div>
 
-          <Button>
-            <Link href="/shop">Continue Shopping</Link>
-          </Button>
+          <Link href="/shop" className={buttonVariants()}>
+            Continue Shopping
+          </Link>
         </div>
       )}
     </Container>

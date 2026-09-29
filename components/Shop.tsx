@@ -37,9 +37,11 @@ const Shop = ({ categories, brands }: Props) => {
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
 
-  const activeFilterCount = [selectedCategory, selectedBrand, selectedPrice].filter(
-    Boolean,
-  ).length;
+  const activeFilterCount = [
+    selectedCategory,
+    selectedBrand,
+    selectedPrice,
+  ].filter(Boolean).length;
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -113,7 +115,7 @@ const Shop = ({ categories, brands }: Props) => {
 
   return (
     <div className="w-full bg-slate-50/40 min-h-screen pb-16">
-      <Container className="pt-6 sm:pt-8">
+      <Container className="px-2 pt-6 sm:px-4 sm:pt-8">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
           <div>
@@ -242,12 +244,14 @@ const Shop = ({ categories, brands }: Props) => {
             {/* Status bar */}
             <div className="flex items-center justify-between mb-4 text-xs text-slate-500 font-medium">
               <span>
-                {loading ? "Searching products..." : `${products.length} products available`}
+                {loading
+                  ? "Searching products..."
+                  : `${products.length} products available`}
               </span>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+              <div className="grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-3 lg:gap-6 xl:grid-cols-4">
                 {[...Array(8)].map((_, i) => (
                   <div
                     key={i}

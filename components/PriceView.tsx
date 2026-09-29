@@ -24,23 +24,21 @@ const PriceView = ({
 
   return (
     <div
-      className={cn(
-        "flex flex-col items-baseline gap-0.5 sm:flex-row sm:items-baseline sm:gap-2 min-h-7",
-        className,
-      )}
+      className={cn("flex min-w-0 items-baseline gap-1.5 sm:gap-2", className)}
     >
       <PriceFormat
         amount={discountedPrice}
         className={cn(
-          "text-sm sm:text-base font-bold text-shop-dark-green tracking-tight",
+          "min-w-0 text-sm text-[10px] font-semibold tracking-tight text-shop-dark-green sm:text-xs",
           priceClassName,
         )}
       />
+
       {hasDiscount && (
         <PriceFormat
           amount={price}
           className={cn(
-            "line-through text-xs font-normal text-slate-400 whitespace-nowrap",
+            "shrink-0 whitespace-nowrap text-[9px] font-normal text-slate-400 line-through sm:text-[11px]",
             discountClassName,
           )}
         />

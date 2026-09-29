@@ -30,9 +30,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : "";
 
   return (
-    <article className="group relative flex min-w-0 h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-[#FDFBF7] shadow-[0_4px_8px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-emerald-300 hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)]">
+    <article className="group relative flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-[#FDFBF7] shadow-[0_4px_8px_rgba(0,0,0,0.04)] transition-all duration-300 ease-out hover:border-emerald-300 hover:shadow-[0_12px_24px_rgba(6,60,40,0.08)]">
       {/* 1. HERO IMAGE STAGE */}
-      <div className="relative w-full aspect-square bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-3.5 sm:p-5 flex items-center justify-center overflow-hidden shrink-0">
+      <div className="relative w-full aspect-square bg-linear-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-3.5 sm:p-5 flex items-center justify-center overflow-hidden shrink-0">
         {product?.image?.[0] ? (
           <Link
             href={`/product/${product?.slug?.current}`}
@@ -48,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               width={500}
               height={500}
               className={`w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 ${
-                isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
+                isOutOfStock ? "opacity-40 grayscale" : ""
               }`}
             />
           </Link>
@@ -101,10 +101,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* 2. PRODUCT DETAILS & ACTIONS */}
-      <div className="flex flex-1 flex-col justify-between gap-2.5 p-2.5 sm:gap-3 sm:p-4">
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-1 flex-col gap-1.5 p-2 sm:gap-2 sm:p-3.5">
+        <div className="flex flex-col gap-1">
           {/* Category / Taxonomy */}
-          <div className="h-4 flex items-center">
+          <div className="flex min-h-4 items-center">
             {categoryText ? (
               <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                 {categoryText}
@@ -121,13 +121,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             href={`/product/${product?.slug?.current}`}
             className="group/title block"
           >
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900 group-hover/title:text-shop-dark-green transition-colors duration-200 line-clamp-2 leading-snug min-h-[2.5rem]">
+            <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-slate-900 transition-colors duration-200 group-hover/title:text-shop-dark-green sm:text-sm">
               {product?.title || "Untitled Product"}
             </h3>
           </Link>
 
           {/* Social Proof (Stars) & Live Inventory */}
-          <div className="flex flex-col gap-1 pt-0.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-1.5">
+          <div className="flex flex-col gap-1 pt-0.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-1">
             {/* Reviews */}
             <div className="flex items-center gap-1">
               <div className="flex items-center gap-0.5">
@@ -166,7 +166,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* 3. PRICING & PRIMARY ACTION */}
-        <div className="mt-auto flex flex-col gap-2 border-t border-slate-100 pt-2 sm:gap-2.5 sm:pt-2.5">
+        <div className="mt-auto flex flex-col gap-1 border-t border-slate-100 pt-1.5 sm:gap-1.5 sm:pt-2">
           <PriceView
             price={product.price}
             discount={product.discount}
@@ -175,7 +175,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <AddToCartButton
             product={product}
-            className="w-full rounded-xl bg-shop-dark-green hover:bg-shop-dark-green/90 text-white font-medium text-xs sm:text-sm py-2 sm:py-2.5 shadow-xs hover:shadow-sm active:scale-[0.99] transition-all duration-200"
+            className="w-full rounded-md bg-shop-dark-green py-2 text-xs font-medium text-white shadow-xs transition-all duration-200 hover:bg-shop-dark-green/90 hover:shadow-sm active:scale-[0.99] sm:py-2.5 sm:text-sm"
           />
         </div>
       </div>

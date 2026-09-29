@@ -49,9 +49,9 @@ const QuantityButtons = ({ product, className }: Props) => {
         type="button"
         onClick={handleDecrease}
         aria-label="Decrease quantity"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95"
+        className="flex h-5 w-5 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95"
       >
-        <Minus className="h-3 w-3" />
+        <Minus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
       </Button>
 
       <span className="min-w-5 shrink-0 select-none text-center text-xs font-semibold text-slate-900">
@@ -63,9 +63,9 @@ const QuantityButtons = ({ product, className }: Props) => {
         onClick={handleIncrease}
         disabled={isOutOfStock || (product?.stock as number) <= itemCount}
         aria-label="Increase quantity"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+        className="flex h-5 w-5 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
       >
-        <Plus className="h-3 w-3" />
+        <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
       </Button>
     </div>
   );

@@ -1,12 +1,16 @@
+
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
-  // turbopack: {
-  //   // Dynamically resolves to the absolute path of your user home folder
-  //   root: path.resolve(__dirname, '../../'),
-  // },
-  experimental: { serverActions: { bodySizeLimit: "5mb" } },
+  turbopack: {
+    root: process.cwd(),
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+    turbopackFileSystemCacheForDev: false,
+  },
   images: {
     remotePatterns: [
       {

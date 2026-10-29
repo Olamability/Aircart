@@ -1,10 +1,12 @@
 import React from "react";
-import { DollarSign, Percent, Wallet, ArrowDownRight } from "lucide-react";
+import Link from "next/link";
+import { DollarSign, Percent, Wallet, ArrowDownRight, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorLedger } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 import StatusBadge from "@/components/dashboard/StatusBadge";
+import EmptyState from "@/components/dashboard/EmptyState";
 import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 const VendorLedgerPage = async () => {
@@ -20,6 +22,32 @@ const VendorLedgerPage = async () => {
     );
   }
 
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Merchant Financial Ledger"
+          description="Transparent breakdown of your store earnings, platform commission deductions, and pending settlement balances."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={Wallet}
+          title="Ledger settlement inactive"
+          description="Settlement tracking and financial balances will populate once your store is approved and starts processing customer orders."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
   const ledger = await getVendorLedger(vendor._id);
 
   return (
@@ -27,6 +55,7 @@ const VendorLedgerPage = async () => {
       <DashboardHeader
         title="Merchant Financial Ledger"
         description="Transparent breakdown of your store earnings, platform commission deductions, and pending settlement balances."
+        badge={<StatusBadge status={vendor.status} />}
       />
 
       {/* Financial Summary Cards */}

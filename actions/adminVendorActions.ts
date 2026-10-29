@@ -13,6 +13,7 @@ export const approveVendor = async (vendorId: string) => {
   revalidatePath("/admin/vendors");
   revalidatePath("/admin/approvals");
   revalidatePath(`/admin/vendors/${vendorId}`);
+  revalidatePath("/vendor");
   return { success: true };
 };
 
@@ -24,6 +25,7 @@ export const suspendVendor = async (vendorId: string) => {
   revalidatePath("/admin/vendors");
   revalidatePath("/admin/compliance");
   revalidatePath(`/admin/vendors/${vendorId}`);
+  revalidatePath("/vendor");
   return { success: true };
 };
 
@@ -41,5 +43,6 @@ export const updateVendorAdmin = async (
 
   revalidatePath("/admin/vendors");
   revalidatePath(`/admin/vendors/${vendorId}`);
+  revalidatePath("/vendor");
   return { success: true };
 };

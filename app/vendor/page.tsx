@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Warehouse,
   UserCheck,
+  Clock,
 } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import {
@@ -49,6 +50,99 @@ const VendorDashboardPage = async () => {
       </div>
     );
   }
+
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title={`${vendor.businessName} Store Overview`}
+          description="Your merchant store application is currently under review by our administrative team."
+          badge={<StatusBadge status="pending" />}
+        />
+
+        <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-amber-100 p-3 text-amber-700 shrink-0">
+              <Clock className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-amber-950">
+                Application Status: Pending Administrative Approval
+              </h3>
+              <p className="text-sm text-amber-800 leading-relaxed max-w-2xl">
+                Thank you for submitting your merchant store profile. Your application has been received and is awaiting administrative verification. While your account is pending, catalog product creation, stock updates, and order fulfillment are restricted.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+          <h3 className="text-base font-semibold text-slate-900">
+            What you can do right now
+          </h3>
+          <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Ensure your store profile, business description, and brand logo are accurate and up to date to expedite the verification process.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              Manage Store Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title={`${vendor.businessName} Store Overview`}
+          description="Your merchant store has been temporarily suspended."
+          badge={<StatusBadge status="suspended" />}
+        />
+
+        <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-rose-100 p-3 text-rose-700 shrink-0">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-rose-950">
+                Store Account Suspended
+              </h3>
+              <p className="text-sm text-rose-800 leading-relaxed max-w-2xl">
+                Your merchant store account is currently suspended by a platform administrator. Your catalog products are hidden from the marketplace, and product creation, inventory management, and fulfillment operations are paused.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+          <h3 className="text-base font-semibold text-slate-900">
+            Next steps
+          </h3>
+          <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Please reach out to the platform administration or support team to address compliance or verification questions regarding your merchant account.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [stats, telemetry] = await Promise.all([
     getVendorDashboardStats(vendor._id),
     getVendorTelemetry(vendor._id),

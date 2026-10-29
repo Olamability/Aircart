@@ -14,7 +14,7 @@ const VendorStorefrontPage = async ({
   const { vendorSlug } = await params;
   const vendor = await getVendorBySlug(vendorSlug);
 
-  if (!vendor) {
+  if (!vendor || vendor.status !== "approved") {
     notFound();
   }
 

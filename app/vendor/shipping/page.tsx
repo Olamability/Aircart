@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { Truck, PackageCheck, Clock, CheckCircle2, ArrowRight } from "lucide-react";
+import { Truck, PackageCheck, Clock, CheckCircle2, ArrowRight, AlertTriangle, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorOrders } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 import StatusBadge from "@/components/dashboard/StatusBadge";
+import EmptyState from "@/components/dashboard/EmptyState";
 import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 const VendorShippingPage = async () => {
@@ -18,6 +19,49 @@ const VendorShippingPage = async () => {
         title="Merchant profile required"
         description="Please complete your merchant profile to manage shipping and coordinate dispatch."
       />
+    );
+  }
+
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Shipping & Dispatch Center"
+          description="Fulfill merchant orders, print parcel labels, and coordinate regional courier logistics."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={Truck}
+          title="Shipping operations locked"
+          description="Shipping and parcel dispatch features will be enabled once your merchant store application is approved."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Shipping & Dispatch Center"
+          description="Fulfill merchant orders, print parcel labels, and coordinate regional courier logistics."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Shipping operations suspended"
+          description="Shipping dispatch operations are disabled while your merchant account is suspended."
+        />
+      </div>
     );
   }
 

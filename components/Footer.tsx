@@ -4,10 +4,10 @@ import SocialMedia from './SocialMedia';
 import Logo from './Logo';
 import FooterTop from './FooterTop';
 import { SubText, SubTitle } from './text';
-import { quickLinksData, categoriesData } from '@/constants/data';
+import { quickLinksData, categoriesData, legalData } from '@/constants/data';
 import Link from 'next/link';
 import { Input } from './ui/input';
-import { Button } from './ui/button';
+import { Button, buttonVariants } from './ui/button';
 
 const Footer = () => {
   return (
@@ -29,10 +29,18 @@ const Footer = () => {
                 iconClassName="border-shop-light-green hover:text-shop-dark-green/60 hover:border-shop-dark-green"
                 tooltipClassName="hover:bg-darkColor"
               />
+              <Link
+                href="/download-app"
+                className={buttonVariants({
+                  className: "bg-shop-dark-green text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-shop-dark-green/90 hoverEffect mt-1",
+                })}
+              >
+                Get the Airmart App
+              </Link>
             </div>
           </div>
           <div>
-            <SubTitle>Quick Links</SubTitle>
+            <SubTitle>Company</SubTitle>
             <ul className="space-y-3 mt-4">
               {quickLinksData?.map((item) => (
                 <li key={item?.title}>
@@ -42,11 +50,23 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>  
-          <div>
+          </div>
+          {/* <div>
             <SubTitle>Categories</SubTitle>
             <ul className="space-y-3 mt-4">
               {categoriesData?.map((item) => (
+                <li key={item?.title}>
+                  <Link href={`/category/${item?.href}`} className="text-slate-600 hover:text-shop-light-green hoverEffect font-medium text-sm">
+                    {item?.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div> */}
+          <div>
+            <SubTitle>Legal</SubTitle>
+            <ul className="space-y-3 mt-4">
+              {legalData?.map((item) => (
                 <li key={item?.title}>
                   <Link href={`/category/${item?.href}`} className="text-slate-600 hover:text-shop-light-green hoverEffect font-medium text-sm">
                     {item?.title}
@@ -74,7 +94,7 @@ const Footer = () => {
             <span>© {new Date().getFullYear()} </span><Logo className="text-sm" /><span>| All rights reserved.</span>
           </div>
         </div>
-      </Container>   
+      </Container>
     </footer>
   );
 };

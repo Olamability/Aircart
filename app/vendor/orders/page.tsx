@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Package, Truck } from "lucide-react";
+import { ShoppingBag, Package, Truck, AlertTriangle, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import {
   getVendorOrders,
@@ -38,6 +38,49 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
         title="Merchant profile required"
         description="Please complete your store profile to begin receiving and fulfilling customer orders."
       />
+    );
+  }
+
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Orders"
+          description="Customer orders specifically containing your merchant catalog products."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={ShoppingBag}
+          title="Order routing locked"
+          description="Customer orders will appear here once your store is approved and products are active on the marketplace."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Orders"
+          description="Customer orders specifically containing your merchant catalog products."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Order management suspended"
+          description="Order processing and fulfillment operations are paused while your merchant account is suspended."
+        />
+      </div>
     );
   }
 

@@ -11,3 +11,15 @@ export const getCurrentVendor = async () => {
   );
   return vendor ?? null;
 };
+
+export const requireApprovedVendor = async () => {
+  const vendor = await getCurrentVendor();
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+  if (vendor.status !== "approved") {
+    throw new Error("Unauthorized");
+  }
+  return vendor;
+};
+

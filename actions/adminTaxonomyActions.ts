@@ -4,6 +4,8 @@ import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { requirePermission } from "@/lib/guards";
 import { permissions } from "@/lib/permissions";
+import { getUserRole } from "@/lib/roles";
+import { requireApprovedVendor } from "@/lib/vendor";
 import { revalidatePath } from "next/cache";
 
 export const createCategory = async (title: string, description?: string) => {
@@ -40,6 +42,10 @@ export const deleteCategory = async (categoryId: string) => {
 
 export const createBrand = async (title: string) => {
   await requirePermission(permissions.brands_create);
+  const role = await getUserRole();
+  if (role === "vendor") {
+    await requireApprovedVendor();
+  }
 
   const brandTitle = title.trim();
   if (!brandTitle) {

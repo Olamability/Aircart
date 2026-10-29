@@ -6,8 +6,12 @@
 
 @theme {
   --font-poppins: Poppins, sans-serif;
-  --font-sans: Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-heading:
+    Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   --color-shop-light-pink: #fcf0e4;
   --color-lightColor: #675589;
   --color-shop-dark-green: #063c28;
@@ -33,6 +37,7 @@
   --color-shop-lighter-text: #ababab;
   --color-deal-bg: #f1f3f8;
   --color-shop-light-offwhite: #fafaf6;
+  --color-shop-darkOrange: #fb923c;
 }
 
 @theme inline {

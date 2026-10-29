@@ -1,9 +1,11 @@
 "use server";
 import { requirePermission } from "@/lib/guards";
 import { permissions } from "@/lib/permissions";
+import { requireApprovedVendor } from "@/lib/vendor";
 import { writeClient } from "@/sanity/lib/writeClient";
 export const uploadVendorProductImage = async (file: File) => {
   await requirePermission(permissions.products_create);
+  await requireApprovedVendor();
   if (!file || file.size === 0) {
     throw new Error("Image is required");
   }

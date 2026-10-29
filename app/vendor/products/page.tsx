@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { PlusCircle, Package } from "lucide-react";
+import { PlusCircle, Package, Clock, AlertTriangle, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getCurrentVendorProducts } from "@/lib/vendorProduct";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -8,6 +8,7 @@ import FilterBar from "@/components/dashboard/FilterBar";
 import EmptyState from "@/components/dashboard/EmptyState";
 import VendorProductCard from "@/components/dashboard/VendorProductCard";
 import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
+import StatusBadge from "@/components/dashboard/StatusBadge";
 
 interface VendorProductsPageProps {
   searchParams: Promise<{
@@ -27,6 +28,49 @@ const VendorProductsPage = async ({ searchParams }: VendorProductsPageProps) => 
         title="Merchant profile required"
         description="Your merchant profile has not been configured yet. Set up your store profile to begin listing and managing products."
       />
+    );
+  }
+
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="My Products"
+          description="Manage your marketplace products from here."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={Clock}
+          title="Product listing locked"
+          description="Your merchant application is currently pending administrative approval. You will be able to add and manage catalog products once approved."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="My Products"
+          description="Manage your marketplace products from here."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Store products suspended"
+          description="Your store catalog is temporarily suspended. Product creation and updates are disabled."
+        />
+      </div>
     );
   }
 

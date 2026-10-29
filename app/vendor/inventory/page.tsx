@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Warehouse, PlusCircle } from "lucide-react";
+import { Warehouse, PlusCircle, AlertTriangle, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorInventory } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -8,6 +8,7 @@ import FilterBar from "@/components/dashboard/FilterBar";
 import EmptyState from "@/components/dashboard/EmptyState";
 import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 import VendorInventoryTable from "@/components/dashboard/VendorInventoryTable";
+import StatusBadge from "@/components/dashboard/StatusBadge";
 
 interface VendorInventoryPageProps {
   searchParams: Promise<{
@@ -26,6 +27,49 @@ const VendorInventoryPage = async ({ searchParams }: VendorInventoryPageProps) =
         title="Merchant profile required"
         description="Please configure your vendor store profile first to track and manage product inventory."
       />
+    );
+  }
+
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Inventory Management"
+          description="Track product stock counts in real time, monitor depletion alerts, and adjust quantities."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={Warehouse}
+          title="Inventory tracking locked"
+          description="Inventory management will be enabled once your merchant store application has been approved by an administrator."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Inventory Management"
+          description="Track product stock counts in real time, monitor depletion alerts, and adjust quantities."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Inventory management suspended"
+          description="Stock updates and inventory adjustments are disabled while your merchant account is suspended."
+        />
+      </div>
     );
   }
 

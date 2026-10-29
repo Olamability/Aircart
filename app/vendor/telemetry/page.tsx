@@ -1,9 +1,12 @@
 import React from "react";
-import { TrendingUp, ShoppingBag, BarChart3, Package, Award } from "lucide-react";
+import Link from "next/link";
+import { TrendingUp, ShoppingBag, Package, Award, UserCheck } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorTelemetry } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
+import StatusBadge from "@/components/dashboard/StatusBadge";
+import EmptyState from "@/components/dashboard/EmptyState";
 import VendorMissingProfileState from "@/components/dashboard/VendorMissingProfileState";
 
 const VendorTelemetryPage = async () => {
@@ -19,6 +22,32 @@ const VendorTelemetryPage = async () => {
     );
   }
 
+  if (vendor.status === "pending") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Store Analytics & Telemetry"
+          description="Real-time performance indicators, top converting merchandise, and sales volume analysis."
+          badge={<StatusBadge status="pending" />}
+        />
+        <EmptyState
+          icon={TrendingUp}
+          title="Store telemetry inactive"
+          description="Store analytics and performance indicators will activate once your merchant store is approved and sales commence."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
   const telemetry = await getVendorTelemetry(vendor._id);
 
   return (
@@ -26,6 +55,7 @@ const VendorTelemetryPage = async () => {
       <DashboardHeader
         title="Store Analytics & Telemetry"
         description="Real-time performance indicators, top converting merchandise, and sales volume analysis."
+        badge={<StatusBadge status={vendor.status} />}
       />
 
       {/* KPI Cards */}

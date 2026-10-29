@@ -9,9 +9,12 @@ export const headerData = [
 export const quickLinksData = [
   { title: "About Us", href: "/about" },
   { title: "Contact Us", href: "/contact" },
+  { title: "FAQ", href: "/faq" },
+];
+export const legalData = [
   { title: "Privacy Policy", href: "/privacy-policy" },
   { title: "Terms & Conditions", href: "/terms-conditions" },
-  { title: "FAQ", href: "/faq" },
+  { title: "Cookie Policy", href: "/cookie-policy" },
 ];
 export const categoriesData = [
   { title: "Mobiles", href: "/shop/mobiles" },

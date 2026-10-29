@@ -124,7 +124,7 @@ export const updateVendorProfile = async (data: VendorProfileInput) => {
       slug: { _type: "slug", current: finalSlug },
       clerkUserId: userId,
       email,
-      status: "approved",
+      status: "pending",
       createdAt: new Date().toISOString(),
     };
 

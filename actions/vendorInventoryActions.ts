@@ -7,10 +7,12 @@ import {
   requireVendorProductOwnership,
   requireVendorOrderOwnership,
 } from "@/lib/vendorOwnershipGuard";
+import { requireApprovedVendor } from "@/lib/vendor";
 import { revalidatePath } from "next/cache";
 
 export const updateVendorStock = async (productId: string, newStock: number) => {
   await requirePermission(permissions.inventory_update);
+  await requireApprovedVendor();
   await requireVendorProductOwnership(productId);
 
   if (newStock < 0) {
@@ -29,6 +31,7 @@ export const updateVendorShippingStatus = async (
   newStatus: "processing" | "shipped" | "out_for_delivery" | "delivered"
 ) => {
   await requirePermission(permissions.shipping_manage);
+  await requireApprovedVendor();
   await requireVendorOrderOwnership(orderId);
 
   const validStatuses = [

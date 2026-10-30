@@ -30,11 +30,11 @@ export default function DownloadPage() {
                     </div>
 
                     <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-shop-dark-green sm:text-4xl md:text-5xl">
-                        Airmart is coming to your phone.
+                        Spaazr is coming to your phone.
                     </h1>
 
                     <p className="mx-auto mt-5 max-w-lg text-base leading-7 text-slate-600 sm:text-lg lg:mx-0">
-                        We&apos;re working on the Airmart mobile app to bring shopping,
+                        We&apos;re working on the Spaazr mobile app to bring shopping,
                         groceries, everyday services, and more into one convenient
                         experience. Our team is working to make your experience worth
                         the wait.
@@ -44,7 +44,7 @@ export default function DownloadPage() {
                         {[
                             "A convenient shopping experience",
                             "Everyday services in one place",
-                            "A simpler way to access Airmart on the go",
+                            "A simpler way to access Spaazr on the go",
                         ].map((item) => (
                             <div key={item} className="flex items-start gap-3">
                                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-shop-light-green" />
@@ -60,7 +60,7 @@ export default function DownloadPage() {
                             href="/services"
                             className="hoverEffect inline-flex items-center justify-center gap-2 rounded-xl bg-shop-dark-green px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-shop-dark-green/90 hover:shadow-md"
                         >
-                            Explore Airmart
+                            Explore Spaazr
                             <ArrowRight className="h-4 w-4" />
                         </Link>
 

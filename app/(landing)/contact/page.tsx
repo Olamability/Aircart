@@ -14,7 +14,7 @@ const contactInfo = [
     },
     {
         title: "Email Support",
-        value: "Airmart@gmail.com",
+        value: "Spaazr@gmail.com",
         description: "Send us your questions or feedback.",
         icon: Mail,
     },
@@ -52,7 +52,7 @@ export default function ContactPage() {
                         </h1>
 
                         <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-600 md:text-lg md:leading-8">
-                            Have a question about Airmart, need assistance, or want to
+                            Have a question about Spaazr, need assistance, or want to
                             explore a partnership? Send us a message and our team will
                             help point you in the right direction.
                         </p>
@@ -178,7 +178,7 @@ export default function ContactPage() {
                                 </Button>
 
                                 <p className="text-center text-xs leading-5 text-slate-500">
-                                    By sending this message, you are contacting the Airmart
+                                    By sending this message, you are contacting the Spaazr
                                     team about your enquiry.
                                 </p>
                             </form>
@@ -194,7 +194,7 @@ export default function ContactPage() {
 
                             <SubText className="mt-4 max-w-2xl text-slate-600">
                                 Whether you are a customer looking for assistance, a vendor
-                                interested in joining Airmart, or a rider exploring
+                                interested in joining Spaazr, or a rider exploring
                                 opportunities, choose a contact channel that works for you.
                             </SubText>
 
@@ -241,7 +241,7 @@ export default function ContactPage() {
                                             </h3>
 
                                             <p className="mt-2 text-sm leading-6 text-white/80">
-                                                Explore opportunities to become an Airmart vendor
+                                                Explore opportunities to become a Spaazr vendor
                                                 or delivery partner.
                                             </p>
                                         </div>

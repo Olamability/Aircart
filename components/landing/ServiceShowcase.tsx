@@ -15,7 +15,7 @@ const services = [
   {
     title: "Marketplace",
     description:
-      "Discover products and everyday essentials from businesses across the Airmart ecosystem.",
+      "Discover products and everyday essentials from businesses across the Spaazr ecosystem.",
     action: "Explore marketplace",
     href: "/shop",
     icon: Store,
@@ -24,7 +24,7 @@ const services = [
   {
     title: "Food & Groceries",
     description:
-      "Find meals, fresh groceries and daily essentials from businesses on Airmart.",
+      "Find meals, fresh groceries and daily essentials from businesses on Spaazr.",
     action: "Explore food & groceries",
     href: "/category/food-beverages",
     icon: Utensils,
@@ -148,7 +148,7 @@ export default function ServiceShowcase() {
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-shop-dark-green/10 bg-shop-dark-green/[0.04] px-3.5 py-1.5">
             <span className="size-1.5 rounded-full bg-shop-darkOrange" />
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-shop-dark-green sm:text-xs">
-              THE AIRMART EXPERIENCE
+              THE SPAAZR EXPERIENCE
             </span>
           </div>
 
@@ -161,7 +161,7 @@ export default function ServiceShowcase() {
 
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-base sm:leading-7">
             From shopping and food to payments and useful services,
-            discover more ways to make everyday life convenient with Airmart.
+            discover more ways to make everyday life convenient with Spaazr.
           </p>
 
           <Link

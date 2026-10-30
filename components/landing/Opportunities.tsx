@@ -100,7 +100,7 @@ export default function RiderOpportunities() {
                         </h2>
 
                         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:mt-5 sm:text-base sm:leading-8 lg:mx-0">
-                            Become an Airmart rider and enjoy flexibility, independence, and
+                            Become a Spaazr rider and enjoy flexibility, independence, and
                             opportunities to earn. Whether you are looking for regular work
                             or a side hustle, take the next step with a platform built around
                             everyday convenience.
@@ -238,7 +238,7 @@ export default function RiderOpportunities() {
                                     Your next opportunity starts here.
                                 </p>
                                 <p className="mt-0.5 text-xs text-slate-500">
-                                    Move forward with Airmart.
+                                    Move forward with Spaazr.
                                 </p>
                             </div>
                         </div>
@@ -248,7 +248,7 @@ export default function RiderOpportunities() {
             <FAQSection
                 eyebrow="RIDER SUPPORT"
                 title="Questions About Becoming a Rider"
-                description="Find answers about joining the Airmart delivery network and getting started."
+                description="Find answers about joining the Spaazr delivery network and getting started."
                 faqs={riderFaqs}
             />
         </section>

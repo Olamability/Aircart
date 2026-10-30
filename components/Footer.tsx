@@ -23,7 +23,7 @@ const Footer = () => {
           <div>
             <div className="text-shop-dark-green flex flex-col items-start gap-5">
               <Logo />
-              <p className="text-slate-600 text-sm">Discover amazing curated products collections at Airmart</p>
+              <p className="text-slate-600 text-sm">Discover amazing curated products collections at Spaazr</p>
               <SocialMedia
                 className="hover:text-shop-dark-green/60"
                 iconClassName="border-shop-light-green hover:text-shop-dark-green/60 hover:border-shop-dark-green"
@@ -35,7 +35,7 @@ const Footer = () => {
                   className: "bg-shop-dark-green text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-shop-dark-green/90 hoverEffect mt-1",
                 })}
               >
-                Get the Airmart App
+                Get the Spaazr App
               </Link>
             </div>
           </div>

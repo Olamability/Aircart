@@ -33,7 +33,7 @@ export default function BecomeAPartnerPage() {
                 </h1>
 
                 <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    Thank you for your interest in partnering with Airmart. We are
+                    Thank you for your interest in partnering with Spaazr. We are
                     currently preparing for our next phase of growth, and there are
                     no new partner or rider opportunities available at this time.
                 </p>
@@ -64,7 +64,7 @@ export default function BecomeAPartnerPage() {
 
                 <div className="mt-8 border-t border-slate-100 pt-5">
                     <p className="text-xs leading-5 text-slate-500">
-                        We appreciate your interest in being part of the Airmart
+                        We appreciate your interest in being part of the Spaazr
                         ecosystem.
                     </p>
                 </div>

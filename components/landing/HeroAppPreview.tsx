@@ -164,7 +164,7 @@ export default function HeroAppPreview({
     return (
         <div
             className={`relative mx-auto flex aspect-square w-full max-w-lg items-center justify-center ${className}`}
-            aria-label="Preview of Airmart mobile app services"
+            aria-label="Preview of Spaazr mobile app services"
         >
             {/* Decorative backdrop */}
             <div
@@ -191,7 +191,7 @@ export default function HeroAppPreview({
                             </p>
 
                             <p className="text-xs font-extrabold text-[#063C28] sm:text-sm">
-                                Airmart
+                                Spaazr
                             </p>
                         </div>
 
@@ -214,7 +214,7 @@ export default function HeroAppPreview({
                     </div>
 
                     <p className="mt-3 text-[9px] font-extrabold text-[#26382D] sm:mt-5 sm:text-[10px]">
-                        Explore Airmart
+                        Explore Spaazr
                     </p>
 
                     {/* Mini service cards */}
@@ -260,7 +260,7 @@ export default function HeroAppPreview({
 
                         <div className="min-w-0">
                             <p className="text-[9px] font-extrabold sm:text-[10px]">
-                                Airmart Logistics
+                                Spaazr Logistics
                             </p>
 
                             <p className="mt-0.5 text-[8px] text-[#D4E7DC]">

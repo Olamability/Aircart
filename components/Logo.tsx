@@ -21,14 +21,14 @@ const Logo = ({
           className,
         )}
       >
-        Airmar
+        Spaaz
         <span
           className={cn(
             "text-shop-light-green group-hover:text-shop-dark-green hoverEffect",
             spanDesign,
           )}
         >
-          t
+          r
         </span>
       </h2>
     </Link>

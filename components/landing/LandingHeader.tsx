@@ -83,7 +83,7 @@ export default function LandingHeader() {
                           Become a Vendor
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500">
-                          Grow your business with Airmart
+                          Grow your business with Spaazr
                         </p>
                       </div>
                       <ArrowUpRight
@@ -102,7 +102,7 @@ export default function LandingHeader() {
                           Become a Rider
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500">
-                          Move with Airmart
+                          Move with Spaazr
                         </p>
                       </div>
                       <ArrowUpRight

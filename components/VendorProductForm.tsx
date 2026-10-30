@@ -1,11 +1,26 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import {
+  Package,
+  Tag,
+  ImagePlus,
+  Trash2,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+  Star,
+  Layers3,
+  ShoppingBag,
+} from "lucide-react";
+
 import type { Product } from "@/sanity.types";
 import type { VendorProductWithBrand } from "@/lib/vendorProduct";
 import type { VendorProductInput } from "@/lib/validators/product";
+
 import { uploadVendorProductImage } from "@/actions/uploadVendorProductImage";
 import { searchBrands } from "@/actions/searchBrands";
 import { createBrand } from "@/actions/adminTaxonomyActions";
@@ -18,6 +33,12 @@ export interface VendorProductFormProps {
   submitButtonLabel?: string;
   successMessage?: string;
 }
+
+const inputClass =
+  "mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-shop-dark-green focus:ring-2 focus:ring-shop-dark-green/10";
+
+const labelClass =
+  "block text-xs font-semibold text-slate-700";
 
 const VendorProductForm: React.FC<VendorProductFormProps> = ({
   product,
@@ -56,14 +77,17 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
     { _id: string; title: string }[]
   >([]);
   const [categoryLoading, setCategoryLoading] = useState(false);
+
   const [categoryTitleMap, setCategoryTitleMap] = useState<Map<string, string>>(
     () => {
       const map = new Map<string, string>();
+
       if (initial?.categories) {
         for (const cat of initial.categories) {
           map.set(cat._id, cat.title);
         }
       }
+
       return map;
     }
   );
@@ -76,12 +100,15 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
 
   useEffect(() => {
     const search = brandSearch.trim();
+
     if (!search) {
       setBrands([]);
       return;
     }
+
     const timer = setTimeout(async () => {
       setBrandLoading(true);
+
       try {
         const results = await searchBrands(search);
         setBrands(results);
@@ -92,25 +119,32 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
         setBrandLoading(false);
       }
     }, 300);
+
     return () => clearTimeout(timer);
   }, [brandSearch]);
 
   useEffect(() => {
     const search = categorySearch.trim();
+
     if (!search) {
       setCategories([]);
       return;
     }
+
     const timer = setTimeout(async () => {
       setCategoryLoading(true);
+
       try {
         const results = await searchCategories(search);
         setCategories(results);
+
         setCategoryTitleMap((prev) => {
           const updated = new Map(prev);
+
           for (const cat of results) {
             updated.set(cat._id, cat.title);
           }
+
           return updated;
         });
       } catch (error) {
@@ -120,21 +154,27 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
         setCategoryLoading(false);
       }
     }, 300);
+
     return () => clearTimeout(timer);
   }, [categorySearch]);
 
   const handleCreateBrand = async () => {
     const value = brandSearch.trim();
     if (!value) return;
+
     setCreatingBrand(true);
+
     try {
       const result = await createBrand(value);
+
       setBrandId(result.brand._id);
       setBrandSearch(result.brand.title);
       setBrands([]);
+
       toast.success(`Brand "${result.brand.title}" ready`);
     } catch (error) {
       console.error("Error creating brand:", error);
+
       toast.error(
         error instanceof Error ? error.message : "Failed to create brand"
       );
@@ -158,8 +198,12 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
   const handleSelectCategory = (category: { _id: string; title: string }) => {
     if (!categoryIds.includes(category._id)) {
       setCategoryIds((prev) => [...prev, category._id]);
-      setCategoryTitleMap((prev) => new Map(prev).set(category._id, category.title));
+
+      setCategoryTitleMap((prev) =>
+        new Map(prev).set(category._id, category.title)
+      );
     }
+
     setCategorySearch("");
     setCategories([]);
   };
@@ -173,23 +217,30 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     setImageFile(file);
     setImageLoading(true);
     setImageError(null);
+
     try {
       const result = await uploadVendorProductImage(file);
+
       setImageAssetId(result.assetId);
       toast.success("Image uploaded successfully");
     } catch (error) {
       console.error("Error uploading product image:", error);
+
       setImageFile(null);
       setImageAssetId(undefined);
+
       const msg =
         error instanceof Error ? error.message : "Unable to upload image";
+
       setImageError(msg);
       toast.error(msg);
     } finally {
       setImageLoading(false);
+      event.target.value = "";
     }
   };
 
@@ -200,24 +251,29 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
       toast.error("Product name is required");
       return;
     }
+
     if (price < 0) {
       toast.error("Price must be 0 or greater");
       return;
     }
+
     if (stock < 0) {
       toast.error("Stock must be 0 or greater");
       return;
     }
+
     if (discount < 0 || discount > 100) {
       toast.error("Discount must be between 0 and 100%");
       return;
     }
+
     if (!categoryIds.length) {
       toast.error("Please select at least one category");
       return;
     }
 
     setSubmitting(true);
+
     try {
       await onSubmit({
         title: title.trim(),
@@ -239,6 +295,7 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
         (isEdit
           ? "Product updated successfully"
           : "Product created successfully");
+
       toast.success(message);
 
       setTimeout(() => {
@@ -246,6 +303,7 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
       }, 800);
     } catch (error) {
       console.error("Error saving product:", error);
+
       toast.error(
         error instanceof Error ? error.message : "Unable to save product"
       );
@@ -255,285 +313,564 @@ const VendorProductForm: React.FC<VendorProductFormProps> = ({
   };
 
   const defaultButtonLabel = isEdit ? "Save Changes" : "Create Product";
-  const buttonLabel =
-    imageLoading
-      ? "Uploading image..."
-      : submitting
-        ? isEdit
-          ? "Saving Changes..."
-          : "Creating Product..."
-        : submitButtonLabel || defaultButtonLabel;
+
+  const buttonLabel = imageLoading
+    ? "Uploading image..."
+    : submitting
+      ? isEdit
+        ? "Saving Changes..."
+        : "Creating Product..."
+      : submitButtonLabel || defaultButtonLabel;
+
+  const availableCategories = categories.filter(
+    (category) => !categoryIds.includes(category._id)
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-      <div>
-        <label className="block font-medium">Product Name</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          className="mt-1 w-full rounded-md border p-3"
-          placeholder="Enter product name"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block font-medium">Description</label>
-        <textarea
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          className="mt-1 w-full rounded-md border p-3"
-          rows={4}
-          placeholder="Enter product description"
-        />
-      </div>
-
-      <div>
-        <label className="block font-medium">Price</label>
-        <input
-          type="number"
-          min="0"
-          value={price}
-          onChange={(event) => setPrice(Number(event.target.value))}
-          className="mt-1 w-full rounded-md border p-3"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block font-medium">Discount (%)</label>
-        <input
-          type="number"
-          min="0"
-          max="100"
-          value={discount}
-          onChange={(event) => setDiscount(Number(event.target.value))}
-          className="mt-1 w-full rounded-md border p-3"
-        />
-      </div>
-
-      <div>
-        <label className="block font-medium">Stock</label>
-        <input
-          type="number"
-          min="0"
-          value={stock}
-          onChange={(event) => setStock(Number(event.target.value))}
-          className="mt-1 w-full rounded-md border p-3"
-          required
-        />
-      </div>
-
-      <div className="relative">
-        <label className="block font-medium">Brand</label>
-        <input
-          type="text"
-          value={brandSearch}
-          onChange={(event) => {
-            setBrandSearch(event.target.value);
-            setBrandId(undefined);
-            setBrands([]);
-          }}
-          placeholder="Search or enter brand name"
-          className="mt-1 w-full rounded-md border p-3"
-        />
-        {brandLoading && (
-          <p className="mt-2 text-sm text-lightColor">Searching brands...</p>
-        )}
-        {(brands.length > 0 || (!brandLoading && brandSearch.trim())) && (
-          <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-md">
-            {brands.map((brand) => (
-              <button
-                key={brand._id}
-                type="button"
-                onClick={() => handleSelectBrand(brand)}
-                className="block w-full px-3 py-2 text-left hover:bg-shop-light-green/10"
-              >
-                {brand.title}
-              </button>
-            ))}
-            {!brands.some(
-              (brand) =>
-                brand.title.toLowerCase() === brandSearch.trim().toLowerCase()
-            ) && (
-              <button
-                type="button"
-                onClick={handleCreateBrand}
-                disabled={creatingBrand}
-                className="block w-full border-t px-3 py-2 text-left font-medium text-shop-dark-green hover:bg-shop-light-green/10"
-              >
-                {creatingBrand
-                  ? "Adding brand..."
-                  : `Add "${brandSearch.trim()}"`}
-              </button>
-            )}
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+      aria-busy={submitting || imageLoading}
+    >
+      {/* Product details */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-shop-dark-green/10 text-shop-dark-green">
+            <Package className="h-4 w-4" />
           </div>
-        )}
-        {brandId && (
-          <div className="mt-2 flex items-center gap-2 text-sm text-shop-dark-green">
-            <span>
-              Selected brand: <strong>{brandSearch}</strong>
-            </span>
-            <button
-              type="button"
-              onClick={handleClearBrand}
-              className="text-xs text-rose-600 underline hover:text-rose-800"
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Basic Information
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Give your product a clear name and description.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="product-title" className={labelClass}>
+              Product Name <span className="text-rose-500">*</span>
+            </label>
+
+            <input
+              id="product-title"
+              type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              className={inputClass}
+              placeholder="e.g. Samsung Galaxy S24"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="product-variant" className={labelClass}>
+              Product Type
+            </label>
+
+            <select
+              id="product-variant"
+              value={variant ?? ""}
+              onChange={(event) =>
+                setVariant(event.target.value as Product["variant"])
+              }
+              className={inputClass}
             >
-              Clear brand
-            </button>
+              <option value="">Select product type</option>
+              <option value="gadget">Gadget</option>
+              <option value="appliances">Appliances</option>
+              <option value="refrigerator">Refrigerator</option>
+              <option value="others">Others</option>
+              <option value="food & beverages">Food &amp; Beverages</option>
+            </select>
           </div>
-        )}
-      </div>
 
-      <div className="relative">
-        <label className="block font-medium">
-          Category <span className="text-red-600">*</span>
-        </label>
-        <input
-          type="text"
-          value={categorySearch}
-          onChange={(event) => {
-            setCategorySearch(event.target.value);
-            setCategories([]);
-          }}
-          placeholder="Search category"
-          className="mt-1 w-full rounded-md border p-3"
-        />
-        {categoryLoading && (
-          <p className="mt-2 text-sm text-lightColor">
-            Searching categories...
-          </p>
-        )}
-        {!categoryLoading && categories.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-md">
-            {categories
-              .filter((category) => !categoryIds.includes(category._id))
-              .map((category) => (
-                <button
-                  key={category._id}
-                  type="button"
-                  onClick={() => handleSelectCategory(category)}
-                  className="block w-full px-3 py-2 text-left hover:bg-shop-light-green/10"
-                >
-                  {category.title}
-                </button>
-              ))}
-            {!categories.length && (
-              <p className="p-3 text-sm text-lightColor">
-                No categories found.
+          <div className="md:col-span-2">
+            <label htmlFor="product-description" className={labelClass}>
+              Description
+              <span className="ml-1 font-normal text-slate-400">
+                (Optional)
+              </span>
+            </label>
+
+            <textarea
+              id="product-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              className="mt-1.5 min-h-[100px] w-full resize-y rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-shop-dark-green focus:ring-2 focus:ring-shop-dark-green/10"
+              rows={3}
+              placeholder="Describe the product, its features and what customers should know..."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing and inventory */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-shop-darkOrange">
+            <Tag className="h-4 w-4" />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Pricing &amp; Inventory
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Set your selling price, discount and available stock.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="product-price" className={labelClass}>
+              Price <span className="text-rose-500">*</span>
+            </label>
+
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">
+                ₦
+              </span>
+
+              <input
+                id="product-price"
+                type="number"
+                min="0"
+                value={price}
+                onChange={(event) => setPrice(Number(event.target.value))}
+                className={`${inputClass} pl-8`}
+                placeholder="0"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="product-discount" className={labelClass}>
+              Discount
+              <span className="ml-1 font-normal text-slate-400">(%)</span>
+            </label>
+
+            <div className="relative">
+              <input
+                id="product-discount"
+                type="number"
+                min="0"
+                max="100"
+                value={discount}
+                onChange={(event) => setDiscount(Number(event.target.value))}
+                className={`${inputClass} pr-10`}
+                placeholder="0"
+              />
+
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
+                %
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="product-stock" className={labelClass}>
+              Available Stock <span className="text-rose-500">*</span>
+            </label>
+
+            <input
+              id="product-stock"
+              type="number"
+              min="0"
+              value={stock}
+              onChange={(event) => setStock(Number(event.target.value))}
+              className={inputClass}
+              placeholder="Enter quantity"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="product-status" className={labelClass}>
+              Product Status
+            </label>
+
+            <select
+              id="product-status"
+              value={status ?? ""}
+              onChange={(event) =>
+                setStatus(event.target.value as Product["status"])
+              }
+              className={inputClass}
+            >
+              <option value="">Select status</option>
+              <option value="new">New</option>
+              <option value="hot">Hot</option>
+              <option value="sale">Sale</option>
+              <option value="available">Available</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* Brand and category */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-shop-light-green/10 text-shop-dark-green">
+            <Layers3 className="h-4 w-4" />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Brand &amp; Category
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Help customers find your product in the marketplace.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Brand */}
+          <div className="relative">
+            <label htmlFor="product-brand" className={labelClass}>
+              Brand
+              <span className="ml-1 font-normal text-slate-400">
+                (Optional)
+              </span>
+            </label>
+
+            <input
+              id="product-brand"
+              type="text"
+              value={brandSearch}
+              onChange={(event) => {
+                setBrandSearch(event.target.value);
+                setBrandId(undefined);
+                setBrands([]);
+              }}
+              placeholder="Search or enter brand name"
+              className={inputClass}
+              autoComplete="off"
+            />
+
+            {brandLoading && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Searching brands...
               </p>
             )}
-          </div>
-        )}
-        {categoryIds.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {categoryIds.map((categoryId) => (
-              <div
-                key={categoryId}
-                className="flex items-center gap-2 rounded-md bg-shop-light-green/10 px-3 py-1.5 text-sm"
-              >
-                <span>
-                  {categoryTitleMap.get(categoryId) || categoryId}
+
+            {(brands.length > 0 ||
+              (!brandLoading && brandSearch.trim())) && (
+                <div className="absolute left-0 right-0 z-20 mt-1 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                  {brands.map((brand) => (
+                    <button
+                      key={brand._id}
+                      type="button"
+                      onClick={() => handleSelectBrand(brand)}
+                      className="block w-full px-3.5 py-2.5 text-left text-sm text-slate-700 transition hover:bg-shop-light-green/10 hover:text-shop-dark-green"
+                    >
+                      {brand.title}
+                    </button>
+                  ))}
+
+                  {!brands.some(
+                    (brand) =>
+                      brand.title.toLowerCase() ===
+                      brandSearch.trim().toLowerCase()
+                  ) && (
+                      <button
+                        type="button"
+                        onClick={handleCreateBrand}
+                        disabled={creatingBrand}
+                        className="flex w-full items-center gap-2 border-t border-slate-100 px-3.5 py-2.5 text-left text-sm font-semibold text-shop-dark-green transition hover:bg-shop-light-green/10 disabled:opacity-50"
+                      >
+                        {creatingBrand ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <span className="text-base">+</span>
+                        )}
+
+                        {creatingBrand
+                          ? "Adding brand..."
+                          : `Add "${brandSearch.trim()}"`}
+                      </button>
+                    )}
+                </div>
+              )}
+
+            {brandId && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-shop-dark-green">
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-shop-light-green/10 px-2.5 py-1.5 font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  {brandSearch}
                 </span>
+
                 <button
                   type="button"
-                  onClick={() => handleRemoveCategory(categoryId)}
-                  className="font-semibold text-red-600 hover:text-red-800"
-                  aria-label={`Remove category ${categoryTitleMap.get(categoryId) || categoryId}`}
+                  onClick={handleClearBrand}
+                  className="text-xs font-medium text-rose-600 transition hover:text-rose-800"
                 >
-                  ×
+                  Clear
                 </button>
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
 
-      <div>
-        <label className="block font-medium">Product Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="mt-1 w-full rounded-md border p-3"
-        />
-        {imageLoading && (
-          <p className="mt-2 text-sm text-lightColor">Uploading image...</p>
-        )}
-        {imageFile && !imageLoading && (
-          <p className="mt-2 text-sm text-shop-dark-green">
-            {imageFile.name}
-          </p>
-        )}
-        {imageError && !imageLoading && (
-          <p className="mt-2 text-sm text-rose-600">{imageError}</p>
-        )}
-      </div>
+          {/* Category */}
+          <div className="relative">
+            <label htmlFor="product-category" className={labelClass}>
+              Category <span className="text-rose-500">*</span>
+            </label>
 
-      <div>
-        <label className="block font-medium">Status</label>
-        <select
-          value={status ?? ""}
-          onChange={(event) =>
-            setStatus(event.target.value as Product["status"])
-          }
-          className="mt-1 w-full rounded-md border p-3"
+            <input
+              id="product-category"
+              type="text"
+              value={categorySearch}
+              onChange={(event) => {
+                setCategorySearch(event.target.value);
+                setCategories([]);
+              }}
+              placeholder="Search product categories"
+              className={inputClass}
+              autoComplete="off"
+            />
+
+            {categoryLoading && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Searching categories...
+              </p>
+            )}
+
+            {!categoryLoading && categorySearch.trim() && (
+              <div className="absolute left-0 right-0 z-20 mt-1 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                {availableCategories.length > 0 ? (
+                  availableCategories.map((category) => (
+                    <button
+                      key={category._id}
+                      type="button"
+                      onClick={() => handleSelectCategory(category)}
+                      className="block w-full px-3.5 py-2.5 text-left text-sm text-slate-700 transition hover:bg-shop-light-green/10 hover:text-shop-dark-green"
+                    >
+                      {category.title}
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3.5 py-3 text-xs text-slate-500">
+                    No matching categories found.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {categoryIds.length > 0 && (
+            <div className="md:col-span-2">
+              <p className="mb-2 text-xs font-semibold text-slate-600">
+                Selected categories
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {categoryIds.map((categoryId) => {
+                  const categoryName =
+                    categoryTitleMap.get(categoryId) || categoryId;
+
+                  return (
+                    <div
+                      key={categoryId}
+                      className="inline-flex items-center gap-2 rounded-lg border border-shop-light-green/20 bg-shop-light-green/10 py-1.5 pl-3 pr-2 text-xs font-medium text-shop-dark-green"
+                    >
+                      <span>{categoryName}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCategory(categoryId)}
+                        className="flex h-5 w-5 items-center justify-center rounded-md text-shop-dark-green/70 transition hover:bg-rose-100 hover:text-rose-600"
+                        aria-label={`Remove category ${categoryName}`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Product image */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-shop-darkOrange">
+            <ImagePlus className="h-4 w-4" />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Product Image
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Upload a clear image to showcase your product.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/70 p-4 transition hover:border-shop-dark-green/40 sm:p-5">
+          <label
+            htmlFor="product-image"
+            className="flex cursor-pointer flex-col items-center justify-center text-center"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-shop-dark-green/10 text-shop-dark-green">
+              {imageLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <ImagePlus className="h-5 w-5" />
+              )}
+            </div>
+
+            <p className="mt-3 text-sm font-semibold text-slate-800">
+              {imageLoading
+                ? "Uploading your image..."
+                : "Choose a product image"}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              Click to browse your device for an image.
+            </p>
+
+            <span className="mt-3 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-shop-dark-green shadow-sm transition hover:bg-shop-dark-green hover:text-white">
+              Browse files
+            </span>
+          </label>
+
+          <input
+            id="product-image"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={imageLoading}
+            className="sr-only"
+          />
+
+          {imageFile && !imageLoading && (
+            <div className="mt-4 flex flex-col gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-2 text-xs text-emerald-800">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+
+                <span className="truncate font-medium">
+                  {imageFile.name}
+                </span>
+              </div>
+
+              <span className="shrink-0 text-[11px] font-semibold text-emerald-700">
+                Uploaded successfully
+              </span>
+            </div>
+          )}
+
+          {imageError && !imageLoading && (
+            <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600">
+              {imageError}
+            </p>
+          )}
+
+          {imageLoading && (
+            <p className="mt-3 text-center text-xs font-medium text-shop-dark-green">
+              Please wait while your image is being uploaded.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* Listing options */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-shop-light-green/10 text-shop-dark-green">
+            <ShoppingBag className="h-4 w-4" />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">
+              Listing Options
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Choose how your product is highlighted in the store.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 transition hover:border-shop-dark-green/30 hover:bg-shop-dark-green/[0.02]">
+            <input
+              type="checkbox"
+              checked={isNew}
+              onChange={(event) => setIsNew(event.target.checked)}
+              className="h-4 w-4 shrink-0 rounded border-slate-300 accent-shop-dark-green focus:ring-shop-dark-green"
+            />
+
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+              <Sparkles className="h-4 w-4" />
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-slate-800">
+                New Product
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Highlight this as a new arrival.
+              </p>
+            </div>
+          </label>
+
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 transition hover:border-shop-dark-green/30 hover:bg-shop-dark-green/[0.02]">
+            <input
+              type="checkbox"
+              checked={isfeatured}
+              onChange={(event) => setIsfeatured(event.target.checked)}
+              className="h-4 w-4 shrink-0 rounded border-slate-300 accent-shop-dark-green focus:ring-shop-dark-green"
+            />
+
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-shop-darkOrange">
+              <Star className="h-4 w-4" />
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-slate-800">
+                Featured Product
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Highlight this product in your store.
+              </p>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      {/* Submit */}
+      <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[11px] leading-relaxed text-slate-500">
+          Please review your product information before submitting.
+        </p>
+
+        <button
+          type="submit"
+          disabled={imageLoading || submitting}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-shop-dark-green px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-shop-light-green hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto"
         >
-          <option value="">Select status</option>
-          <option value="new">New</option>
-          <option value="hot">Hot</option>
-          <option value="sale">Sale</option>
-          <option value="available">Available</option>
-        </select>
+          {submitting || imageLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+
+          {buttonLabel}
+        </button>
       </div>
-
-      <div>
-        <label className="block font-medium">Product Type</label>
-        <select
-          value={variant ?? ""}
-          onChange={(event) =>
-            setVariant(event.target.value as Product["variant"])
-          }
-          className="mt-1 w-full rounded-md border p-3"
-        >
-          <option value="">Select product type</option>
-          <option value="gadget">Gadget</option>
-          <option value="appliances">Appliances</option>
-          <option value="refrigerator">Refrigerator</option>
-          <option value="others">Others</option>
-          <option value="food & beverages">Food & Beverages</option>
-        </select>
-      </div>
-
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={isNew}
-          onChange={(event) => setIsNew(event.target.checked)}
-        />
-        New Product
-      </label>
-
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={isfeatured}
-          onChange={(event) => setIsfeatured(event.target.checked)}
-        />
-        Featured Product
-      </label>
-
-      <button
-        type="submit"
-        disabled={imageLoading || submitting}
-        className="rounded-md bg-shop-light-green px-5 py-3 font-semibold text-white hover:bg-shop-dark-green hoverEffect disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {buttonLabel}
-      </button>
     </form>
   );
 };
 
 export default VendorProductForm;
-

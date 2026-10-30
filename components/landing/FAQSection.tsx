@@ -21,7 +21,7 @@ export default function FAQSection({
     faqs = [],
     eyebrow = "FAQs",
     title = "Frequently Asked Questions",
-    description = "Find out more about Airmart, our platform, and how to get involved.",
+    description = "Find out more about Spaazr, our platform, and how to get involved.",
     className = "",
     defaultOpenIndex = 0,
 }: FAQSectionProps) {

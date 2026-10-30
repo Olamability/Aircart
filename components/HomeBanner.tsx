@@ -28,7 +28,7 @@ const HomeBanner = () => {
 
             <p className="max-w-lg text-xs leading-relaxed text-slate-600 sm:text-sm lg:text-[13px]">
               Shop groceries, food and everyday essentials, pay bills, and
-              discover useful services—all with the convenience of Airmart.
+              discover useful services—all with the convenience of Spaazr.
             </p>
 
             <p className="text-xs font-semibold text-red-600 sm:text-sm">
@@ -42,7 +42,7 @@ const HomeBanner = () => {
               href="/download"
               className="hoverEffect inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-shop-btn-dark-green px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-shop-dark-green/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-shop-dark-green/90 hover:shadow-md"
             >
-              Get the Airmart App
+              Get the Spaazr App
               <ArrowUpRight size={16} className="shrink-0" />
             </Link>
 

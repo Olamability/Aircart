@@ -10,7 +10,7 @@ export default function EcosystemIntro() {
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
           <div>
             <p className="mx-auto flex items-center justify-center sm:mx-0 text-sm font-semibold uppercase tracking-widest text-shop-light-green">
-              The Airmart experience
+              The Spaazr experience
             </p>
 
             <div className="mt-5 flex items-start gap-4">
@@ -30,7 +30,7 @@ export default function EcosystemIntro() {
           <div className="lg:pb-2">
             <p className="max-w-2xl text-sm sm:text-lg text-shop-light-color">
               From everyday shopping to bills, deliveries and essential
-              services, Airmart brings more of what you need into one connected
+              services, Spaazr brings more of what you need into one connected
               experience.
             </p>
 

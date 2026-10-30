@@ -292,7 +292,7 @@ const SingleProductPage = async ({
                     30-Day Hassle-Free Returns
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Shop with total peace of mind with Airmart buyer protection and simple returns on eligible items.
+                    Shop with total peace of mind with Spaazr buyer protection and simple returns on eligible items.
                   </p>
                 </div>
               </div>

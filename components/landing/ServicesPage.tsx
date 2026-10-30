@@ -22,7 +22,7 @@ const serviceSections = [
         eyebrow: "FOOD & EVERYDAY ESSENTIALS",
         title: "Everyday essentials, made easier to discover.",
         description:
-            "From groceries and food items to household essentials, Airmart is designed to help you explore products for everyday living in one convenient digital experience.",
+            "From groceries and food items to household essentials, Spaazr is designed to help you explore products for everyday living in one convenient digital experience.",
         image: "/images/airmart/services-groceries.jpg",
         alt: "Fresh groceries and everyday food essentials",
         features: [
@@ -42,7 +42,7 @@ const serviceSections = [
                 icon: Store,
                 title: "Participating Sellers",
                 description:
-                    "Find products offered by businesses participating in the Airmart marketplace.",
+                    "Find products offered by businesses participating in the Spaazr marketplace.",
             },
         ],
         cta: "Explore Products",
@@ -54,7 +54,7 @@ const serviceSections = [
         eyebrow: "BILLS & DIGITAL PAYMENTS",
         title: "Make everyday digital tasks simpler.",
         description:
-            "Airmart aims to bring shopping and useful digital services closer together. Where bill-payment and top-up services are available, customers can explore supported options through the platform.",
+            "Spaazr aims to bring shopping and useful digital services closer together. Where bill-payment and top-up services are available, customers can explore supported options through the platform.",
         image: "/images/airmart/services-bills.jpg",
         alt: "Person using a smartphone for a digital payment",
         features: [
@@ -86,7 +86,7 @@ const serviceSections = [
         eyebrow: "GADGETS & TECHNOLOGY",
         title: "Find technology that fits your everyday life.",
         description:
-            "Discover gadgets, electronics, and accessories for work, study, communication, and entertainment. Airmart brings product discovery into a convenient online shopping experience.",
+            "Discover gadgets, electronics, and accessories for work, study, communication, and entertainment. Spaazr brings product discovery into a convenient online shopping experience.",
         image: "/images/airmart/services-gadgets.jpg",
         alt: "Smartphones, laptops, and electronic accessories",
         features: [
@@ -118,7 +118,7 @@ const serviceSections = [
         eyebrow: "DELIVERY & LOGISTICS",
         title: "Helping products get where they need to go.",
         description:
-            "Delivery is an important part of a connected commerce experience. Airmart's logistics offering is intended to support convenient movement of goods, subject to available services and delivery coverage.",
+            "Delivery is an important part of a connected commerce experience. Spaazr's logistics offering is intended to support convenient movement of goods, subject to available services and delivery coverage.",
         image: "/images/airmart/services-logistics.jpg",
         alt: "Delivery rider carrying a parcel",
         features: [
@@ -132,7 +132,7 @@ const serviceSections = [
                 icon: Truck,
                 title: "Delivery Partnerships",
                 description:
-                    "Learn about opportunities to participate in the Airmart delivery network.",
+                    "Learn about opportunities to participate in the Spaazr delivery network.",
             },
             {
                 icon: Store,
@@ -150,7 +150,7 @@ const serviceSections = [
         eyebrow: "MARKETPLACE & BUSINESS OPPORTUNITIES",
         title: "A place for customers and businesses to connect.",
         description:
-            "Airmart brings product discovery and online shopping together while creating opportunities for businesses to reach customers. Whether you want to shop or explore selling, the marketplace is a place to start.",
+            "Spaazr brings product discovery and online shopping together while creating opportunities for businesses to reach customers. Whether you want to shop or explore selling, the marketplace is a place to start.",
         image: "/images/airmart/services-marketplace.jpg",
         alt: "Small business owner preparing products for online customers",
         features: [
@@ -162,7 +162,7 @@ const serviceSections = [
             },
             {
                 icon: Store,
-                title: "Sell Through Airmart",
+                title: "Sell Through Spaazr",
                 description:
                     "Explore vendor registration and the requirements for participating in the marketplace.",
             },
@@ -187,7 +187,7 @@ const serviceHighlights = [
     {
         title: "One connected experience",
         description:
-            "Discover products and explore supported services through the Airmart platform.",
+            "Discover products and explore supported services through the Spaazr platform.",
         icon: Smartphone,
     },
     {
@@ -212,7 +212,7 @@ export default function ServicesPage() {
                 <div className="mx-auto grid min-h-[440px] max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 sm:py-16 lg:grid-cols-2 lg:gap-14 lg:px-10 lg:py-20">
                     <div>
                         <span className="inline-flex rounded-full border border-shop-dark-green/15 bg-white px-4 py-2 text-sm font-semibold text-shop-dark-green shadow-sm">
-                            Discover Airmart Services
+                            Discover Spaazr Services
                         </span>
 
                         <h1 className="mt-6 text-3xl font-bold leading-tight tracking-tight text-shop-dark-green sm:text-4xl lg:text-5xl">
@@ -224,7 +224,7 @@ export default function ServicesPage() {
 
                         <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
                             Explore everyday essentials, gadgets, digital services,
-                            and marketplace opportunities through Airmart. We are
+                            and marketplace opportunities through Spaazr. We are
                             building a more convenient way for customers and
                             businesses to connect.
                         </p>
@@ -251,7 +251,7 @@ export default function ServicesPage() {
                         <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-shop-dark-green/10 bg-white shadow-xl">
                             <Image
                                 src="/images/airmart/services-hero.jpg"
-                                alt="Products and everyday essentials available to explore through Airmart"
+                                alt="Products and everyday essentials available to explore through Spaazr"
                                 fill
                                 priority
                                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -279,7 +279,7 @@ export default function ServicesPage() {
                         <p className="mt-5 leading-8 text-slate-600">
                             From discovering everyday products to exploring
                             digital services and business opportunities, see
-                            how Airmart is bringing different needs together.
+                            how Spaazr is bringing different needs together.
                         </p>
                     </div>
 
@@ -339,7 +339,7 @@ export default function ServicesPage() {
 
                                 <div className="absolute -bottom-4 left-5 rounded-xl border border-slate-100 bg-white px-5 py-3 shadow-lg sm:left-8">
                                     <span className="text-sm font-bold text-shop-dark-green">
-                                        Airmart Services
+                                        Spaazr Services
                                     </span>
                                 </div>
                             </div>
@@ -412,7 +412,7 @@ export default function ServicesPage() {
 
                     <div className="relative mx-auto max-w-3xl">
                         <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
-                            Your Airmart Journey Starts Here
+                            Your Spaazr Journey Starts Here
                         </span>
 
                         <h2 className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -421,7 +421,7 @@ export default function ServicesPage() {
 
                         <p className="mt-5 leading-8 text-white/80">
                             Explore the marketplace, discover available products,
-                            or learn how your business can become part of Airmart.
+                            or learn how your business can become part of Spaazr.
                         </p>
 
                         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -447,7 +447,7 @@ export default function ServicesPage() {
                 <FAQSection
                     eyebrow="NEED TO KNOW"
                     title="Questions About Our Services"
-                    description="Learn how Airmart brings shopping, deliveries, payments, and everyday services together."
+                    description="Learn how Spaazr brings shopping, deliveries, payments, and everyday services together."
                     faqs={serviceFaqs}
                 />
             </section>

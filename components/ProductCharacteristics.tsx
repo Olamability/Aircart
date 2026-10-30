@@ -33,7 +33,7 @@ const ProductCharacteristics = async ({
               <div className="flex items-center justify-between py-2.5">
                 <span className="text-slate-500">Brand</span>
                 <span className="font-semibold text-slate-800 tracking-tight">
-                  {brand?.title || "Airmart Marketplace"}
+                  {brand?.title || "Spaazr Marketplace"}
                 </span>
               </div>
 

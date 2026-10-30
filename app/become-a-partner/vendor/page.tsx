@@ -26,15 +26,15 @@ export default function VendorApplicationPage() {
                 </div>
 
                 <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-shop-darkOrange sm:text-sm">
-                    Airmart Vendor Network
+                    Spaazr Vendor Network
                 </p>
 
                 <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-shop-dark-green sm:text-4xl">
-                    Your business journey with Airmart starts soon.
+                    Your business journey with Spaazr starts soon.
                 </h1>
 
                 <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    Thank you for your interest in selling on Airmart. We&apos;re
+                    Thank you for your interest in selling on Spaazr. We&apos;re
                     preparing our vendor onboarding process to make it easier for
                     businesses to showcase their products and reach more customers.
                 </p>
@@ -66,7 +66,7 @@ export default function VendorApplicationPage() {
                 <div className="mt-8 border-t border-slate-100 pt-5">
                     <div className="flex items-center justify-center gap-2 text-xs leading-5 text-slate-500">
                         <Building2 className="h-4 w-4 shrink-0" />
-                        <span>We look forward to welcoming businesses to Airmart.</span>
+                        <span>We look forward to welcoming businesses to Spaazr.</span>
                     </div>
                 </div>
             </section>

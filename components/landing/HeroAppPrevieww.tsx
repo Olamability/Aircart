@@ -33,7 +33,7 @@ const services = [
         Icon: Smartphone,
     },
     {
-        label: "Airmart Marketplace",
+        label: "Spaazr Marketplace",
         subtitle: "Explore trusted vendors",
         variant: "marketplace" as const,
         Icon: Store,
@@ -207,7 +207,7 @@ function FloatingCard({
         },
         marketplace: {
             Icon: Store,
-            title: "Airmart Marketplace",
+            title: "Spaazr Marketplace",
             subtitle: "Trusted vendors",
             iconColor: "#56536C",
             background: "#F4EFF9",
@@ -276,7 +276,7 @@ export default function HeroAppPrevieww({
                                     Welcome to
                                 </p>
                                 <h2 className="text-[16px] font-extrabold tracking-tight text-[#063C28]">
-                                    Airmart<span className="text-[#F28C28]">.</span>
+                                    Spaazr<span className="text-[#F28C28]">.</span>
                                 </h2>
                             </div>
 

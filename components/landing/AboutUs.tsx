@@ -75,29 +75,29 @@ const benefits = [
 
 const faqs = [
     {
-        question: "What is Airmart?",
+        question: "What is Spaazr?",
         answer:
-            "Airmart is a digital commerce platform being developed to connect customers with products, everyday essentials, and supported services through a convenient digital experience.",
+            "Spaazr is a digital commerce platform being developed to connect customers with products, everyday essentials, and supported services through a convenient digital experience.",
     },
     {
-        question: "What can I find on Airmart?",
+        question: "What can I find on Spaazr?",
         answer:
-            "Airmart is designed to bring together categories such as groceries, gadgets, marketplace products, and supported bill-payment services. Availability depends on the services currently offered on the platform.",
+            "Spaazr is designed to bring together categories such as groceries, gadgets, marketplace products, and supported bill-payment services. Availability depends on the services currently offered on the platform.",
     },
     {
-        question: "Can I sell my products on Airmart?",
+        question: "Can I sell my products on Spaazr?",
         answer:
-            "Interested businesses can explore becoming Airmart vendors. Participation is subject to the applicable registration, verification, and approval requirements.",
+            "Interested businesses can explore becoming Spaazr vendors. Participation is subject to the applicable registration, verification, and approval requirements.",
     },
     {
-        question: "How can I become an Airmart rider?",
+        question: "How can I become a Spaazr rider?",
         answer:
             "Visit our Become a Rider page to learn about the available partnership process and requirements.",
     },
     {
-        question: "Where can I access Airmart?",
+        question: "Where can I access Spaazr?",
         answer:
-            "You can explore Airmart through our website. Official mobile app download information should be used when the app is available for your device.",
+            "You can explore Spaazr through our website. Official mobile app download information should be used when the app is available for your device.",
     },
 ];
 
@@ -112,7 +112,7 @@ export default function AboutUs() {
                     {/* Left: Hero text */}
                     <div className="relative z-10">
                         <span className="inline-flex items-center rounded-full border border-shop-dark-green/15 bg-white/80 px-4 py-2 text-sm font-semibold text-shop-dark-green shadow-sm">
-                            Get to know Airmart
+                            Get to know Spaazr
                         </span>
 
                         <h1 className="mt-6 text-3xl font-bold leading-tight tracking-tight text-shop-dark-green sm:text-4xl lg:text-5xl">
@@ -149,7 +149,7 @@ export default function AboutUs() {
                         <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-shop-dark-green/10 bg-white shadow-xl">
                             <Image
                                 src="/images/about-us.png"
-                                alt="Airmart and its vision for convenient everyday commerce"
+                                alt="Spaazr and its vision for convenient everyday commerce"
                                 fill
                                 priority
                                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -164,7 +164,7 @@ export default function AboutUs() {
             </section>
 
 
-            {/* About Airmart */}
+            {/* About Spaazr */}
             <section className="py-16 sm:py-20 lg:py-28">
                 <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16 lg:px-10">
                     <div className="relative">
@@ -206,7 +206,7 @@ export default function AboutUs() {
 
                         <div className="mt-6 space-y-5 text-base leading-8 text-slate-600">
                             <p>
-                                At Airmart, we believe technology should make everyday life
+                                At Spaazr, we believe technology should make everyday life
                                 more convenient and create meaningful opportunities for people
                                 and businesses.
                             </p>
@@ -219,7 +219,7 @@ export default function AboutUs() {
                             </p>
 
                             <p>
-                                That is the idea behind Airmart: a connected digital commerce
+                                That is the idea behind Spaazr: a connected digital commerce
                                 platform designed to help customers discover products and
                                 services while giving participating businesses opportunities
                                 to reach potential buyers.
@@ -242,7 +242,7 @@ export default function AboutUs() {
                 <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
                     <div className="mx-auto max-w-3xl text-center">
                         <p className="text-sm font-bold uppercase tracking-[0.18em] text-shop-darkOrange">
-                            Why Airmart?
+                            Why Spaazr?
                         </p>
 
                         <h2 className="mt-4 text-3xl font-bold tracking-tight text-shop-dark-green sm:text-4xl">
@@ -250,7 +250,7 @@ export default function AboutUs() {
                         </h2>
 
                         <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                            Modern life comes with many small tasks. Airmart is being built
+                            Modern life comes with many small tasks. Spaazr is being built
                             to make it easier to discover products and supported services
                             through a more connected digital experience.
                         </p>
@@ -283,7 +283,7 @@ export default function AboutUs() {
                 </div>
             </section>
 
-            {/* Who Airmart is for */}
+            {/* Who Spaazr is for */}
             <section className="py-16 sm:py-20 lg:py-28">
                 <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
                     <div className="mx-auto max-w-3xl text-center">
@@ -297,7 +297,7 @@ export default function AboutUs() {
 
                         <p className="mt-5 text-base leading-8 text-slate-600">
                             From households and students to everyday shoppers and growing
-                            businesses, Airmart is being developed with a range of needs in
+                            businesses, Spaazr is being developed with a range of needs in
                             mind.
                         </p>
                     </div>
@@ -381,7 +381,7 @@ export default function AboutUs() {
                         </p>
 
                         <h2 className="mt-4 text-3xl font-bold tracking-tight text-shop-dark-green sm:text-4xl">
-                            Be part of the Airmart journey.
+                            Be part of the Spaazr journey.
                         </h2>
 
                         <p className="mt-5 leading-8 text-slate-600">
@@ -403,7 +403,7 @@ export default function AboutUs() {
 
                             <p className="mt-3 flex-1 leading-7 text-slate-600">
                                 Have products you want to sell online? Explore becoming an
-                                Airmart vendor and discover how your business can participate
+                                Spaazr vendor and discover how your business can participate
                                 in our marketplace.
                             </p>
 
@@ -427,7 +427,7 @@ export default function AboutUs() {
 
                             <p className="mt-3 flex-1 leading-7 text-slate-600">
                                 Interested in supporting deliveries? Explore the opportunity
-                                to join the Airmart rider network, subject to available
+                                to join the Spaazr rider network, subject to available
                                 delivery services and requirements.
                             </p>
 
@@ -462,7 +462,7 @@ export default function AboutUs() {
 
                         <p className="mt-5 leading-8 text-white/80">
                             Discover available products and services, explore the marketplace,
-                            or find out how you can become part of the Airmart community.
+                            or find out how you can become part of the Spaazr community.
                         </p>
 
                         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">

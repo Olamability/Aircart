@@ -13,30 +13,41 @@ interface StatsCardProps {
 
 const colorMap = {
   green: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-600",
-    border: "hover:border-emerald-300",
+    iconBg: "bg-emerald-50",
+    iconText: "text-emerald-700",
+    hoverBorder: "hover:border-emerald-200",
+    accent: "bg-emerald-500",
   },
   blue: {
-    bg: "bg-sky-50",
-    text: "text-sky-600",
-    border: "hover:border-sky-300",
+    iconBg: "bg-sky-50",
+    iconText: "text-sky-700",
+    hoverBorder: "hover:border-sky-200",
+    accent: "bg-sky-500",
   },
   purple: {
-    bg: "bg-purple-50",
-    text: "text-purple-600",
-    border: "hover:border-purple-300",
+    iconBg: "bg-purple-50",
+    iconText: "text-purple-700",
+    hoverBorder: "hover:border-purple-200",
+    accent: "bg-purple-500",
   },
   amber: {
-    bg: "bg-amber-50",
-    text: "text-amber-600",
-    border: "hover:border-amber-300",
+    iconBg: "bg-amber-50",
+    iconText: "text-amber-700",
+    hoverBorder: "hover:border-amber-200",
+    accent: "bg-amber-500",
   },
   rose: {
-    bg: "bg-rose-50",
-    text: "text-rose-600",
-    border: "hover:border-rose-300",
+    iconBg: "bg-rose-50",
+    iconText: "text-rose-700",
+    hoverBorder: "hover:border-rose-200",
+    accent: "bg-rose-500",
   },
+};
+
+const trendStyles = {
+  positive: "bg-emerald-50 text-emerald-700",
+  negative: "bg-rose-50 text-rose-700",
+  neutral: "bg-slate-100 text-slate-600",
 };
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -48,42 +59,53 @@ const StatsCard: React.FC<StatsCardProps> = ({
   trendType = "neutral",
   color = "green",
 }) => {
-  const styles = colorMap[color] || colorMap.green;
+  const styles = colorMap[color];
+
+  const formattedValue =
+    typeof value === "number" ? value.toLocaleString() : value;
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 ${styles.border}`}
+      className={`group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-6 ${styles.hoverBorder}`}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-500">{title}</span>
+      <div
+        className={`absolute inset-x-0 top-0 h-1 ${styles.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+      />
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium leading-5 text-slate-500">
+            {title}
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              {formattedValue}
+            </h3>
+
+            {trend && (
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold ${trendStyles[trendType]}`}
+              >
+                {trend}
+              </span>
+            )}
+          </div>
+        </div>
+
         {Icon && (
-          <div className={`rounded-lg p-2.5 ${styles.bg} ${styles.text}`}>
-            <Icon className="h-5 w-5" />
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${styles.iconBg} ${styles.iconText} transition-transform duration-300 group-hover:scale-105`}
+          >
+            <Icon className="h-5 w-5" strokeWidth={1.9} />
           </div>
         )}
       </div>
 
-      <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-slate-900">
-          {typeof value === "number" ? value.toLocaleString() : value}
-        </span>
-        {trend && (
-          <span
-            className={`text-xs font-semibold ${
-              trendType === "positive"
-                ? "text-emerald-600"
-                : trendType === "negative"
-                ? "text-rose-600"
-                : "text-slate-500"
-            }`}
-          >
-            {trend}
-          </span>
-        )}
-      </div>
-
       {description && (
-        <p className="mt-1 text-xs text-slate-500 line-clamp-1">{description}</p>
+        <p className="mt-3 truncate text-xs leading-5 text-slate-500">
+          {description}
+        </p>
       )}
     </div>
   );

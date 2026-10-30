@@ -28,7 +28,7 @@ const data: ContactItemData[] = [
 
   {
     title: "Email Us",
-    subtitle: "hello@airmart.com",
+    subtitle: "hello@spaazr.com",
     icon: <Mail />,
   },
 ];

@@ -36,7 +36,7 @@ export default function LandingFooter() {
               href="/download"
               className="group mt-6 inline-flex items-center gap-2 rounded-full bg-shop-darkOrange px-5 py-3 text-sm font-semibold text-shop-dark-green transition-colors hover:bg-white"
             >
-              Get the Airmart App
+              Get the Spaazr App
               <ArrowUpRight
                 size={16}
                 className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -86,7 +86,7 @@ export default function LandingFooter() {
         {/* Bottom */}
         <div className="flex flex-col gap-5 border-t border-white/10 py-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-white/50">
-            © {new Date().getFullYear()} Airmart. All rights reserved.
+            © {new Date().getFullYear()} Spaazr. All rights reserved.
           </p>
 
           <div className="flex items-center gap-4">

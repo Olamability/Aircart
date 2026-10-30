@@ -35,7 +35,7 @@ export default function HeroSection() {
             {/* Description */}
             <p className="mt-5 max-w-xl text-base leading-relaxed text-shop-light-color/70 sm:text-lg">
               Shop what you need, pay your bills, discover useful services and
-              move things with ease—all through Airmart.
+              move things with ease—all through Spaazr.
             </p>
 
             {/* Call-to-action buttons */}
@@ -44,7 +44,7 @@ export default function HeroSection() {
                 href="/download"
                 className="group inline-flex items-center justify-center gap-2 rounded-full bg-shop-btn-dark-green px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-shop-dark-green/15 transition-colors hover:bg-shop-dark-green"
               >
-                Get the Airmart App
+                Get the Spaazr App
                 <ArrowUpRight
                   size={16}
                   className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"

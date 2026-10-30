@@ -6,11 +6,11 @@ import { SanityLive } from "@/sanity/lib/live";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s - Airmart online store",
-    default: "Airmart online store",
+    template: "%s - Spaazr online store",
+    default: "Spaazr online store",
   },
   description:
-    "Airmart online store, the best place to buy your favorite products online.",
+    "Spaazr online store, the best place to buy your favorite products online.",
 };
 
 export default function RootLayout({

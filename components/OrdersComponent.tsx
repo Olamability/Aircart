@@ -1,4 +1,6 @@
+
 "use client";
+
 import { useState } from "react";
 import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import { TableBody, TableCell, TableRow } from "./ui/table";
@@ -13,7 +15,11 @@ import { format } from "date-fns";
 import OrderDetailDialog from "./OrderDetailDialog";
 import StatusBadge from "./dashboard/StatusBadge";
 
-const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
+const OrdersComponent = ({
+  orders,
+}: {
+  orders: MY_ORDERS_QUERY_RESULT;
+}) => {
   const [selectedOrder, setSelectedOrder] = useState<
     MY_ORDERS_QUERY_RESULT[number] | null
   >(null);
@@ -29,7 +35,9 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
               className="cursor-pointer"
             >
               {/* S/N */}
-              <TableCell className="whitespace-nowrap">{index + 1}</TableCell>
+              <TableCell className="whitespace-nowrap">
+                {index + 1}
+              </TableCell>
 
               {/* Order Number */}
               <TableCell className="font-medium">
@@ -81,6 +89,32 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+              </TableCell>
+
+              {/* Product Names and Quantities */}
+              <TableCell className="min-w-[180px] max-w-[260px]">
+                <div className="flex flex-col gap-1">
+                  {order?.products?.length ? (
+                    order.products.map((item, productIndex) => (
+                      <div
+                        key={item?._key ?? `${order._id}-${productIndex}`}
+                        className="text-sm"
+                      >
+                        <span className="font-medium">
+                          {item?.product?.title ?? "Product unavailable"}
+                        </span>
+
+                        <span className="ml-1 text-slate-500 whitespace-nowrap">
+                          × {item?.quantity ?? 0}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400">
+                      No products found
+                    </span>
+                  )}
+                </div>
               </TableCell>
 
               {/* Total */}

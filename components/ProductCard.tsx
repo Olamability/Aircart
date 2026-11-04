@@ -13,7 +13,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const isOutOfStock = (product?.stock as number) <= 0;
+  const isOutOfStock = (product?.stock as number) <= 0;;
 
   // Format category string safely whether passed as array of strings or references
   const categoryText = Array.isArray(product?.categories)

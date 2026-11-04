@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { TrendingUp, ShoppingBag, Package, Award, UserCheck } from "lucide-react";
+import { TrendingUp, ShoppingBag, Package, Award, UserCheck, AlertTriangle, XCircle } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorTelemetry } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -34,6 +34,49 @@ const VendorTelemetryPage = async () => {
           icon={TrendingUp}
           title="Store telemetry inactive"
           description="Store analytics and performance indicators will activate once your merchant store is approved and sales commence."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Store Analytics & Telemetry"
+          description="Real-time performance indicators, top converting merchandise, and sales volume analysis."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Store analytics suspended"
+          description="Store telemetry and performance metrics are paused while your merchant account is suspended."
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Store Analytics & Telemetry"
+          description="Real-time performance indicators, top converting merchandise, and sales volume analysis."
+          badge={<StatusBadge status="rejected" />}
+        />
+        <EmptyState
+          icon={XCircle}
+          title="Store analytics not available"
+          description="Your merchant store application was not approved. Telemetry features are disabled."
           action={
             <Link
               href="/vendor/profile"

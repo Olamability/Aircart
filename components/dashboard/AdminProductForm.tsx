@@ -33,7 +33,7 @@ type ProductStatus = NonNullable<AdminProductInput["status"]>;
 type ProductVariant = NonNullable<AdminProductInput["variant"]>;
 
 const isValidStatus = (val: string): val is ProductStatus =>
-  ["available", "new", "hot", "sale"].includes(val);
+  ["available", "new", "hot", "sale", "draft", "archived"].includes(val);
 
 const isValidVariant = (val: string): val is ProductVariant =>
   [
@@ -128,7 +128,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
   );
 
   const [vendorId, setVendorId] = useState(
-    initialData?.vendorId || vendors[0]?._id || ""
+    initialData?.vendorId || "platform"
   );
 
   // Brand
@@ -302,11 +302,6 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
       return;
     }
 
-    if (!vendorId) {
-      setError("Please assign a vendor to this product.");
-      return;
-    }
-
     if (!Number.isFinite(price) || price < 0) {
       setError("Please enter a valid product price.");
       return;
@@ -423,27 +418,26 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
 
           <div>
             <label htmlFor="product-vendor" className={labelClass}>
-              Assign Vendor <span className="text-rose-500">*</span>
+              Product Ownership / Vendor
             </label>
 
             <select
               id="product-vendor"
-              required
-              value={vendorId}
+              value={vendorId || "platform"}
               onChange={(e) => setVendorId(e.target.value)}
               className={inputClass}
             >
-              <option value="">Select a vendor</option>
+              <option value="platform">Platform Owned (Direct Marketplace)</option>
 
               {vendors.map((vendor) => (
                 <option key={vendor._id} value={vendor._id}>
-                  {vendor.businessName}
+                  Vendor: {vendor.businessName}
                 </option>
               ))}
             </select>
 
             <p className="mt-2 text-xs text-slate-500">
-              Select the vendor responsible for this product.
+              Select "Platform Owned" for in-house inventory or assign to a verified vendor.
             </p>
           </div>
 

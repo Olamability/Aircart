@@ -58,9 +58,8 @@ const VendorProductCard: React.FC<VendorProductCardProps> = ({ product }) => {
               alt={product.title || "Product image"}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              className={`object-contain p-2 transition-transform duration-300 group-hover:scale-105 ${
-                isOutOfStock ? "opacity-60" : ""
-              }`}
+              className={`object-contain p-2 transition-transform duration-300 group-hover:scale-105 ${isOutOfStock ? "opacity-60" : ""
+                }`}
             />
           </div>
         ) : (
@@ -96,29 +95,34 @@ const VendorProductCard: React.FC<VendorProductCardProps> = ({ product }) => {
         </div>
 
         {/* Price & Stock Section */}
-        <div className="mt-1 flex items-center justify-between gap-2">
-          <div>
+        <div className="mt-2 flex flex-col gap-3">
+          {/* Product Pricing */}
+          <div className="min-w-0 w-full">
             <PriceView price={product.price} discount={product.discount} />
           </div>
 
-          <div>
+          {/* Stock Availability */}
+          <div className="flex items-center justify-between border-t border-slate-100 pt-2">
+            <span className="text-xs font-medium text-slate-400">
+              Inventory
+            </span>
+
             {isOutOfStock ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
+              <span className="inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-bold text-rose-700">
                 Out of Stock
               </span>
             ) : isLowStock ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700">
+              <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">
                 <AlertTriangle className="h-3 w-3" />
                 Stock: {stock}
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
                 Stock: {stock}
               </span>
             )}
           </div>
         </div>
-
         {/* Actions Area pinned to bottom */}
         <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3">
           <Link

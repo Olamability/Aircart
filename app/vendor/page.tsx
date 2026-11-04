@@ -11,6 +11,7 @@ import {
   Warehouse,
   UserCheck,
   Clock,
+  XCircle,
 } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import {
@@ -90,6 +91,59 @@ const VendorDashboardPage = async () => {
             >
               <UserCheck className="h-4 w-4" />
               Manage Store Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title={`${vendor.businessName} Store Overview`}
+          description="Your merchant store application has been reviewed."
+          badge={<StatusBadge status="rejected" />}
+        />
+
+        <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-rose-100 p-3 text-rose-700 shrink-0">
+              <XCircle className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-rose-950">
+                Application Not Approved
+              </h3>
+              <p className="text-sm text-rose-800 leading-relaxed max-w-2xl">
+                Your merchant store application was reviewed and could not be approved at this time.
+                Please review the reason below and contact platform support if you believe this is an error.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {vendor.rejectionReason && (
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-2">
+            <h3 className="text-sm font-semibold text-slate-700">Reason provided by reviewer</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">{vendor.rejectionReason}</p>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+          <h3 className="text-base font-semibold text-slate-900">What you can do</h3>
+          <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Update your store profile with accurate business information and ensure all required
+            details are complete. Contact platform support to request reconsideration.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              Review Store Profile
             </Link>
           </div>
         </div>

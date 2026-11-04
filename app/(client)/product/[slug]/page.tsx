@@ -29,6 +29,10 @@ const SingleProductPage = async ({
     notFound();
   }
 
+  if (product.vendor?.status && product.vendor.status !== "approved") {
+    notFound();
+  }
+
   const isOutOfStock = (product?.stock as number) <= 0;
   const hasDiscount = !!product?.discount && product.discount > 0;
   const status = product?.status;

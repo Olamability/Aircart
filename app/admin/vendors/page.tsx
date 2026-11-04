@@ -48,6 +48,7 @@ const AdminVendorsPage = async ({
         { label: "Approved", value: "approved" },
         { label: "Pending", value: "pending" },
         { label: "Suspended", value: "suspended" },
+        { label: "Rejected", value: "rejected" },
       ],
     },
   ];
@@ -106,7 +107,7 @@ const AdminVendorsPage = async ({
       <div className="space-y-7 pb-12">
         <DashboardHeader
           title="Vendor Management"
-          description="Manage marketplace sellers, review vendor status, and monitor merchant activity across Airmart."
+          description="Manage marketplace sellers, review vendor status, and monitor merchant activity across Spaazr."
         />
 
         {/* Overview */}

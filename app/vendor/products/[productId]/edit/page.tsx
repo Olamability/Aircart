@@ -6,7 +6,7 @@ import VendorProductForm from "@/components/VendorProductForm";
 import { updateVendorProduct } from "@/actions/updateVendorProduct";
 import type { VendorProductInput } from "@/lib/validators/product";
 import EmptyState from "@/components/dashboard/EmptyState";
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, XCircle } from "lucide-react";
 
 interface VendorProductEditPageProps {
   params: Promise<{ productId: string }>;
@@ -32,6 +32,24 @@ const VendorProductEditPage = async ({
             className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
           >
             Back to Products
+          </Link>
+        }
+      />
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <EmptyState
+        icon={XCircle}
+        title="Product editing locked"
+        description="Your vendor application was not approved. Product updates are disabled."
+        action={
+          <Link
+            href="/vendor/profile"
+            className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+          >
+            Back to Profile
           </Link>
         }
       />

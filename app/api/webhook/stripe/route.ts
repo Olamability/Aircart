@@ -1,285 +1,492 @@
-import crypto from "crypto";
+
+import { createHash, randomUUID } from "crypto";
 import stripe from "@/lib/stripe";
 import { backendClient } from "@/sanity/lib/backendClient";
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import type { Metadata } from "@/actions/createCheckoutSession";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const headerList = await headers();
-  const sig = headerList.get("stripe-signature");
+  const signature = req.headers.get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!sig) {
+  if (!signature) {
     return NextResponse.json(
-      { error: "No Signature found for Stripe" },
-      { status: 500 },
+      { error: "Missing Stripe signature." },
+      { status: 400 },
     );
   }
 
-  const webhooksecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not configured.");
 
-  if (!webhooksecret) {
     return NextResponse.json(
-      {
-        error: "Stripe webhook secret is not set",
-      },
-      { status: 404 },
+      { error: "Webhook configuration error." },
+      { status: 500 },
     );
   }
 
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhooksecret);
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      webhookSecret,
+    );
   } catch (error) {
-    console.log("Webhook signature verification failed", error);
+    console.error("Stripe webhook signature verification failed:", error);
 
     return NextResponse.json(
-      { error: `Webhook Error: ${error}` },
+      { error: "Invalid webhook signature." },
       { status: 400 },
     );
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-
-    console.log("Stripe checkout completed:", session.id);
-    console.log("Stripe webhook received:", event.type);
-
-    try {
-      let invoice: Stripe.Invoice | null = null;
-
-      if (session.invoice) {
-        const invoiceId =
-          typeof session.invoice === "string"
-            ? session.invoice
-            : session.invoice.id;
-
-        invoice = await stripe.invoices.retrieve(invoiceId);
-      }
-
-      await createOrderInSanity(session, invoice);
-    } catch (error) {
-      console.log("Error creating order in Sanity:", error);
-
-      return NextResponse.json(
-        {
-          error: `Error creating order: ${error}`,
-        },
-        {
-          status: 400,
-        },
-      );
-    }
+  // This handler currently processes completed Checkout Sessions.
+  if (event.type !== "checkout.session.completed") {
+    return NextResponse.json({ received: true });
   }
 
-  return NextResponse.json({ received: true });
+  const session = event.data.object as Stripe.Checkout.Session;
+
+  // Never create an order until Stripe confirms payment.
+  if (session.payment_status !== "paid") {
+    console.warn(
+      `Checkout session ${session.id} completed without a paid status.`,
+    );
+
+    return NextResponse.json({
+      received: true,
+      message: "Payment is not complete. No order was created.",
+    });
+  }
+
+  try {
+    let invoice: Stripe.Invoice | null = null;
+
+    if (session.invoice) {
+      const invoiceId =
+        typeof session.invoice === "string"
+          ? session.invoice
+          : session.invoice.id;
+
+      invoice = await stripe.invoices.retrieve(invoiceId);
+    }
+
+    const order = await createOrderInSanity(
+      session,
+      event.id,
+      invoice,
+    );
+
+    console.log(
+      `Stripe event ${event.id} processed for session ${session.id}.`,
+    );
+
+    return NextResponse.json({
+      received: true,
+      orderId: order._id,
+    });
+  } catch (error) {
+    console.error(
+      `Failed to process Stripe event ${event.id}:`,
+      error,
+    );
+
+    // A 500 response allows Stripe to retry transient failures.
+    return NextResponse.json(
+      { error: "Order processing failed. Stripe can retry this event." },
+      { status: 500 },
+    );
+  }
 }
+
+type ParsedAddress = {
+  name?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+};
+
+type StockUpdate = {
+  productId: string;
+  quantity: number;
+};
 
 async function createOrderInSanity(
   session: Stripe.Checkout.Session,
+  stripeEventId: string,
   invoice: Stripe.Invoice | null,
 ) {
   const {
-    id,
+    id: sessionId,
     amount_total,
     currency,
     metadata,
     payment_intent,
+    customer,
     total_details,
   } = session;
 
-  // Check if this order has already been created
+  if (!metadata) {
+    throw new Error("Checkout Session metadata is missing.");
+  }
+
+  const {
+    orderNumber,
+    customerName,
+    customerEmail,
+    clerkUserId,
+    address,
+  } = metadata;
+
+  if (!orderNumber || !customerName || !customerEmail || !clerkUserId) {
+    throw new Error(
+      "Required customer or order metadata is missing from the Checkout Session.",
+    );
+  }
+
+  if (amount_total === null || amount_total < 0) {
+    throw new Error("Stripe returned an invalid order total.");
+  }
+
+  if (!currency) {
+    throw new Error("Stripe Checkout Session currency is missing.");
+  }
+
+  // A deterministic document ID prevents the same Checkout Session
+  // from creating multiple Sanity orders.
+  const orderId = `stripe-order-${createHash("sha256")
+    .update(sessionId)
+    .digest("hex")}`;
+
+  // Check for an existing order before processing inventory.
   const existingOrder = await backendClient.fetch(
     `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
-    { sessionId: id },
+    { sessionId },
   );
 
   if (existingOrder) {
-    console.log(`Order already exists for session ${id}`);
+    console.log(`Order already exists for session ${sessionId}.`);
     return existingOrder;
   }
 
-  const { orderNumber, customerName, customerEmail, clerkUserId, address } =
-    metadata as unknown as Metadata & {
-      address?: string;
-    };
-
-  let parsedAddress = null;
-  try {
-    parsedAddress = address && address !== "undefined" ? JSON.parse(address) : null;
-  } catch (error) {
-    console.error("Failed to parse address from metadata:", error);
-  }
-
-  // Get Stripe line items and expand the Stripe products
-  const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(
-    id,
-    {
-      expand: ["data.price.product"],
-    },
+  // Also check the deterministic ID in case an earlier attempt
+  // created the document before a response was received.
+  const existingById = await backendClient.fetch(
+    `*[_id == $orderId][0]`,
+    { orderId },
   );
 
-  // Create Sanity product references and prepare stock updates
-  const sanityProducts = [];
-  const stockUpdates = [];
+  if (existingById) {
+    return existingById;
+  }
 
-  for (const item of lineItemsWithProduct.data) {
-    const productId = (item.price?.product as Stripe.Product)?.metadata?.id;
+  const parsedAddress = parseAddress(address);
 
-    const quantity = item.quantity || 0;
+  // Retrieve every line item, not just the first page.
+  const lineItems = await getAllCheckoutLineItems(sessionId);
 
-    if (!productId) {
-      console.warn("No Sanity product ID found for Stripe line item");
-      continue;
+  if (lineItems.length === 0) {
+    throw new Error("No products were found in the Stripe Checkout Session.");
+  }
+
+  const sanityProducts: {
+    _key: string;
+    product: {
+      _type: "reference";
+      _ref: string;
+    };
+    quantity: number;
+    price: number;
+  }[] = [];
+
+  // Aggregate duplicate product IDs before checking stock.
+  const stockMap = new Map<string, number>();
+
+  for (const item of lineItems) {
+    const stripeProduct = item.price?.product;
+
+    if (
+      !stripeProduct ||
+      typeof stripeProduct === "string" ||
+      stripeProduct.deleted
+    ) {
+      throw new Error(
+        `Stripe product information is missing or deleted for line item ${item.id}.`,
+      );
     }
 
-    const priceAtPurchase =
-      typeof item.price?.unit_amount === "number"
-        ? item.price.unit_amount / 100
-        : 0;
+    const productId = stripeProduct.metadata?.id;
+    const quantity = item.quantity;
+    const unitAmount = item.price?.unit_amount;
+
+    if (!productId) {
+      throw new Error(
+        `Sanity product ID is missing for Stripe line item ${item.id}.`,
+      );
+    }
+
+    if (!Number.isSafeInteger(quantity) || !quantity || quantity < 1) {
+      throw new Error(
+        `Invalid quantity for Stripe line item ${item.id}.`,
+      );
+    }
+
+    if (
+      typeof unitAmount !== "number" ||
+      !Number.isSafeInteger(unitAmount) ||
+      unitAmount < 0
+    ) {
+      throw new Error(
+        `Invalid unit price for Stripe line item ${item.id}.`,
+      );
+    }
 
     sanityProducts.push({
-      _key: crypto.randomUUID(),
-
+      _key: randomUUID(),
       product: {
         _type: "reference",
         _ref: productId,
       },
-
       quantity,
-
-      price: priceAtPurchase,
+      price: unitAmount / 100,
     });
 
-    stockUpdates.push({
+    stockMap.set(
       productId,
-      quantity,
-    });
+      (stockMap.get(productId) ?? 0) + quantity,
+    );
   }
+
+  const stockUpdates: StockUpdate[] = Array.from(
+    stockMap.entries(),
+  ).map(([productId, quantity]) => ({
+    productId,
+    quantity,
+  }));
+
+  // Read current stock and revision numbers before creating the transaction.
+  const stockDocuments = await Promise.all(
+    stockUpdates.map(async ({ productId, quantity }) => {
+      const product = await backendClient.getDocument(productId);
+
+      if (!product) {
+        throw new Error(`Product ${productId} no longer exists.`);
+      }
+
+      if (
+        typeof product.stock !== "number" ||
+        !Number.isFinite(product.stock) ||
+        product.stock < 0
+      ) {
+        throw new Error(
+          `Product ${productId} has an invalid stock value.`,
+        );
+      }
+
+      if (!product._rev) {
+        throw new Error(
+          `Product ${productId} is missing its revision identifier.`,
+        );
+      }
+
+      if (product.stock < quantity) {
+        throw new Error(
+          `Insufficient stock for product ${productId}. Available: ${product.stock}; ordered: ${quantity}.`,
+        );
+      }
+
+      return {
+        productId,
+        revision: product._rev,
+        newStock: product.stock - quantity,
+      };
+    }),
+  );
 
   const paymentIntentId =
     typeof payment_intent === "string"
       ? payment_intent
-      : (payment_intent?.id ?? undefined);
+      : payment_intent?.id;
 
   const stripeCustomerId =
-    typeof session.customer === "string"
-      ? session.customer
-      : (session.customer?.id ?? undefined);
+    typeof customer === "string"
+      ? customer
+      : customer?.id;
 
-  // Create order data
+  const now = new Date().toISOString();
+
   const orderData = {
+    _id: orderId,
     _type: "order",
 
     orderNumber,
 
-    stripeCheckoutSessionId: id,
+    stripeCheckoutSessionId: sessionId,
+    stripeEventId,
 
     stripeCustomerId,
-
     stripePaymentIntentId: paymentIntentId,
-
     paymentReference: paymentIntentId,
 
     paymentStatus: "paid",
 
     clerkUserId,
-
     customerName,
-
     customerEmail,
 
     products: sanityProducts,
 
-    totalPrice: amount_total ? amount_total / 100 : 0,
+    totalPrice: amount_total / 100,
+    currency: currency.toLowerCase(),
 
-    currency: currency ?? "ngn",
-
-    amountDiscount: total_details?.amount_discount
-      ? total_details.amount_discount / 100
-      : 0,
+    // This is the additional Stripe promotion discount.
+    // Product-level discounts are already reflected in Stripe unit prices.
+    amountDiscount:
+      (total_details?.amount_discount ?? 0) / 100,
 
     status: "processing",
 
-    orderDate: new Date().toISOString(),
-
-    createdAt: new Date().toISOString(),
+    orderDate: now,
+    createdAt: now,
 
     ...(parsedAddress
       ? {
-          address: {
-            state: parsedAddress.state,
-            zip: parsedAddress.zip,
-            city: parsedAddress.city,
-            address: parsedAddress.address,
-            name: parsedAddress.name,
-          },
-        }
+        address: {
+          name: parsedAddress.name,
+          address: parsedAddress.address,
+          city: parsedAddress.city,
+          state: parsedAddress.state,
+          zip: parsedAddress.zip,
+        },
+      }
       : {}),
 
     ...(invoice
       ? {
-          invoice: {
-            id: invoice.id,
-            number: invoice.number ?? undefined,
-            hosted_invoice_url: invoice.hosted_invoice_url ?? undefined,
-          },
-        }
+        invoice: {
+          id: invoice.id,
+          number: invoice.number ?? undefined,
+          hosted_invoice_url:
+            invoice.hosted_invoice_url ?? undefined,
+        },
+      }
       : {}),
   };
 
-  // Only add address if an address actually exists
-  if (parsedAddress) {
-    orderData.address = {
-      state: parsedAddress.state,
-      zip: parsedAddress.zip,
-      city: parsedAddress.city,
-      address: parsedAddress.address,
-      name: parsedAddress.name,
-    };
+  // Create the order and deduct inventory atomically.
+  // Revision checks prevent silently overwriting concurrent stock changes.
+  const transaction = backendClient.transaction();
+
+  transaction.create(orderData);
+
+  for (const stockDocument of stockDocuments) {
+    transaction.patch(
+      stockDocument.productId,
+      (patch) =>
+        patch
+          .ifRevisionId(stockDocument.revision)
+          .set({ stock: stockDocument.newStock }),
+    );
   }
 
-  // Only add invoice if Stripe actually created one
-  if (invoice) {
-    orderData.invoice = {
-      id: invoice.id,
-      number: invoice.number ?? undefined,
-      hosted_invoice_url: invoice.hosted_invoice_url ?? undefined,
-    };
+  try {
+    await transaction.commit();
+  } catch (error) {
+    // A duplicate delivery may have raced with another webhook execution.
+    const orderAfterFailure = await backendClient.getDocument(orderId);
+
+    if (orderAfterFailure) {
+      console.log(
+        `Order ${orderId} already exists. Treating this as a duplicate delivery.`,
+      );
+
+      return orderAfterFailure;
+    }
+
+    // Do not swallow revision conflicts or inventory failures.
+    // Stripe should retry transient failures.
+    throw error;
   }
 
-  // Create order in Sanity
-  const order = await backendClient.create(orderData);
+  // Confirm that the committed order can be retrieved from Sanity.
+  const createdOrder = await backendClient.getDocument(orderId);
 
-  // Update product stock
-  await updateStockLevels(stockUpdates);
+  if (!createdOrder) {
+    throw new Error(
+      `Order ${orderId} was committed but could not be retrieved.`,
+    );
+  }
 
-  return order;
-}
+  return createdOrder;
 
-async function updateStockLevels(
-  stockUpdates: { productId: string; quantity: number }[],
-) {
-  for (const { productId, quantity } of stockUpdates) {
-    try {
-      const product = await backendClient.getDocument(productId);
+  async function getAllCheckoutLineItems(
+    sessionId: string,
+  ): Promise<Stripe.LineItem[]> {
+    const allItems: Stripe.LineItem[] = [];
+    let startingAfter: string | undefined;
 
-      if (!product || typeof product.stock !== "number") {
-        console.warn(
-          `Product with ID ${productId} not found or stock is invalid.`,
-        );
+    while (true) {
+      const page = await stripe.checkout.sessions.listLineItems(
+        sessionId,
+        {
+          limit: 100,
+          expand: ["data.price.product"],
+          ...(startingAfter ? { starting_after: startingAfter } : {}),
+        },
+      );
 
-        continue;
+      allItems.push(...page.data);
+
+      if (!page.has_more) {
+        break;
       }
 
-      const newStock = Math.max(product.stock - quantity, 0);
+      const lastItem = page.data[page.data.length - 1];
 
-      await backendClient.patch(productId).set({ stock: newStock }).commit();
+      if (!lastItem) {
+        throw new Error(
+          "Stripe indicated more line items but returned an empty page.",
+        );
+      }
+
+      startingAfter = lastItem.id;
+    }
+
+    return allItems;
+  }
+
+  function parseAddress(
+    address: string | undefined,
+  ): ParsedAddress | null {
+    if (!address || address === "undefined") {
+      return null;
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(address);
+
+      if (!parsed || typeof parsed !== "object") {
+        throw new Error("Address metadata is not an object.");
+      }
+
+      const value = parsed as Record<string, unknown>;
+
+      return {
+        name: typeof value.name === "string" ? value.name : undefined,
+        address:
+          typeof value.address === "string" ? value.address : undefined,
+        city: typeof value.city === "string" ? value.city : undefined,
+        state: typeof value.state === "string" ? value.state : undefined,
+        zip: typeof value.zip === "string" ? value.zip : undefined,
+      };
     } catch (error) {
-      console.error(`Failed to update stock for product ${productId}:`, error);
+      throw new Error(
+        `Unable to parse checkout address metadata: ${String(error)}`,
+      );
     }
   }
 }

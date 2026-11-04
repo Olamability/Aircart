@@ -8,6 +8,8 @@ import { urlFor } from "@/sanity/lib/image";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import OrderStatusSelect from "@/components/dashboard/OrderStatusSelect";
+import { OrderAuditTimeline } from "@/components/dashboard/OrderAuditTimeline";
+import { OrderVendorSplit } from "@/components/dashboard/OrderVendorSplit";
 import { PermissionGuard } from "@/lib/permissionGuard";
 import { permissions } from "@/lib/permissions";
 
@@ -182,6 +184,17 @@ const AdminOrderDetailPage = async ({ params }: AdminOrderDetailPageProps) => {
           </div>
         </div>
       </div>
+
+      {/* Multi-Vendor Financial Settlement & Commission Breakdown */}
+      <OrderVendorSplit products={order.products || []} currency={order.currency} />
+
+      {/* Order Status Modification Audit Trail */}
+      <OrderAuditTimeline
+        statusHistory={order.statusHistory || []}
+        createdAt={order.createdAt}
+        orderStatus={order.status}
+        paymentStatus={order.paymentStatus}
+      />
     </div>
     </PermissionGuard>
   );

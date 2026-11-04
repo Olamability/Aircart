@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { ReactNode, useState } from "react";
@@ -27,17 +28,17 @@ const AddressDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        nativeButton={false}
+        nativeButton={true}
         render={
           React.isValidElement(children) ? (
             children
           ) : (
-            <span>{children}</span>
+            <button type="button">{children}</button>
           )
         }
       />
 
-      <DialogContent className="w-[calc(100%-1rem)] max-w-[650px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-1rem)] max-w-[650px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center font-bold text-shop-dark-green">
             {address ? "Edit Address" : "Add New Address"}

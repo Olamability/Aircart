@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { FolderTree, Plus, Trash2, Package } from "lucide-react";
-import { createCategory, deleteCategory } from "@/actions/adminTaxonomyActions";
+import { FolderTree, Plus, Trash2, Package, Pencil, Eye, EyeOff, X, Check, AlertTriangle } from "lucide-react";
+import {
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  toggleCategoryVisibility,
+} from "@/actions/adminTaxonomyActions";
 
 interface CategoryItem {
   _id: string;
@@ -10,6 +15,7 @@ interface CategoryItem {
   slug?: { current?: string };
   description?: string;
   productCount: number;
+  hidden?: boolean;
 }
 
 interface CategoryManagerProps {
@@ -20,6 +26,9 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ initialCategories }) 
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -40,7 +49,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ initialCategories }) 
         if (res.category) {
           setCategories((prev) => [
             ...prev,
-            { ...res.category, productCount: 0 },
+            { ...res.category, productCount: 0, hidden: false },
           ]);
           setTitle("");
           setDescription("");
@@ -52,12 +61,78 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ initialCategories }) 
     });
   };
 
-  const handleDelete = (id: string, catTitle: string) => {
+  const startEdit = (cat: CategoryItem) => {
+    setEditingId(cat._id);
+    setEditTitle(cat.title);
+    setEditDescription(cat.description || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+    setEditDescription("");
+  };
+
+  const handleSaveEdit = (id: string) => {
+    if (!editTitle.trim()) return;
+
+    startTransition(async () => {
+      try {
+        await updateCategory(id, {
+          title: editTitle,
+          description: editDescription,
+        });
+        setCategories((prev) =>
+          prev.map((c) =>
+            c._id === id
+              ? { ...c, title: editTitle.trim(), description: editDescription.trim() }
+              : c
+          )
+        );
+        cancelEdit();
+      } catch (err) {
+        alert("Failed to update category: " + (err instanceof Error ? err.message : "Unknown error"));
+      }
+    });
+  };
+
+  const handleToggleVisibility = (id: string, currentHidden?: boolean) => {
+    const nextHidden = !currentHidden;
+    startTransition(async () => {
+      try {
+        await toggleCategoryVisibility(id, nextHidden);
+        setCategories((prev) =>
+          prev.map((c) => (c._id === id ? { ...c, hidden: nextHidden } : c))
+        );
+      } catch (err) {
+        alert("Failed to update visibility: " + (err instanceof Error ? err.message : "Unknown error"));
+      }
+    });
+  };
+
+  const handleDelete = (id: string, catTitle: string, count: number) => {
+    if (count > 0) {
+      const confirmForce = confirm(
+        `Warning: Category "${catTitle}" has ${count} product(s) assigned to it!\n\nAre you sure you want to force delete it? Products will lose their category association.`
+      );
+      if (!confirmForce) return;
+
+      startTransition(async () => {
+        try {
+          await deleteCategory(id, true);
+          setCategories((prev) => prev.filter((c) => c._id !== id));
+        } catch (err) {
+          alert("Failed to delete category: " + (err instanceof Error ? err.message : "Unknown error"));
+        }
+      });
+      return;
+    }
+
     if (!confirm(`Delete category "${catTitle}"? This cannot be undone.`)) return;
 
     startTransition(async () => {
       try {
-        await deleteCategory(id);
+        await deleteCategory(id, false);
         setCategories((prev) => prev.filter((c) => c._id !== id));
       } catch (err) {
         alert("Failed to delete category: " + (err instanceof Error ? err.message : "Unknown error"));
@@ -73,7 +148,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ initialCategories }) 
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Filter categories..."
+          placeholder="Filter categories by name..."
           className="w-full sm:max-w-xs rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm focus:border-emerald-500 focus:outline-hidden"
         />
 
@@ -147,38 +222,129 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ initialCategories }) 
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((cat) => (
-            <div
-              key={cat._id}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs flex items-start justify-between gap-3 hover:border-slate-300 transition"
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-lg bg-emerald-50 text-shop-dark-green shrink-0">
-                  <FolderTree className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-slate-900 text-sm">{cat.title}</h4>
-                  <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
-                    {cat.description || "Marketplace category"}
-                  </p>
-                  <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                    <Package className="h-3 w-3" />
-                    {cat.productCount} product{cat.productCount === 1 ? "" : "s"}
-                  </span>
-                </div>
-              </div>
+          {filtered.map((cat) => {
+            const isEditing = editingId === cat._id;
 
-              <button
-                type="button"
-                onClick={() => handleDelete(cat._id, cat.title)}
-                disabled={isPending}
-                className="text-slate-400 hover:text-rose-600 p-1 rounded transition"
-                title="Delete category"
+            return (
+              <div
+                key={cat._id}
+                className={`rounded-xl border bg-white p-4 shadow-xs flex flex-col justify-between transition ${
+                  cat.hidden ? "border-amber-200 bg-amber-50/20" : "border-slate-200 hover:border-slate-300"
+                }`}
               >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600">Title</label>
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-emerald-500 focus:outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-600">Description</label>
+                      <input
+                        type="text"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-emerald-500 focus:outline-hidden"
+                      />
+                    </div>
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={cancelEdit}
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                      >
+                        <X className="h-3 w-3" /> Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveEdit(cat._id)}
+                        disabled={isPending}
+                        className="inline-flex items-center gap-1 rounded-md bg-shop-dark-green px-2.5 py-1 text-xs font-semibold text-white hover:bg-shop-light-green disabled:opacity-50"
+                      >
+                        <Check className="h-3 w-3" /> Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`p-2.5 rounded-lg shrink-0 ${
+                            cat.hidden
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-emerald-50 text-shop-dark-green"
+                          }`}
+                        >
+                          <FolderTree className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="font-semibold text-slate-900 text-sm">{cat.title}</h4>
+                            {cat.hidden && (
+                              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                                Hidden
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+                            {cat.description || "Marketplace category"}
+                          </p>
+                          <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                            <Package className="h-3 w-3" />
+                            {cat.productCount} product{cat.productCount === 1 ? "" : "s"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleVisibility(cat._id, cat.hidden)}
+                          disabled={isPending}
+                          className="text-slate-400 hover:text-slate-700 p-1 rounded transition"
+                          title={cat.hidden ? "Unhide from storefront" : "Hide from storefront"}
+                        >
+                          {cat.hidden ? (
+                            <EyeOff className="h-4 w-4 text-amber-600" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startEdit(cat)}
+                          disabled={isPending}
+                          className="text-slate-400 hover:text-slate-700 p-1 rounded transition"
+                          title="Edit category"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(cat._id, cat.title, cat.productCount)}
+                          disabled={isPending}
+                          className="text-slate-400 hover:text-rose-600 p-1 rounded transition"
+                          title={
+                            cat.productCount > 0
+                              ? `Cannot safely delete: ${cat.productCount} product(s) attached`
+                              : "Delete category"
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

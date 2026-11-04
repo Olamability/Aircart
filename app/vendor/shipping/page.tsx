@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Truck, PackageCheck, Clock, CheckCircle2, ArrowRight, AlertTriangle, UserCheck } from "lucide-react";
+import { Truck, PackageCheck, Clock, CheckCircle2, ArrowRight, AlertTriangle, UserCheck, XCircle } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorOrders } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -60,6 +60,32 @@ const VendorShippingPage = async () => {
           icon={AlertTriangle}
           title="Shipping operations suspended"
           description="Shipping dispatch operations are disabled while your merchant account is suspended."
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Shipping & Dispatch Center"
+          description="Fulfill merchant orders, print parcel labels, and coordinate regional courier logistics."
+          badge={<StatusBadge status="rejected" />}
+        />
+        <EmptyState
+          icon={XCircle}
+          title="Shipping operations not available"
+          description="Your merchant store application was not approved. Shipping operations are disabled."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
         />
       </div>
     );
@@ -148,7 +174,7 @@ const VendorShippingPage = async () => {
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-2">
         <h4 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
           <PackageCheck className="h-4 w-4 text-emerald-600" />
-          Airmart Merchant Logistics Protocol
+          Spaazr Merchant Logistics Protocol
         </h4>
         <p className="text-xs text-slate-600 leading-relaxed max-w-3xl">
           Merchants are responsible for securely packaging merchandise and dispatching parcels within 24–48 hours of order placement. Supported logistics partners include GIG Logistics, DHL Express, and local registered dispatch riders.

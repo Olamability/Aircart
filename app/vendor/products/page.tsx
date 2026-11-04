@@ -12,6 +12,7 @@ import {
   AlertCircle,
   TrendingDown,
   SearchX,
+  XCircle,
 } from "lucide-react";
 
 import { getCurrentVendor } from "@/lib/vendor";
@@ -88,6 +89,34 @@ const VendorProductsPage = async ({
           icon={AlertTriangle}
           title="Store products suspended"
           description="Your store catalog is temporarily suspended. Product creation and updates are disabled."
+        />
+      </div>
+    );
+  }
+
+  // Rejected vendors cannot manage products.
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="My Products"
+          description="Manage your marketplace products from here."
+          badge={<StatusBadge status="rejected" />}
+        />
+
+        <EmptyState
+          icon={XCircle}
+          title="Application not approved"
+          description="Your vendor application was not approved. Product management is not available."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-xl bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-shop-light-green hover:shadow-md"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
         />
       </div>
     );

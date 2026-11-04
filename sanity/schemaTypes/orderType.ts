@@ -147,9 +147,8 @@ export const orderType = defineType({
 
                 subtitle:
                   typeof select.price === "number"
-                    ? `₦${select.price.toLocaleString()} × ${
-                        select.quantity || 0
-                      }`
+                    ? `₦${select.price.toLocaleString()} × ${select.quantity || 0
+                    }`
                     : `Quantity: ${select.quantity || 0}`,
 
                 media: select.image,
@@ -246,11 +245,34 @@ export const orderType = defineType({
       validation: (Rule) => Rule.required(),
     }),
 
+
+    defineField({
+      name: "statusHistory",
+      title: "Status Audit History",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({ name: "status", title: "Status", type: "string" }),
+            defineField({ name: "note", title: "Note / Reason", type: "string" }),
+            defineField({ name: "changedBy", title: "Changed By", type: "string" }),
+            defineField({ name: "changedAt", title: "Timestamp", type: "datetime" }),
+          ],
+        },
+      ],
+    }),
     defineField({
       name: "createdAt",
       title: "Created At",
       type: "datetime",
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: "stripeEventId",
+      title: "Stripe Webhook Event ID",
+      type: "string",
+      description: "Stripe event used to create or update this order.",
     }),
   ],
 
@@ -276,11 +298,9 @@ export const orderType = defineType({
       return {
         title: `${select.name || "Customer"} (${orderIdSnippet})`,
 
-        subtitle: `${select.amount || 0} ${
-          select.currency || ""
-        } • ${select.email || ""} • ${
-          select.status || "pending"
-        } • Payment: ${select.paymentStatus || "pending"}`,
+        subtitle: `${select.amount || 0} ${select.currency || ""
+          } • ${select.email || ""} • ${select.status || "pending"
+          } • Payment: ${select.paymentStatus || "pending"}`,
 
         media: BasketIcon,
       };

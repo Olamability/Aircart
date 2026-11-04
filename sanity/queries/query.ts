@@ -12,7 +12,7 @@ const BLOG_QUERY = defineQuery(`
 `);
 
 const DEAL_PRODUCTS = defineQuery(`
-  *[_type == "product" && status == "hot"]
+  *[_type == "product" && status == "hot" && (!defined(vendor) || vendor->status == "approved")]
   | order(_createdAt desc) {
     ...,
     "categories": categories[]->title,
@@ -37,11 +37,25 @@ const BRANDQ = defineQuery(`
 export const PRODUCT_BY_VARIANT_QUERY = defineQuery(`
   *[
     _type == "product" &&
-    variant == $variant
+    variant == $variant &&
+    (!defined(vendor) || vendor->status == "approved")
   ]
   | order(title desc) {
     ...,
     "categories": categories[]->title
+  }
+`);
+const FEATURED_PRODUCTS_QUERY = defineQuery(`
+  *[
+    _type == "product" &&
+    isfeatured == true &&
+    stock > 0 &&
+    (!defined(vendor) || vendor->status == "approved")
+  ]
+  | order(_createdAt desc)[0...8] {
+    ...,
+    "categories": categories[]->title,
+    "brand": brand->title
   }
 `);
 
@@ -67,15 +81,25 @@ const ADDRESS_QUERY = defineQuery(`
   }
 `);
 const MY_ORDERS_QUERY = defineQuery(
-  `*[_type == "order" && clerkUserId == 
-  $userId] | order(orderDate desc)
-  {...,products[]{...,product->}}`,
+  `*[_type == "order" && clerkUserId == $userId]
+    | order(orderDate desc) {
+      ...,
+      products[] {
+        ...,
+        product-> {
+          _id,
+          title,
+          slug,
+          image
+        }
+      }
+    }`,
 );
 const BRAND_SEARCH_QUERY = defineQuery(
   ` *[ _type == "brand" && lower(title) match $search ] | order(title asc)[0...20] { _id, title, slug } `,
 );
 const VENDOR_BY_SLUG_QUERY = defineQuery(
-  ` *[_type == "vendor" && slug.current == $slug][0]{ _id, businessName, slug, logo, description, status, createdAt, "products": *[ _type == "product" && vendor._ref == ^._id ]{ _id, _type, _createdAt, _updatedAt, _rev, title, slug, image, description, price, discount, "categories": coalesce(categories, []), stock, brand, status, images, isNew, variant, isfeatured, vendor } } `,
+  ` *[_type == "vendor" && slug.current == $slug && status == "approved"][0]{ _id, businessName, slug, logo, description, status, createdAt, "products": *[ _type == "product" && vendor._ref == ^._id ]{ _id, _type, _createdAt, _updatedAt, _rev, title, slug, image, description, price, discount, "categories": coalesce(categories, []), stock, brand, status, images, isNew, variant, isfeatured, vendor } } `,
 );
 
 export {
@@ -88,4 +112,5 @@ export {
   MY_ORDERS_QUERY,
   BRAND_SEARCH_QUERY,
   VENDOR_BY_SLUG_QUERY,
+  FEATURED_PRODUCTS_QUERY,
 };

@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -11,11 +12,29 @@ interface VendorProfileInput {
   businessName: string;
   description?: string;
   logoAssetId?: string;
+
+  storeEmail?: string;
+  phone?: string;
+  storeCategory?: string;
+  storeSubcategory?: string;
+  storeAddress?: string;
+  storeCity?: string;
+  storeState?: string;
+  storeLga?: string;
+
+  registeredBusinessName?: string;
+  businessType?: string;
+  cacRegistrationNumber?: string;
+  taxIdentificationNumber?: string;
+  registeredBusinessAddress?: string;
+  registeredBusinessCity?: string;
+  registeredBusinessState?: string;
+  registeredBusinessLga?: string;
 }
 
 const generateUniqueVendorSlug = async (
   businessName: string,
-  excludeVendorId?: string
+  excludeVendorId?: string,
 ): Promise<string> => {
   const rawSlug = businessName
     .toLowerCase()
@@ -23,8 +42,9 @@ const generateUniqueVendorSlug = async (
     .replace(/^-+|-+$/g, "");
 
   const baseSlug =
-    (rawSlug.length > 80 ? rawSlug.slice(0, 80).replace(/-+$/, "") : rawSlug) ||
-    "vendor";
+    (rawSlug.length > 80
+      ? rawSlug.slice(0, 80).replace(/-+$/, "")
+      : rawSlug) || "vendor";
 
   const cleanId = excludeVendorId?.replace(/^drafts\./, "") || "";
 
@@ -37,7 +57,7 @@ const generateUniqueVendorSlug = async (
       {
         candidate,
         cleanId,
-      }
+      },
     );
 
     if (count === 0) {
@@ -49,46 +69,91 @@ const generateUniqueVendorSlug = async (
   }
 };
 
+const optionalTextFields = [
+  "description",
+  "storeEmail",
+  "phone",
+  "storeCategory",
+  "storeSubcategory",
+  "storeAddress",
+  "storeCity",
+  "storeState",
+  "storeLga",
+  "registeredBusinessName",
+  "businessType",
+  "cacRegistrationNumber",
+  "taxIdentificationNumber",
+  "registeredBusinessAddress",
+  "registeredBusinessCity",
+  "registeredBusinessState",
+  "registeredBusinessLga",
+] as const;
+
+type OptionalTextField = (typeof optionalTextFields)[number];
+
+const buildProfileFields = (
+  data: VendorProfileInput,
+): Partial<Record<OptionalTextField, string>> => {
+  const fields: Partial<Record<OptionalTextField, string>> = {};
+
+  for (const field of optionalTextFields) {
+    const value = data[field];
+
+    if (typeof value === "string") {
+      fields[field] = value.trim();
+    }
+  }
+
+  return fields;
+};
+
 export const updateVendorProfile = async (data: VendorProfileInput) => {
   await requirePermission(permissions.vendor_profile_update);
 
   const { userId } = await auth();
+
   if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  const businessName = data.businessName.trim();
+  const businessName = data.businessName?.trim();
+
   if (!businessName) {
     throw new Error("Business name is required");
   }
 
+  if (businessName.length > 100) {
+    throw new Error("Business name cannot exceed 100 characters");
+  }
+
   const vendor = await getCurrentVendor();
+  const profileFields = buildProfileFields(data);
+  const now = new Date().toISOString();
 
   if (vendor) {
-    // Preserve existing slug if business name has not changed and slug exists
     const hasNameChanged =
-      vendor.businessName?.trim().toLowerCase() !== businessName.toLowerCase();
+      vendor.businessName?.trim().toLowerCase() !==
+      businessName.toLowerCase();
 
     const finalSlug =
       !hasNameChanged && vendor.slug?.current
         ? vendor.slug.current
         : await generateUniqueVendorSlug(businessName, vendor._id);
 
-    // Update existing vendor document
     const updateData: Record<string, unknown> = {
       businessName,
       slug: { _type: "slug", current: finalSlug },
+      updatedAt: now,
+      ...profileFields,
     };
-
-    const trimmedDescription = data.description?.trim();
-    if (trimmedDescription !== undefined) {
-      updateData.description = trimmedDescription;
-    }
 
     if (data.logoAssetId) {
       updateData.logo = {
         _type: "image",
-        asset: { _type: "reference", _ref: data.logoAssetId },
+        asset: {
+          _type: "reference",
+          _ref: data.logoAssetId,
+        },
       };
     }
 
@@ -97,50 +162,39 @@ export const updateVendorProfile = async (data: VendorProfileInput) => {
     if (vendor.slug?.current && vendor.slug.current !== finalSlug) {
       revalidatePath(`/vendor/${vendor.slug.current}`);
     }
+
     revalidatePath(`/vendor/${finalSlug}`);
   } else {
-    // Create new vendor document for first-time vendor onboarding with collision-safe slug
     const finalSlug = await generateUniqueVendorSlug(businessName);
 
     const user = await currentUser();
     const email = user?.emailAddresses?.[0]?.emailAddress || "";
 
-    const newVendor: {
-      _type: "vendor";
-      businessName: string;
-      slug: { _type: "slug"; current: string };
-      clerkUserId: string;
-      email: string;
-      status: string;
-      createdAt: string;
-      description?: string;
-      logo?: {
-        _type: "image";
-        asset: { _type: "reference"; _ref: string };
-      };
-    } = {
-      _type: "vendor",
+    const newVendor = {
+      _type: "vendor" as const,
       businessName,
-      slug: { _type: "slug", current: finalSlug },
+      slug: { _type: "slug" as const, current: finalSlug },
       clerkUserId: userId,
       email,
       status: "pending",
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
+      ...profileFields,
+      ...(data.logoAssetId
+        ? {
+          logo: {
+            _type: "image" as const,
+            asset: {
+              _type: "reference" as const,
+              _ref: data.logoAssetId,
+            },
+          },
+        }
+        : {}),
     };
 
-    const trimmedDescription = data.description?.trim();
-    if (trimmedDescription) {
-      newVendor.description = trimmedDescription;
-    }
-
-    if (data.logoAssetId) {
-      newVendor.logo = {
-        _type: "image",
-        asset: { _type: "reference", _ref: data.logoAssetId },
-      };
-    }
-
     await writeClient.create(newVendor);
+
     revalidatePath(`/vendor/${finalSlug}`);
   }
 

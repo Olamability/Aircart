@@ -12,13 +12,13 @@ export interface AdminProductInput {
   price: number;
   discount?: number;
   stock: number;
-  status?: "new" | "hot" | "sale" | "available";
+  status?: "new" | "hot" | "sale" | "available" | "draft" | "archived";
   isNew?: boolean;
   variant?: "gadget" | "appliances" | "refrigerator" | "others" | "food & beverages";
   isfeatured?: boolean;
   brandId?: string;
   categoryIds: string[];
-  vendorId: string;
+  vendorId?: string; // Optional for platform-owned products
   imageAssetId?: string;
 }
 
@@ -34,20 +34,23 @@ export const createAdminProduct = async (data: AdminProductInput) => {
   if (data.stock < 0) {
     throw new Error("Stock cannot be negative");
   }
-  if (!data.vendorId) {
-    throw new Error("Vendor assignment is required");
-  }
   if (!data.categoryIds?.length) {
     throw new Error("At least one category is required");
   }
 
-  // Validate vendor exists
-  const vendor = await client.fetch(
-    `*[_type == "vendor" && _id == $vendorId][0]{ _id }`,
-    { vendorId: data.vendorId }
-  );
-  if (!vendor) {
-    throw new Error("Selected vendor does not exist");
+  // Validate vendor if assigned (platform-owned products omit vendor)
+  const isVendorProduct = Boolean(data.vendorId && data.vendorId !== "platform");
+  let vendorReference: { _type: "reference"; _ref: string } | undefined;
+
+  if (isVendorProduct && data.vendorId) {
+    const vendor = await client.fetch(
+      `*[_type == "vendor" && _id == $vendorId][0]{ _id }`,
+      { vendorId: data.vendorId }
+    );
+    if (!vendor) {
+      throw new Error("Selected vendor does not exist");
+    }
+    vendorReference = { _type: "reference", _ref: vendor._id };
   }
 
   let brandReference;
@@ -74,14 +77,17 @@ export const createAdminProduct = async (data: AdminProductInput) => {
     price: data.price,
     discount: data.discount,
     stock: data.stock,
-    status: data.status,
+    status: data.status || "available",
     isNew: data.isNew,
     variant: data.variant,
     isfeatured: data.isfeatured,
     brand: brandReference,
     categories: categoryReferences,
-    vendor: { _type: "reference", _ref: vendor._id },
   };
+
+  if (vendorReference) {
+    doc.vendor = vendorReference;
+  }
 
   if (data.imageAssetId) {
     doc.image = [
@@ -116,11 +122,8 @@ export const updateAdminProduct = async (
   if (data.variant !== undefined) updateData.variant = data.variant;
   if (data.isfeatured !== undefined) updateData.isfeatured = data.isfeatured;
 
-  if (data.vendorId) {
-    updateData.vendor = { _type: "reference", _ref: data.vendorId };
-  }
-  if (data.brandId) {
-    updateData.brand = { _type: "reference", _ref: data.brandId };
+  if (data.brandId !== undefined) {
+    updateData.brand = data.brandId ? { _type: "reference", _ref: data.brandId } : null;
   }
   if (data.categoryIds) {
     updateData.categories = data.categoryIds.map((id) => ({
@@ -139,9 +142,47 @@ export const updateAdminProduct = async (
     ];
   }
 
-  await writeClient.patch(productId).set(updateData).commit();
+  let patch = writeClient.patch(productId).set(updateData);
+
+  // Manage vendor ownership: platform vs specific vendor
+  if (data.vendorId === "platform" || data.vendorId === "") {
+    patch = patch.unset(["vendor"]);
+  } else if (data.vendorId) {
+    patch = patch.set({ vendor: { _type: "reference", _ref: data.vendorId } });
+  }
+
+  await patch.commit();
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}/edit`);
+  return { success: true };
+};
+
+export const toggleProductPublishAction = async (productId: string, publish: boolean) => {
+  await requirePermission(permissions.products_publish);
+
+  const newStatus = publish ? "available" : "draft";
+  await writeClient.patch(productId).set({ status: newStatus }).commit();
+
+  revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${productId}/edit`);
+  return { success: true, status: newStatus };
+};
+
+export const adjustProductStockAction = async (
+  productId: string,
+  newStock: number,
+  reason?: string
+) => {
+  await requirePermission(permissions.inventory_update);
+
+  if (newStock < 0) {
+    throw new Error("Stock cannot be negative");
+  }
+
+  await writeClient.patch(productId).set({ stock: newStock }).commit();
+
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/inventory");
   return { success: true };
 };
 

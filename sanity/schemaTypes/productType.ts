@@ -89,6 +89,8 @@ export const productType = defineType({
           { title: "Hot", value: "hot" },
           { title: "Sale", value: "sale" },
           { title: "Available", value: "available" },
+          { title: "Draft", value: "draft" },
+          { title: "Archived", value: "archived" },
         ],
       },
     }),
@@ -142,7 +144,7 @@ export const productType = defineType({
       title: "Vendor",
       type: "reference",
       to: [{ type: "vendor" }],
-      validation: (Rule) => Rule.required(),
+      description: "Platform-owned direct products omit vendor",
     }),
   ],
 

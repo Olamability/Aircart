@@ -1,9 +1,10 @@
+
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { urlFor } from "@/sanity/lib/image";
 import { client } from "@/sanity/lib/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -12,7 +13,6 @@ import {
   ShieldCheck,
   MapPin,
   ShoppingBag,
-  RotateCcw,
   Package,
   Plus,
   ChevronRight,
@@ -21,7 +21,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useAuth, useClerk, useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import useStore from "@/store";
 import Container from "@/components/Container";
@@ -39,194 +39,285 @@ import type { ADDRESS_QUERY_RESULT } from "@/sanity.types";
 import AddressDialog from "@/components/AddressDialog";
 
 const CheckoutPage = () => {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedAddressId = searchParams.get("addressId");
 
-  const {
-    items,
-    getTotalPrice,
-    getSubTotalPrice,
-    getItemCount,
-  } = useStore();
-
-  const [loading, setLoading] = useState(false);
-  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(true);
+  const getTotalPrice = useStore((state) => state.getTotalPrice);
+  const getSubTotalPrice = useStore((state) => state.getSubTotalPrice);
+  const getDiscountAmount = useStore((state) => state.getDiscountAmount);
   const groupedItems = useStore((state) => state.getGroupedItems());
 
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(true);
+
   const { isLoaded, isSignedIn } = useAuth();
-  const { openSignIn } = useClerk();
   const { user } = useUser();
 
-  const [addresses, setAddresses] = useState<ADDRESS_QUERY_RESULT | null>(null);
+  const [addresses, setAddresses] = useState<ADDRESS_QUERY_RESULT | null>(
+    null,
+  );
+
   const [selectedAddresses, setSelectedAddresses] = useState<
     ADDRESS_QUERY_RESULT[number] | null
   >(null);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!user?.id) return;
-    setLoading(true);
+
+    setAddressLoading(true);
 
     try {
-      const query = `*[_type == "address" && clerkUserId == $userId ] | order(CreatedAT desc)`;
-      const data = await client.fetch(query, { userId: user?.id });
+      const query = `
+        *[_type == "address" && clerkUserId == $userId]
+        | order(CreatedAT desc)
+      `;
+
+      const data: ADDRESS_QUERY_RESULT = await client.fetch(query, {
+        userId: user.id,
+      });
 
       setAddresses(data);
 
+      // When Cart supplied an address ID, preserve that exact selection.
+      if (requestedAddressId) {
+        const requestedAddress = data.find(
+          (address) => address._id === requestedAddressId,
+        );
+
+        if (requestedAddress) {
+          setSelectedAddresses(requestedAddress);
+        } else {
+          setSelectedAddresses(null);
+
+          toast.error(
+            "Your previously selected address is unavailable. Please select another address.",
+          );
+        }
+
+        return;
+      }
+
+      // Only use the default/first address when checkout was
+      // opened without an address ID.
       const defaultAddress = data.find(
-        (addr: ADDRESS_QUERY_RESULT[number]) => addr.Default === true,
+        (address) => address.Default === true,
       );
 
-      if (defaultAddress) {
-        setSelectedAddresses(defaultAddress);
-      } else if (data.length > 0) {
-        setSelectedAddresses(data[0]);
-      }
+      setSelectedAddresses(defaultAddress ?? data[0] ?? null);
     } catch (error) {
-      console.log("Addresses fetching error", error);
+      console.error("Address fetching error:", error);
+
+      setAddresses(null);
+      setSelectedAddresses(null);
+
+      toast.error("Unable to load your delivery addresses.");
     } finally {
-      setLoading(false);
+      setAddressLoading(false);
     }
-  };
+  }, [user?.id, requestedAddressId]);
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.id) {
-      const timeoutId = window.setTimeout(() => {
-        void fetchAddresses();
-      }, 0);
-
-      return () => window.clearTimeout(timeoutId);
+      void fetchAddresses();
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, fetchAddresses]);
 
   const handlePayment = async () => {
     if (!isLoaded || !isSignedIn || !user?.id) {
-      toast.error("Please sign in before completing checkout");
+      toast.error("Please sign in before completing checkout.");
       return;
     }
-    if (!selectedAddresses) {
-      toast.error("Please select a delivery address");
+
+    if (!groupedItems.length) {
+      toast.error("Your cart is empty.");
       return;
     }
-    setLoading(true);
+
+    if (addressLoading || !addresses) {
+      toast.error("Please wait while your delivery address is verified.");
+      return;
+    }
+
+    if (!selectedAddresses?._id) {
+      toast.error("Please select a valid delivery address.");
+      return;
+    }
+
+    // Confirm the selected address is still in the current
+    // signed-in user's fetched address list.
+    const verifiedAddress = addresses.find(
+      (address) => address._id === selectedAddresses._id,
+    );
+
+    if (!verifiedAddress) {
+      setSelectedAddresses(null);
+
+      toast.error("Please select a valid delivery address.");
+      return;
+    }
+
+    setPaymentLoading(true);
+
     try {
       const metadata: Metadata = {
         orderNumber: crypto.randomUUID(),
-        customerName: user?.fullName ?? "Unknown",
-        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
-        address: selectedAddresses
-          ? {
-            label: selectedAddresses.label ?? "",
-            name: selectedAddresses.fullName ?? "",
-            address: selectedAddresses.street ?? "",
-            city: selectedAddresses.city ?? "",
-            state: selectedAddresses.state ?? "",
-            zip: selectedAddresses.zip ?? "",
-          }
-          : null,
+        customerName: user.fullName ?? "Customer",
+        customerEmail:
+          user.emailAddresses[0]?.emailAddress ?? "",
+        addressId: verifiedAddress._id,
       };
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+
+      const checkoutUrl = await createCheckoutSession(
+        groupedItems,
+        metadata,
+      );
+
+      if (!checkoutUrl) {
+        throw new Error("Unable to generate a payment link.");
       }
+
+      window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Error creating checkout session:", error);
+
       toast.error(
         error instanceof Error
           ? error.message
           : "Unable to create checkout session. Please try again.",
       );
-    } finally {
-      setLoading(false);
+
+      setPaymentLoading(false);
     }
   };
 
-  const totalItemsCount = groupedItems?.reduce(
-    (acc, item) => acc + (item.quantity || 1),
+  const totalItemsCount = groupedItems.reduce(
+    (total, item) => total + item.quantity,
     0,
   );
-  const discountAmount = getSubTotalPrice() - getTotalPrice();
+
+  // Pricing contract:
+  // Original subtotal = price before product discounts.
+  // Discounted subtotal = amount payable for products.
+  // Discount amount = actual savings.
+  const originalSubtotal = getTotalPrice();
+  const discountedSubtotal = getSubTotalPrice();
+  const discountAmount = getDiscountAmount();
+
+  const formatDiscountedUnitPrice = (
+    price: number | undefined,
+    discount: number | undefined,
+  ) => {
+    const safePrice =
+      typeof price === "number" && Number.isFinite(price)
+        ? Math.max(price, 0)
+        : 0;
+
+    const safeDiscount =
+      typeof discount === "number" && Number.isFinite(discount)
+        ? Math.min(Math.max(discount, 0), 100)
+        : 0;
+
+    return safePrice - (safePrice * safeDiscount) / 100;
+  };
 
   return (
-    <div className="bg-slate-50/50 min-h-screen py-6 sm:py-8 lg:py-12 pb-60 md:pb-12">
+    <div className="min-h-screen bg-slate-50/50 py-6 pb-60 sm:py-8 md:pb-12 lg:py-12">
       {isSignedIn ? (
         <Container>
-          {groupedItems?.length ? (
+          {groupedItems.length > 0 ? (
             <>
               {/* Breadcrumb Navigation */}
               <nav
                 aria-label="Breadcrumb"
-                className="mb-5 flex items-center gap-2 text-xs sm:text-sm text-slate-500"
+                className="mb-5 flex items-center gap-2 text-xs text-slate-500 sm:text-sm"
               >
                 <Link
                   href="/"
-                  className="hover:text-shop-dark-green transition-colors"
+                  className="transition-colors hover:text-shop-dark-green"
                 >
                   Home
                 </Link>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+
                 <Link
                   href="/cart"
-                  className="hover:text-shop-dark-green transition-colors"
+                  className="transition-colors hover:text-shop-dark-green"
                 >
                   Cart
                 </Link>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span className="text-slate-900 font-semibold">Checkout</span>
+
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+
+                <span className="font-semibold text-slate-900">
+                  Checkout
+                </span>
               </nav>
 
               {/* Checkout Header */}
-              <div className="mb-6 sm:mb-8 pb-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="mb-6 flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-5 sm:mb-8 sm:flex-row sm:items-end">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-shop-dark-green shadow-2xs">
-                      <ShieldCheck className="w-5 h-5 stroke-[1.75]" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-shop-dark-green shadow-2xs">
+                      <ShieldCheck className="h-5 w-5 stroke-[1.75]" />
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                       Checkout
                     </h1>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
-                    Review your order and select your delivery destination before payment.
+
+                  <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">
+                    Review your order and select your delivery destination
+                    before payment.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-full shadow-2xs">
-                    <Lock className="w-3.5 h-3.5" />
-                    Secure Encrypted Checkout
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 shadow-2xs">
+                    <Lock className="h-3.5 w-3.5" />
+                    Secure Checkout
                   </span>
                 </div>
               </div>
 
-              {/* 2-Column Responsive Checkout Architecture */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-                {/* Left Column: Delivery Address & Order Review */}
-                <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-                  {/* 1. Delivery Address Card */}
-                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+              {/* Main Checkout Layout */}
+              <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+                {/* Delivery Address and Order Review */}
+                <div className="space-y-6 lg:col-span-7 xl:col-span-8">
+                  {/* Delivery Address */}
+                  <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-shop-dark-green">
-                          <MapPin className="w-4 h-4" />
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-100 bg-emerald-50 text-shop-dark-green">
+                          <MapPin className="h-4 w-4" />
                         </div>
-                        <h2 className="font-bold text-base text-slate-900">
+
+                        <h2 className="text-base font-bold text-slate-900">
                           1. Delivery Address
                         </h2>
                       </div>
 
                       {selectedAddresses && (
-                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                        <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
                           Selected
                         </span>
                       )}
                     </div>
 
-                    {addresses && addresses.length > 0 ? (
+                    {addressLoading && !addresses ? (
+                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-8 text-center text-xs text-slate-500">
+                        Loading delivery addresses...
+                      </div>
+                    ) : addresses && addresses.length > 0 ? (
                       <RadioGroup
-                        value={selectedAddresses?._id}
+                        value={selectedAddresses?._id ?? ""}
                         onValueChange={(value) => {
                           const address = addresses.find(
-                            (a) => a._id === value,
+                            (item) => item._id === value,
                           );
+
                           if (address) {
                             setSelectedAddresses(address);
                           }
@@ -234,16 +325,20 @@ const CheckoutPage = () => {
                         className="space-y-2.5"
                       >
                         {addresses.map((address) => {
-                          const isSelected = selectedAddresses?._id === address._id;
+                          const isSelected =
+                            selectedAddresses?._id === address._id;
+
                           return (
                             <div
                               key={address._id}
-                              onClick={() => setSelectedAddresses(address)}
+                              onClick={() =>
+                                setSelectedAddresses(address)
+                              }
                               className={cn(
-                                "flex items-start gap-3 rounded-xl border p-3.5 cursor-pointer transition-all duration-200",
+                                "flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all duration-200",
                                 isSelected
                                   ? "border-shop-dark-green bg-emerald-50/40 ring-1 ring-shop-dark-green/20"
-                                  : "border-slate-200/80 hover:border-slate-300 bg-white",
+                                  : "border-slate-200/80 bg-white hover:border-slate-300",
                               )}
                             >
                               <RadioGroupItem
@@ -254,27 +349,33 @@ const CheckoutPage = () => {
 
                               <label
                                 htmlFor={`checkout-${address._id}`}
-                                className="flex-1 cursor-pointer text-xs space-y-1"
+                                className="flex-1 cursor-pointer space-y-1 text-xs"
                               >
                                 <div className="flex items-center justify-between">
-                                  <span className="font-bold text-sm text-slate-900">
+                                  <span className="text-sm font-bold text-slate-900">
                                     {address.fullName}
                                   </span>
+
                                   {address.label && (
-                                    <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded uppercase">
+                                    <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-600">
                                       {address.label}
                                     </span>
                                   )}
                                 </div>
 
-                                <p className="text-slate-600 text-xs leading-relaxed">
+                                <p className="text-xs leading-relaxed text-slate-600">
                                   {address.street}, {address.city},{" "}
                                   {address.state}
                                 </p>
 
-                                <div className="flex flex-wrap items-center gap-3 text-slate-400 text-[11px] pt-0.5">
-                                  {address.phone && <span>Tel: {address.phone}</span>}
-                                  {address.email && <span>• {address.email}</span>}
+                                <div className="flex flex-wrap items-center gap-3 pt-0.5 text-[11px] text-slate-400">
+                                  {address.phone && (
+                                    <span>Tel: {address.phone}</span>
+                                  )}
+
+                                  {address.email && (
+                                    <span>• {address.email}</span>
+                                  )}
                                 </div>
                               </label>
                             </div>
@@ -282,83 +383,107 @@ const CheckoutPage = () => {
                         })}
                       </RadioGroup>
                     ) : (
-                      <div className="py-6 text-center text-xs text-slate-500 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 p-4">
-                        <MapPin className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="font-medium text-slate-700">No delivery address found</p>
-                        <p className="mt-0.5">Please add a shipping address to proceed with order delivery.</p>
+                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-4 py-6 text-center text-xs text-slate-500">
+                        <MapPin className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+
+                        <p className="font-medium text-slate-700">
+                          No delivery address found
+                        </p>
+
+                        <p className="mt-0.5">
+                          Please add a shipping address to proceed with
+                          order delivery.
+                        </p>
                       </div>
                     )}
 
                     <AddressDialog onSuccess={fetchAddresses}>
                       <Button
                         variant="outline"
-                        className="w-full h-10 rounded-xl text-xs font-semibold border-dashed border-slate-300 hover:border-shop-dark-green hover:bg-emerald-50/30 text-slate-700 cursor-pointer"
+                        className="h-10 w-full cursor-pointer rounded-xl border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:border-shop-dark-green hover:bg-emerald-50/30"
                       >
-                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        <Plus className="mr-1.5 h-3.5 w-3.5" />
                         Add New Delivery Address
                       </Button>
                     </AddressDialog>
                   </div>
 
-                  {/* 2. Compact Order Review Card */}
-                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                  {/* Order Review */}
+                  <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-shop-dark-green">
-                          <ShoppingBag className="w-4 h-4" />
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-100 bg-emerald-50 text-shop-dark-green">
+                          <ShoppingBag className="h-4 w-4" />
                         </div>
-                        <h2 className="font-bold text-base text-slate-900">
+
+                        <h2 className="text-base font-bold text-slate-900">
                           2. Order Review
                         </h2>
+
                         <span className="text-xs font-medium text-slate-500">
-                          ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})
+                          ({totalItemsCount}{" "}
+                          {totalItemsCount === 1 ? "item" : "items"})
                         </span>
                       </div>
 
                       <Link
                         href="/cart"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-shop-dark-green hover:underline decoration-1 underline-offset-2"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-shop-dark-green underline-offset-2 hover:underline"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="h-3.5 w-3.5" />
                         <span>Edit Cart</span>
                       </Link>
                     </div>
 
-                    {/* Compact Item Rows */}
+                    {/* Product Rows */}
                     <div className="divide-y divide-slate-100">
                       {groupedItems.map(({ product, quantity }) => {
+                        const originalUnitPrice =
+                          typeof product.price === "number"
+                            ? product.price
+                            : 0;
+
+                        const discountedUnitPrice =
+                          formatDiscountedUnitPrice(
+                            product.price,
+                            product.discount,
+                          );
+
+                        const hasDiscount =
+                          discountedUnitPrice < originalUnitPrice;
+
                         return (
                           <div
                             key={product._id}
-                            className="py-3 sm:py-3.5 flex items-center justify-between gap-3"
+                            className="flex items-center justify-between gap-3 py-3 sm:py-3.5"
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex min-w-0 items-center gap-3">
                               {/* Product Thumbnail */}
-                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-slate-100/50 p-1 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
+                              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-slate-100/50 p-1 shadow-2xs sm:h-16 sm:w-16">
                                 {product?.image?.[0] ? (
                                   <Image
                                     src={urlFor(product.image[0]).url()}
                                     alt={product.title ?? "Product image"}
                                     width={70}
                                     height={70}
-                                    className="w-full h-full object-contain"
+                                    className="h-full w-full object-contain"
                                   />
                                 ) : (
-                                  <Package className="w-6 h-6 text-slate-300 stroke-1" />
+                                  <Package className="h-6 w-6 stroke-1 text-slate-300" />
                                 )}
                               </div>
 
-                              {/* Title & Metadata */}
+                              {/* Product Details */}
                               <div className="min-w-0 space-y-1">
                                 <Link
                                   href={`/product/${product?.slug?.current}`}
-                                  className="font-semibold text-xs sm:text-sm text-slate-900 hover:text-shop-dark-green transition-colors line-clamp-1"
+                                  className="line-clamp-1 text-xs font-semibold text-slate-900 transition-colors hover:text-shop-dark-green sm:text-sm"
                                 >
                                   {product?.title}
                                 </Link>
 
                                 <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                                  <span className="font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
+                                  <span className="rounded bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-700">
                                     Qty: {quantity}
                                   </span>
 
@@ -369,7 +494,7 @@ const CheckoutPage = () => {
                                   )}
 
                                   {product?.status && (
-                                    <span className="uppercase text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-emerald-800">
                                       {product.status}
                                     </span>
                                   )}
@@ -377,15 +502,27 @@ const CheckoutPage = () => {
                               </div>
                             </div>
 
-                            {/* Line Subtotal */}
-                            <div className="text-right shrink-0">
+                            {/* Discounted Line Total */}
+                            <div className="shrink-0 text-right">
                               <PriceFormat
-                                amount={(product?.price as number) * quantity}
-                                className="text-sm sm:text-base font-bold text-shop-dark-green"
+                                amount={discountedUnitPrice * quantity}
+                                className="text-sm font-bold text-shop-dark-green sm:text-base"
                               />
+
+                              {hasDiscount && (
+                                <PriceFormat
+                                  amount={originalUnitPrice * quantity}
+                                  className="text-[11px] text-slate-400 line-through"
+                                />
+                              )}
+
                               {quantity > 1 && (
                                 <p className="text-[11px] text-slate-400">
-                                  <PriceFormat amount={product?.price} className="text-[11px] text-slate-400" /> each
+                                  <PriceFormat
+                                    amount={discountedUnitPrice}
+                                    className="text-[11px] text-slate-400"
+                                  />{" "}
+                                  each
                                 </p>
                               )}
                             </div>
@@ -396,31 +533,36 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                {/* Right Column: Sticky Order & Payment Summary */}
-                <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
-                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-                    <h2 className="text-lg font-bold text-slate-900 tracking-tight pb-3 border-b border-slate-100">
+                {/* Payment Summary */}
+                <div className="space-y-6 lg:sticky lg:top-24 lg:col-span-5 xl:col-span-4">
+                  <div className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
+                    <h2 className="border-b border-slate-100 pb-3 text-lg font-bold tracking-tight text-slate-900">
                       Payment Summary
                     </h2>
 
                     <div className="space-y-3 text-sm">
-                      {/* Subtotal */}
+                      {/* Original Subtotal */}
                       <div className="flex items-center justify-between text-slate-600">
-                        <span>Items Subtotal</span>
+                        <span>Original Subtotal</span>
+
                         <PriceFormat
-                          amount={getSubTotalPrice()}
+                          amount={originalSubtotal}
                           className="font-semibold text-slate-800"
                         />
                       </div>
 
-                      {/* Discount */}
+                      {/* Product Discounts */}
                       {discountAmount > 0 && (
                         <div className="flex items-center justify-between text-emerald-700">
-                          <span className="font-medium">Marketplace Savings</span>
+                          <span className="font-medium">
+                            Product Discounts
+                          </span>
+
                           <span className="font-bold">
-                            -<PriceFormat
+                            -
+                            <PriceFormat
                               amount={discountAmount}
-                              className="text-emerald-700 font-bold"
+                              className="font-bold text-emerald-700"
                             />
                           </span>
                         </div>
@@ -428,88 +570,116 @@ const CheckoutPage = () => {
 
                       <Separator className="my-2 bg-slate-100" />
 
-                      {/* Total */}
+                      {/* Total Payable */}
                       <div className="flex items-baseline justify-between pt-1">
                         <div>
-                          <span className="text-base font-bold text-slate-900">Total Payable</span>
-                          <p className="text-[11px] text-slate-400 font-normal">All taxes included</p>
+                          <span className="text-base font-bold text-slate-900">
+                            Total Payable
+                          </span>
+
+                          <p className="text-[11px] font-normal text-slate-400">
+                            Before delivery charges
+                          </p>
                         </div>
+
                         <PriceFormat
-                          amount={getTotalPrice()}
-                          className="text-xl sm:text-2xl font-black text-shop-dark-green tracking-tight"
+                          amount={discountedSubtotal}
+                          className="text-xl font-black tracking-tight text-shop-dark-green sm:text-2xl"
                         />
                       </div>
                     </div>
 
-                    {/* Primary Payment CTA Button */}
+                    {/* Payment CTA */}
                     <Button
-                      className="w-full h-12 rounded-xl bg-shop-dark-green text-white font-semibold text-sm sm:text-base hover:bg-shop-dark-green/90 active:scale-[0.99] transition-all duration-200 shadow-xs cursor-pointer"
+                      className="h-12 w-full cursor-pointer rounded-xl bg-shop-dark-green text-sm font-semibold text-white shadow-xs transition-all duration-200 hover:bg-shop-dark-green/90 active:scale-[0.99] sm:text-base"
                       size="lg"
-                      disabled={loading}
+                      disabled={
+                        paymentLoading ||
+                        addressLoading ||
+                        !selectedAddresses
+                      }
                       onClick={handlePayment}
                     >
-                      {loading ? "Please wait..." : "Proceed to Payment"}
+                      {paymentLoading
+                        ? "Connecting..."
+                        : "Proceed to Payment"}
+
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
 
-                    {/* Trust / Security Reassurance */}
-                    <div className="pt-2 border-t border-slate-100 space-y-2 text-[11px] text-slate-500">
+                    {/* Payment Information */}
+                    <div className="space-y-2 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
                       <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>256-bit SSL encrypted Stripe payment processing</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <RotateCcw className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>30-day marketplace return guarantee</span>
+                        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+
+                        <span>
+                          Payment is processed securely through Stripe.
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Mobile Sticky Complete Payment Summary */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/98 backdrop-blur-md px-4 pt-3.5 pb-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] md:hidden">
+              {/* Mobile Sticky Payment Summary */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/98 px-4 pb-4 pt-3.5 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden">
                 <div className="mx-auto w-full max-w-lg space-y-3">
                   {/* Collapsible Summary Header */}
                   <button
                     type="button"
-                    onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
-                    className="w-full flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                    onClick={() =>
+                      setMobileSummaryOpen((current) => !current)
+                    }
+                    aria-expanded={mobileSummaryOpen}
+                    className="flex w-full cursor-pointer items-center justify-between text-xs text-slate-600 transition-colors hover:text-slate-900"
                   >
-                    <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
                       <span>Payment Summary</span>
+
                       <span className="text-xs font-normal text-slate-500">
-                        ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})
+                        ({totalItemsCount}{" "}
+                        {totalItemsCount === 1 ? "item" : "items"})
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-shop-dark-green bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                      <span>{mobileSummaryOpen ? "Hide breakdown" : "View breakdown"}</span>
+
+                    <div className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-shop-dark-green">
+                      <span>
+                        {mobileSummaryOpen
+                          ? "Hide breakdown"
+                          : "View breakdown"}
+                      </span>
+
                       {mobileSummaryOpen ? (
-                        <ChevronDown className="w-3.5 h-3.5" />
+                        <ChevronDown className="h-3.5 w-3.5" />
                       ) : (
-                        <ChevronUp className="w-3.5 h-3.5" />
+                        <ChevronUp className="h-3.5 w-3.5" />
                       )}
                     </div>
                   </button>
 
-                  {/* Complete Breakdown */}
+                  {/* Mobile Breakdown */}
                   {mobileSummaryOpen && (
-                    <div className="space-y-2 text-xs pt-2 border-t border-slate-100 animate-in fade-in-50 duration-200">
+                    <div className="animate-in space-y-2 border-t border-slate-100 pt-2 text-xs duration-200 fade-in-50">
                       <div className="flex items-center justify-between text-slate-600">
-                        <span>Items Subtotal</span>
+                        <span>Original Subtotal</span>
+
                         <PriceFormat
-                          amount={getSubTotalPrice()}
+                          amount={originalSubtotal}
                           className="font-semibold text-slate-800"
                         />
                       </div>
 
                       {discountAmount > 0 && (
                         <div className="flex items-center justify-between text-emerald-700">
-                          <span className="font-medium">Marketplace Savings</span>
+                          <span className="font-medium">
+                            Product Discounts
+                          </span>
+
                           <span className="font-bold">
-                            -<PriceFormat
+                            -
+                            <PriceFormat
                               amount={discountAmount}
-                              className="text-emerald-700 font-bold"
+                              className="font-bold text-emerald-700"
                             />
                           </span>
                         </div>
@@ -517,24 +687,32 @@ const CheckoutPage = () => {
                     </div>
                   )}
 
-                  {/* Total Row & CTA */}
-                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                  {/* Mobile Total and CTA */}
+                  <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
                     <div>
-                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block">
+                      <span className="block text-[10px] font-medium uppercase tracking-wider text-slate-400">
                         Total Payable
                       </span>
+
                       <PriceFormat
-                        amount={getTotalPrice()}
-                        className="text-lg font-black text-shop-dark-green tracking-tight"
+                        amount={discountedSubtotal}
+                        className="text-lg font-black tracking-tight text-shop-dark-green"
                       />
                     </div>
 
                     <Button
-                      className="flex-1 max-w-[200px] h-11 px-5 rounded-xl bg-shop-dark-green font-semibold text-sm text-white hover:bg-shop-dark-green/90 shadow-xs cursor-pointer"
-                      disabled={loading}
+                      className="h-11 max-w-[200px] flex-1 cursor-pointer rounded-xl bg-shop-dark-green px-5 text-sm font-semibold text-white shadow-xs hover:bg-shop-dark-green/90"
+                      disabled={
+                        paymentLoading ||
+                        addressLoading ||
+                        !selectedAddresses
+                      }
                       onClick={handlePayment}
                     >
-                      {loading ? "Connecting..." : "Proceed to Payment"}
+                      {paymentLoading
+                        ? "Connecting..."
+                        : "Proceed to Payment"}
+
                       <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Button>
                   </div>

@@ -15,6 +15,13 @@ import {
   Boxes,
   Plus,
   ArrowUpRight,
+  Building2,
+  MapPin,
+  Phone,
+  Hash,
+  FileText,
+  History,
+  Clock,
 } from "lucide-react";
 
 import { getAdminVendorDetail } from "@/sanity/queries/adminQueries";
@@ -23,6 +30,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import StatsCard from "@/components/dashboard/StatsCard";
 import VendorStatusActions from "@/components/dashboard/VendorStatusActions";
+import VendorApprovalActionPanel from "@/components/dashboard/VendorApprovalActionPanel";
 import { PermissionGuard } from "@/lib/permissionGuard";
 import { permissions } from "@/lib/permissions";
 
@@ -202,6 +210,109 @@ const AdminVendorDetailPage = async ({
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Compliance and Administrative Review */}
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Business & Verification Details */}
+          <div className="space-y-6 lg:col-span-8">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3.5">
+                <Building2 className="h-4 w-4 text-slate-500" />
+                <h3 className="text-sm font-semibold text-slate-700">Business Registration & Compliance</h3>
+              </div>
+              <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 text-xs">
+                <div>
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Registered Name</span>
+                  <p className="mt-1 text-sm text-slate-800 font-medium">{vendor.registeredBusinessName || "—"}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Business Type</span>
+                  <p className="mt-1 text-sm text-slate-800 font-medium">{vendor.businessType ? vendor.businessType.replace(/_/g, " ") : "—"}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">CAC Registration Number</span>
+                  <p className="mt-1 text-sm font-mono text-slate-800 font-medium">{vendor.cacRegistrationNumber || "—"}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Tax ID Number (TIN)</span>
+                  <p className="mt-1 text-sm font-mono text-slate-800 font-medium">{vendor.taxIdentificationNumber || "—"}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Registered Business Address</span>
+                  <p className="mt-1 text-sm text-slate-800">
+                    {[vendor.registeredBusinessAddress, vendor.registeredBusinessCity, vendor.registeredBusinessState, vendor.registeredBusinessLga].filter(Boolean).join(", ") || "—"}
+                  </p>
+                </div>
+                <div className="sm:col-span-2 border-t border-slate-100 pt-3">
+                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Physical Store Address</span>
+                  <p className="mt-1 text-sm text-slate-800">
+                    {[vendor.storeAddress, vendor.storeCity, vendor.storeState, vendor.storeLga].filter(Boolean).join(", ") || "—"}
+                  </p>
+                </div>
+                {vendor.phone && (
+                  <div>
+                    <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Store Phone</span>
+                    <p className="mt-1 text-sm text-slate-800">{vendor.phone}</p>
+                  </div>
+                )}
+                {vendor.storeEmail && (
+                  <div>
+                    <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Store Email</span>
+                    <p className="mt-1 text-sm text-slate-800">{vendor.storeEmail}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Approval History */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3.5">
+                <History className="h-4 w-4 text-slate-500" />
+                <h3 className="text-sm font-semibold text-slate-700">Audit & Approval History</h3>
+              </div>
+              <div className="p-5">
+                {Array.isArray(vendor.approvalHistory) && vendor.approvalHistory.length > 0 ? (
+                  <ol className="relative border-l border-slate-200 space-y-4 pl-5">
+                    {[...vendor.approvalHistory].reverse().map((entry: any, idx: number) => (
+                      <li key={idx} className="relative">
+                        <span className="absolute -left-[23px] top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-slate-300 ring-2 ring-white" />
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                              {entry.action}
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              {entry.reviewedAt ? new Date(entry.reviewedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                            </span>
+                          </div>
+                          {entry.reviewedBy && (
+                            <p className="text-xs text-slate-500">By: {entry.reviewedBy}</p>
+                          )}
+                          {entry.reason && (
+                            <p className="text-xs text-slate-600 bg-slate-50 rounded p-2 mt-1 border border-slate-100">
+                              {entry.reason}
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-xs text-slate-400 italic">No formal review decisions recorded yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Control Panel */}
+          <div className="lg:col-span-4">
+            <VendorApprovalActionPanel
+              vendorId={vendor._id}
+              vendorName={vendor.businessName}
+              currentStatus={vendorStatus}
+            />
           </div>
         </section>
 

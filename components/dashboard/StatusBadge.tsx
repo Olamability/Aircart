@@ -19,7 +19,8 @@ const statusStyles: Record<string, { bg: string; text: string; border: string }>
   shipped: { bg: "bg-indigo-50 text-indigo-700", text: "text-indigo-700", border: "border-indigo-200" },
   out_for_delivery: { bg: "bg-purple-50 text-purple-700", text: "text-purple-700", border: "border-purple-200" },
 
-  suspended: { bg: "bg-rose-50 text-rose-700", text: "text-rose-700", border: "border-rose-200" },
+  suspended: { bg: "bg-orange-50 text-orange-700", text: "text-orange-700", border: "border-orange-200" },
+  rejected: { bg: "bg-rose-50 text-rose-700", text: "text-rose-700", border: "border-rose-200" },
   cancelled: { bg: "bg-rose-50 text-rose-700", text: "text-rose-700", border: "border-rose-200" },
   failed: { bg: "bg-rose-50 text-rose-700", text: "text-rose-700", border: "border-rose-200" },
   refunded: { bg: "bg-orange-50 text-orange-700", text: "text-orange-700", border: "border-orange-200" },

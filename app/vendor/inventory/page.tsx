@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Warehouse, PlusCircle, AlertTriangle, UserCheck } from "lucide-react";
+import { Warehouse, PlusCircle, AlertTriangle, UserCheck, XCircle } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorInventory } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -68,6 +68,32 @@ const VendorInventoryPage = async ({ searchParams }: VendorInventoryPageProps) =
           icon={AlertTriangle}
           title="Inventory management suspended"
           description="Stock updates and inventory adjustments are disabled while your merchant account is suspended."
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Inventory Management"
+          description="Track product stock counts in real time, monitor depletion alerts, and adjust quantities."
+          badge={<StatusBadge status="rejected" />}
+        />
+        <EmptyState
+          icon={XCircle}
+          title="Inventory tracking not available"
+          description="Your merchant store application was not approved. Inventory management is disabled."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
         />
       </div>
     );

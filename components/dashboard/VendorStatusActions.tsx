@@ -2,8 +2,8 @@
 
 import React, { useTransition } from "react";
 import Link from "next/link";
-import { CheckCircle, Ban, Eye } from "lucide-react";
-import { approveVendor, suspendVendor } from "@/actions/adminVendorActions";
+import { CheckCircle, Ban, Eye, RotateCcw } from "lucide-react";
+import { approveVendor, suspendVendor, reinstateVendorAction } from "@/actions/adminVendorActions";
 
 interface VendorStatusActionsProps {
   vendorId: string;
@@ -41,6 +41,19 @@ const VendorStatusActions: React.FC<VendorStatusActionsProps> = ({
     });
   };
 
+  const handleReinstate = () => {
+    if (!confirm(`Are you sure you want to reinstate vendor "${vendorName}"?`)) {
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await reinstateVendorAction(vendorId);
+      } catch (err) {
+        alert("Failed to reinstate vendor: " + (err instanceof Error ? err.message : "Unknown error"));
+      }
+    });
+  };
+
   return (
     <div className="flex items-center justify-end gap-1.5">
       <Link
@@ -52,7 +65,7 @@ const VendorStatusActions: React.FC<VendorStatusActionsProps> = ({
         View
       </Link>
 
-      {currentStatus !== "approved" && (
+      {currentStatus !== "approved" && currentStatus !== "suspended" && (
         <button
           type="button"
           onClick={handleApprove}
@@ -65,7 +78,20 @@ const VendorStatusActions: React.FC<VendorStatusActionsProps> = ({
         </button>
       )}
 
-      {currentStatus !== "suspended" && (
+      {currentStatus === "suspended" && (
+        <button
+          type="button"
+          onClick={handleReinstate}
+          disabled={isPending}
+          title="Reinstate Vendor"
+          className="inline-flex items-center gap-1 rounded-lg bg-sky-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-sky-700 transition disabled:opacity-50"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Reinstate
+        </button>
+      )}
+
+      {currentStatus !== "suspended" && currentStatus !== "rejected" && (
         <button
           type="button"
           onClick={handleSuspend}

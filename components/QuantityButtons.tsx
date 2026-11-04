@@ -1,3 +1,4 @@
+
 import useStore from "@/store";
 import React from "react";
 import { Button } from "@base-ui/react";
@@ -14,21 +15,36 @@ interface Props {
 const QuantityButtons = ({ product, className }: Props) => {
   const { addItem, removeItem, getItemCount } = useStore();
   const itemCount = getItemCount(product?._id);
-  const isOutOfStock = product?.stock === 0;
+
+  const stock = product?.stock;
+  const hasValidStock =
+    typeof stock === "number" &&
+    Number.isFinite(stock) &&
+    stock >= 0;
+
+  const availableStock = hasValidStock ? stock : 0;
+  const isOutOfStock = availableStock <= 0;
+  const canIncrease = hasValidStock && itemCount < availableStock;
 
   const handleIncrease = () => {
-    if ((product?.stock as number) > itemCount) {
-      addItem(product);
-      toast.success("Quantity Increased Successfully!");
-    } else {
+    if (!canIncrease) {
       toast.error(
-        `Cannot add more than only ${product.stock} available ${product.title}.`,
+        hasValidStock
+          ? `Cannot add more than ${availableStock} available ${product.title}.`
+          : "This product is currently unavailable.",
       );
+      return;
     }
+
+    addItem(product);
+    toast.success("Quantity Increased Successfully!");
   };
 
   const handleDecrease = () => {
+    if (itemCount <= 0) return;
+
     removeItem(product?._id);
+
     if (itemCount > 1) {
       toast.success("Quantity Decreased Successfully");
     } else {
@@ -61,7 +77,7 @@ const QuantityButtons = ({ product, className }: Props) => {
       <Button
         type="button"
         onClick={handleIncrease}
-        disabled={isOutOfStock || (product?.stock as number) <= itemCount}
+        disabled={isOutOfStock || !canIncrease}
         aria-label="Increase quantity"
         className="flex h-5 w-5 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
       >

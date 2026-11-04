@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Package, Truck, AlertTriangle, UserCheck } from "lucide-react";
+import { ShoppingBag, Package, Truck, AlertTriangle, UserCheck, XCircle } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import {
   getVendorOrders,
@@ -79,6 +79,32 @@ const VendorOrdersPage = async ({ searchParams }: VendorOrdersPageProps) => {
           icon={AlertTriangle}
           title="Order management suspended"
           description="Order processing and fulfillment operations are paused while your merchant account is suspended."
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-6 pb-12">
+        <DashboardHeader
+          title="Store Orders"
+          description="Customer orders specifically containing your merchant catalog products."
+          badge={<StatusBadge status="rejected" />}
+        />
+        <EmptyState
+          icon={XCircle}
+          title="Order access not available"
+          description="Your vendor application was not approved. Order management is disabled."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
         />
       </div>
     );

@@ -28,7 +28,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   const fetchProducts = async (categorySlug: string) => {
     setLoading(true);
     try {
-      const query = `*[_type=="product" && references(*[_type == "category" && slug.current == 
+      const query = `*[_type=="product" && (!defined(vendor) || vendor->status == "approved") && references(*[_type == "category" && slug.current == 
       $categorySlug]._id)] | order(title asc){
       ...,"categories": categories[]->title}
       `;

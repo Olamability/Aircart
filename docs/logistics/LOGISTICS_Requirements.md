@@ -1,11 +1,11 @@
-# Airmart Logistics — Requirements Specification
+# Spaazr Logistics — Requirements Specification
 
 ## 1. Purpose
 
-Airmart Logistics is a first-party logistics operation owned and operated by Airmart.
+Spaazr Logistics is a first-party logistics operation owned and operated by Spaazr.
 
-Airmart allows customers and businesses to request delivery services independently of
-whether the shipment originated from an Airmart marketplace purchase.
+Spaazr allows customers and businesses to request delivery services independently of
+whether the shipment originated from an Spaazr marketplace purchase.
 
 Third-party logistics providers are not part of the initial version.
 
@@ -14,7 +14,7 @@ in the future without requiring a fundamental redesign.
 
 ## 2. Operating Model
 
-Airmart controls:
+Spaazr controls:
 
 - Logistics operations
 - Drivers/riders
@@ -25,7 +25,7 @@ Airmart controls:
 - Delivery completion
 - Logistics pricing and configuration
 
-Customers and businesses request delivery services from Airmart Logistics.
+Customers and businesses request delivery services from Spaazr Logistics.
 
 ## 3. Requestors
 
@@ -60,9 +60,9 @@ Businesses can:
 The architecture should support future business features such as bulk deliveries,
 multiple staff members and business reporting.
 
-## 4. Airmart Logistics Operations
+## 4. Spaazr Logistics Operations
 
-Airmart logistics staff can:
+Spaazr logistics staff can:
 
 - View incoming delivery requests
 - Review shipments
@@ -78,7 +78,7 @@ Airmart logistics staff can:
 
 ## 5. Drivers / Riders
 
-Airmart drivers/riders can:
+Spaazr drivers/riders can:
 
 - View assigned deliveries
 - View authorized pickup information
@@ -97,7 +97,7 @@ payment information, pricing or shipment ownership.
 
 ## 6. Super Admin
 
-The existing Airmart Super Admin architecture remains the platform-level authority.
+The existing Spaazr Super Admin architecture remains the platform-level authority.
 
 Super Admin may manage:
 
@@ -111,16 +111,16 @@ Super Admin may manage:
 - Reports
 - Auditing
 
-Existing Airmart authentication, RBAC and authorization architecture must be reused.
+Existing Spaazr authentication, RBAC and authorization architecture must be reused.
 
 ## 7. Shipment Independence
 
 A shipment may originate from:
 
-1. An Airmart marketplace order.
+1. An Spaazr marketplace order.
 2. An independent delivery request.
 
-A logistics shipment must therefore not depend on an Airmart marketplace order.
+A logistics shipment must therefore not depend on an Spaazr marketplace order.
 
 A marketplace order may optionally reference a logistics shipment.
 
@@ -129,7 +129,7 @@ A marketplace order may optionally reference a logistics shipment.
 Customers/businesses own their delivery requests and associated customer-facing
 shipment records.
 
-Airmart owns and controls logistics operational resources including:
+Spaazr owns and controls logistics operational resources including:
 
 - Drivers/riders
 - Vehicles
@@ -175,11 +175,11 @@ The following are explicitly excluded from the initial implementation:
 The architecture may provide future extension points for these capabilities.
 ## 11. Delivery Types
 
-Airmart Logistics v1 should support the following delivery types:
+Spaazr Logistics v1 should support the following delivery types:
 
 ### 11.1 Standard Delivery
 
-Normal delivery with the standard Airmart delivery workflow and pricing.
+Normal delivery with the standard Spaazr delivery workflow and pricing.
 
 ### 11.2 Express Delivery
 
@@ -240,7 +240,7 @@ A shipment may be cancelled when its current state permits cancellation.
 Possible cancellation states include:
 
 - CANCELLED_BY_CUSTOMER
-- CANCELLED_BY_AIRMART
+- CANCELLED_BY_SPAAZR
 - CANCELLED_DUE_TO_PAYMENT
 - CANCELLED_DUE_TO_OPERATIONAL_REASON
 
@@ -373,12 +373,12 @@ Depending on the delivery configuration, completion may require:
 The exact proof-of-delivery requirements will be defined in a later section.
 ## 16. Shipment Data Requirements
 
-Every shipment must contain enough information for Airmart Logistics to safely,
+Every shipment must contain enough information for Spaazr Logistics to safely,
 accurately and efficiently process the delivery.
 
-A shipment must not depend on an Airmart marketplace order.
+A shipment must not depend on an Spaazr marketplace order.
 
-A shipment may optionally reference an Airmart marketplace order when applicable.
+A shipment may optionally reference an Spaazr marketplace order when applicable.
 
 ---
 
@@ -462,7 +462,7 @@ Optional:
 - Delivery instructions
 - Contact notes
 
-The recipient does not necessarily need to have an Airmart account.
+The recipient does not necessarily need to have an Spaazr account.
 
 ---
 
@@ -518,7 +518,7 @@ The destination represents where the shipment is intended to end.
 
 ## 16.7 Package Information
 
-Every shipment must contain package information sufficient for Airmart to determine
+Every shipment must contain package information sufficient for Spaazr to determine
 how it should be transported.
 
 The system should support:
@@ -583,13 +583,13 @@ Instructions must not be used to bypass safety, legal or operational restriction
 
 ## 16.10 Marketplace Order Reference
 
-A shipment may optionally reference an Airmart marketplace order.
+A shipment may optionally reference an Spaazr marketplace order.
 
 This relationship is optional.
 
 Example:
 
-A customer purchases a product on Airmart:
+A customer purchases a product on Spaazr:
 
 Marketplace Order
 → Logistics Shipment
@@ -612,7 +612,7 @@ Where scheduled delivery is selected, the shipment may contain:
 - Confirmed delivery date
 - Confirmed delivery time window
 
-The system must distinguish between what the customer requested and what Airmart
+The system must distinguish between what the customer requested and what Spaazr
 actually confirmed.
 
 ---
@@ -678,13 +678,13 @@ A customer must only be able to access their authorized shipments.
 A driver must only be able to access shipment information required for assigned
 deliveries.
 
-Airmart logistics staff must have access according to their operational permissions.
+Spaazr logistics staff must have access according to their operational permissions.
 
-Super Admin access must remain controlled through the existing Airmart authorization
+Super Admin access must remain controlled through the existing Spaazr authorization
 architecture.
 ## 17. Delivery Pricing
 
-Airmart Logistics must have a controlled and configurable delivery pricing system.
+Spaazr Logistics must have a controlled and configurable delivery pricing system.
 
 Delivery pricing must not be hardcoded into the customer interface.
 
@@ -738,7 +738,7 @@ logic.
 
 ## 17.3 Delivery Zones
 
-Airmart Logistics should support configurable delivery zones.
+Spaazr Logistics should support configurable delivery zones.
 
 Examples:
 
@@ -747,7 +747,7 @@ Examples:
 - Intercity zone
 - Regional zone
 
-The final zone structure must be determined based on Airmart's actual operating
+The final zone structure must be determined based on Spaazr's actual operating
 model.
 
 A shipment should be associated with the applicable pricing zone when the price
@@ -787,7 +787,7 @@ Potential vehicle categories may include:
 - Small truck
 - Other approved vehicle types
 
-The pricing system should allow Airmart to configure pricing according to the
+The pricing system should allow Spaazr to configure pricing according to the
 vehicle required for the shipment.
 
 ---
@@ -890,7 +890,7 @@ logic.
 
 ## 17.12 Pricing Configuration
 
-Authorized Airmart staff should eventually be able to configure:
+Authorized Spaazr staff should eventually be able to configure:
 
 - Base fees
 - Distance rates
@@ -955,9 +955,7 @@ business logic so that future expansion can support additional currencies if
 required.
 ## 18. Driver, Rider, Vehicle & Dispatch Operations
 
-Airmart Logistics is operated directly by Airmart.
-
-Drivers and riders are Airmart-controlled logistics personnel.
+SpaazrSpaazrics is operated directly by SpaazrSpaazrers and riders are SpaazrSpaazrlled logistics personnel.
 
 Third-party logistics operators are not part of the initial implementation.
 
@@ -965,12 +963,12 @@ Third-party logistics operators are not part of the initial implementation.
 
 ## 18.1 Driver / Rider Profile
 
-Each Airmart driver or rider should have an operational profile.
+Each Spaazr driver or rider should have an operational profile.
 
 The profile should support:
 
 - Internal unique identifier
-- Linked Airmart user account
+- Linked Spaazr user account
 - Full name
 - Phone number
 - Profile photo where applicable
@@ -1006,13 +1004,13 @@ be maintained.
 
 For example:
 
-A driver may be ACTIVE as an Airmart driver but currently OFF_DUTY.
+A driver may be ACTIVE as an Spaazr driver but currently OFF_DUTY.
 
 ---
 
 ## 18.3 Driver Verification
 
-Before a driver/rider can receive delivery assignments, Airmart should be able
+Before a driver/rider can receive delivery assignments, Spaazr should be able
 to verify the required information.
 
 Potential verification information may include:
@@ -1033,7 +1031,7 @@ Unverified or suspended drivers must not receive normal delivery assignments.
 
 ## 18.4 Vehicle Management
 
-Airmart should maintain a vehicle registry.
+Spaazr should maintain a vehicle registry.
 
 A vehicle should support:
 
@@ -1081,7 +1079,7 @@ to a new shipment.
 
 ## 18.6 Driver-to-Vehicle Assignment
 
-Airmart should support temporary or operational driver-to-vehicle assignments.
+Spaazr should support temporary or operational driver-to-vehicle assignments.
 
 The system must not permanently assume:
 
@@ -1095,7 +1093,7 @@ Assignments should therefore be represented as operational records where appropr
 
 ## 18.7 Dispatch
 
-Dispatch is responsible for assigning shipments to appropriate Airmart drivers/riders.
+Dispatch is responsible for assigning shipments to appropriate Spaazr drivers/riders.
 
 Dispatch should consider factors such as:
 
@@ -1235,7 +1233,7 @@ Examples:
 
 A failed attempt must not automatically mean the shipment is permanently failed.
 
-Airmart operations should determine the next action.
+Spaazr operations should determine the next action.
 
 ---
 
@@ -1311,7 +1309,7 @@ The architecture should leave room for future automated dispatch based on:
 Automated dispatch is not required for the initial version.
 ## 19. Tracking, Location & Proof of Delivery
 
-Airmart Logistics must provide customers and authorized Airmart personnel with
+Spaazr Logistics must provide customers and authorized Spaazr personnel with
 appropriate shipment tracking information.
 
 Tracking must balance operational usefulness, privacy, security and system
@@ -1372,7 +1370,7 @@ Each event should record:
 
 ## 19.3 Location Data
 
-Airmart may use geographic coordinates for logistics operations.
+Spaazr may use geographic coordinates for logistics operations.
 
 Potential location information includes:
 
@@ -1388,7 +1386,7 @@ Location information must only be collected when operationally justified.
 
 ## 19.4 Driver Location
 
-During an active delivery, Airmart may collect a driver's current or recent
+During an active delivery, Spaazr may collect a driver's current or recent
 location to support:
 
 - Dispatch
@@ -1430,7 +1428,7 @@ help the customer understand the shipment's progress.
 
 ## 19.6 Operational Tracking
 
-Authorized Airmart logistics staff should have a more detailed operational view.
+Authorized Spaazr logistics staff should have a more detailed operational view.
 
 Operations may be able to see:
 
@@ -1469,7 +1467,7 @@ Where supported, location records may include accuracy information.
 
 ## 19.8 Proof of Delivery
 
-Airmart must support proof-of-delivery mechanisms.
+Spaazr must support proof-of-delivery mechanisms.
 
 Possible proof methods include:
 
@@ -1489,7 +1487,7 @@ operational requirements.
 
 ## 19.9 OTP / Delivery Code
 
-For deliveries requiring stronger recipient verification, Airmart may generate
+For deliveries requiring stronger recipient verification, SpaazrSpaazrnerate
 a delivery code or OTP.
 
 The code should:
@@ -1581,13 +1579,13 @@ A customer should not be able to:
 Drivers should only access location and shipment information required for their
 assigned work.
 
-Airmart staff access must follow role and permission requirements.
+Spaazr staff access must follow role and permission requirements.
 
 ---
 
 ## 19.15 Location Retention
 
-Airmart should define how long detailed driver-location history is retained.
+Spaazr should define how long detailed driver-location history is retained.
 
 The system should avoid retaining high-frequency location data indefinitely when
 there is no operational, legal or business requirement to do so.
@@ -1609,7 +1607,7 @@ The system should prevent accidental duplicate submission of the same operationa
 event.
 ## 20. Notifications & Communication
 
-Airmart Logistics must provide timely communication about important shipment
+Spaazr Logistics must provide timely communication about important shipment
 events.
 
 Notifications must be generated from trusted server-side events rather than
@@ -1626,7 +1624,7 @@ The system may send logistics notifications to:
 - Sender
 - Recipient
 - Driver/rider
-- Airmart logistics operations staff
+- Spaazr logistics operations staff
 - Authorized administrators
 
 A recipient should only receive information they are authorized to receive.
@@ -1679,9 +1677,9 @@ where the information and permissions differ.
 
 ## 20.4 Recipient Notifications
 
-A recipient does not necessarily need an Airmart account.
+A recipient does not necessarily need an Spaazr account.
 
-Where a valid recipient contact method is available, Airmart may notify the recipient
+Where a valid recipient contact method is available, Spaazr may notify the recipient
 about relevant delivery events.
 
 Potential notifications include:
@@ -1717,7 +1715,7 @@ Driver notifications should not contain unnecessary customer-sensitive informati
 
 ## 20.6 Operations Notifications
 
-Authorized Airmart logistics staff may receive alerts for:
+Authorized Spaazr logistics staff may receive alerts for:
 
 - New delivery requests
 - Unassigned shipments
@@ -1799,7 +1797,7 @@ Next is **Section 21 — Cancellation, Failed Delivery, Returns & Refunds**.
 That section is the last major business-rule section before we start converting everything we've defined into the **actual domain entities and relationships**.
 ## 21. Cancellation, Failed Delivery, Returns & Refunds
 
-Airmart Logistics must define clear rules for cancellation, failed delivery,
+Spaazr Logistics must define clear rules for cancellation, failed delivery,
 returns and refunds.
 
 These operations must be controlled by server-side business rules.
@@ -1844,7 +1842,7 @@ Shipment state updated
 Refund workflow initiated if applicable
 ## 23. Data Architecture
 
-Airmart Logistics will use a domain-appropriate data architecture.
+Spaazr Logistics will use a domain-appropriate data architecture.
 
 The core principle is:
 
@@ -1855,7 +1853,7 @@ The core principle is:
 
 ### 23.1 Supabase / PostgreSQL
 
-Supabase/PostgreSQL will be the primary transactional database for Airmart Logistics.
+Supabase/PostgreSQL will be the primary transactional database for Spaazr Logistics.
 
 It will store operational data including:
 
@@ -1977,7 +1975,7 @@ Each domain must have a clearly defined source of truth.
 | Logistics media/content | Sanity |
 | Pricing operational configuration | Supabase |
 | Shipment pricing snapshot | Supabase |
-| Authorization | Existing Airmart server-side RBAC |
+| Authorization | Existing Spaazr server-side RBAC |
 
 ### 23.6 Historical Integrity
 
@@ -2018,14 +2016,14 @@ The server must independently:
 
 Client-side state is for presentation and user interaction only.
 
-### 23.8 Existing Airmart Architecture
+### 23.8 Existing Spaazr Architecture
 
-The logistics domain will integrate with the existing Airmart architecture rather than replacing it.
+The logistics domain will integrate with the existing Spaazr architecture rather than replacing it.
 
 Existing systems remain responsible for their existing domains:
 
 - Clerk → authentication
-- Existing Airmart RBAC → authorization
+- Existing Spaazr RBAC → authorization
 - Sanity → marketplace/content management
 - Zustand → client-side application state
 - Stripe/Paystack → payment processing
@@ -2036,7 +2034,7 @@ Supabase will be introduced specifically where relational, transactional, operat
 
 A logistics shipment must remain independent from marketplace orders.
 
-A shipment may optionally reference an Airmart marketplace order.
+A shipment may optionally reference an Spaazr marketplace order.
 
 Therefore:
 
@@ -2045,11 +2043,11 @@ Therefore:
 - Business delivery request → may create a shipment without an order.
 - Shipment → must not require an order to exist.
 
-This ensures Airmart Logistics remains a standalone Airmart service while still integrating naturally with marketplace purchases.
+This ensures Spaazr Logistics remains a standalone Spaazr service while still integrating naturally with marketplace purchases.
 
 ### 23.10 Future Scalability
 
-The initial implementation will remain focused on Airmart's first-party logistics operation.
+The initial implementation will remain focused on Spaazr's first-party logistics operation.
 
 The architecture should remain extensible for future capabilities such as:
 
@@ -2067,7 +2065,7 @@ The architecture should remain extensible for future capabilities such as:
 These capabilities must not be introduced prematurely if they are not required for the initial system.
 ## 24. Supabase Database Schema
 
-Airmart Logistics will use a relational PostgreSQL schema.
+Spaazr Logistics will use a relational PostgreSQL schema.
 
 The schema will prioritize:
 
@@ -2090,9 +2088,9 @@ The initial logistics database will contain the following primary domains.
 - `logistics_customer_profiles`
 - `logistics_business_profiles`
 
-These represent customers and businesses using Airmart Logistics.
+These represent customers and businesses using Spaazr Logistics.
 
-They reference the authenticated Airmart/Clerk identity where applicable.
+They reference the authenticated Spaazr/Clerk identity where applicable.
 
 ---
 
@@ -2174,9 +2172,9 @@ Historical shipment pricing must never depend on the current pricing rules.
 - `logistics_driver_verifications`
 - `logistics_vehicles`
 
-These represent Airmart's operational logistics resources.
+These represent Spaazr's operational logistics resources.
 
-Drivers reference the appropriate authenticated Airmart identity.
+Drivers reference the appropriate authenticated Spaazr identity.
 
 Vehicles are maintained separately from drivers because driver-vehicle relationships can change.
 

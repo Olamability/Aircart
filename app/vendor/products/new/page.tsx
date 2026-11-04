@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Store,
   CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 import VendorProductForm from "@/components/VendorProductForm";
@@ -54,6 +55,34 @@ const NewVendorProductPage = async () => {
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Products
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  // Rejected vendors cannot create products.
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-5 pb-8">
+        <DashboardHeader
+          title="Add Product"
+          description="Create a new product for your marketplace store."
+          badge={<StatusBadge status="rejected" />}
+        />
+
+        <EmptyState
+          icon={XCircle}
+          title="Product creation not available"
+          description="Your vendor application was not approved. You cannot create products."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-xl bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-shop-light-green hover:shadow-md"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              View Store Profile
             </Link>
           }
         />

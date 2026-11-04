@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useAuth, useClerk, useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import useStore from "@/store";
@@ -31,47 +32,72 @@ import EmptyCart from "@/components/EmptyCart";
 import FavoriteIcon from "@/components/FavoriteIcon";
 import QuantityButtons from "@/components/QuantityButtons";
 import { Separator } from "@/components/ui/separator";
-import {
-  createCheckoutSession,
-  type Metadata,
-} from "@/actions/createCheckoutSession";
-import type { ADDRESS_QUERY_RESULT } from "@/sanity.types";
+import type { ADDRESS_QUERY_RESULT, Product } from "@/sanity.types";
 import AddressDialog from "@/components/AddressDialog";
+
+const getValidPrice = (price: Product["price"]): number => {
+  return typeof price === "number" &&
+    Number.isFinite(price) &&
+    price >= 0
+    ? price
+    : 0;
+};
+
+const getValidDiscount = (discount: Product["discount"]): number => {
+  return typeof discount === "number" &&
+    Number.isFinite(discount) &&
+    discount >= 0
+    ? Math.min(discount, 100)
+    : 0;
+};
+
+const hasValidStock = (stock: Product["stock"]): boolean => {
+  return (
+    typeof stock === "number" &&
+    Number.isFinite(stock) &&
+    stock >= 0
+  );
+};
 
 const CartPage = () => {
   const router = useRouter();
 
   const {
-    items,
-    addItem,
-    removeItem,
     deleteCartProduct,
     resetCart,
     getTotalPrice,
     getSubTotalPrice,
+    getDiscountAmount,
     getItemCount,
   } = useStore();
 
   const [loading, setLoading] = useState(false);
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(true);
+
   const groupedItems = useStore((state) => state.getGroupedItems());
 
   const { isLoaded, isSignedIn } = useAuth();
-  const { openSignIn } = useClerk();
   const { user } = useUser();
 
-  const [addresses, setAddresses] = useState<ADDRESS_QUERY_RESULT | null>(null);
+  const [addresses, setAddresses] = useState<ADDRESS_QUERY_RESULT | null>(
+    null,
+  );
+
   const [selectedAddresses, setSelectedAddresses] = useState<
     ADDRESS_QUERY_RESULT[number] | null
   >(null);
 
   const fetchAddresses = async () => {
     if (!user?.id) return;
+
     setLoading(true);
 
     try {
-      const query = `*[_type == "address" && clerkUserId == $userId ] | order(CreatedAT desc)`;
-      const data = await client.fetch(query, { userId: user?.id });
+      const query = `*[_type == "address" && clerkUserId == $userId] | order(CreatedAT desc)`;
+
+      const data = await client.fetch(query, {
+        userId: user.id,
+      });
 
       setAddresses(data);
 
@@ -83,9 +109,12 @@ const CartPage = () => {
         setSelectedAddresses(defaultAddress);
       } else if (data.length > 0) {
         setSelectedAddresses(data[0]);
+      } else {
+        setSelectedAddresses(null);
       }
     } catch (error) {
-      console.log("Addresses fetching error", error);
+      console.error("Addresses fetching error:", error);
+      toast.error("Unable to load your delivery addresses.");
     } finally {
       setLoading(false);
     }
@@ -113,50 +142,80 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    if (!isLoaded || !isSignedIn || !user?.id) {
-      toast.error("Please sign in before checkout");
+    if (!isSignedIn) {
+      toast.error("Please sign in before proceeding to checkout.");
       return;
     }
-    router.push("/checkout");
+
+    if (!selectedAddresses?._id) {
+      toast.error("Please select a delivery address before checkout.");
+      return;
+    }
+
+    const addressExists = addresses?.some(
+      (address) => address._id === selectedAddresses._id,
+    );
+
+    if (!addressExists) {
+      toast.error("Please select a valid delivery address.");
+      return;
+    }
+
+    router.push(
+      `/checkout?addressId=${encodeURIComponent(selectedAddresses._id)}`,
+    );
   };
 
-  const totalItemsCount = groupedItems?.reduce(
-    (acc, item) => acc + (item.quantity || 1),
+  const totalItemsCount = groupedItems.reduce(
+    (acc, item) => acc + item.quantity,
     0,
   );
-  const discountAmount = getSubTotalPrice() - getTotalPrice();
+
+  // Original product total before discounts
+  const originalSubtotal = getTotalPrice();
+
+  // Product total after discounts
+  const discountedSubtotal = getSubTotalPrice();
+
+  // Total savings from product discounts
+  const discountAmount = getDiscountAmount();
 
   return (
-    <div className="bg-slate-50/50 min-h-screen py-6 sm:py-8 lg:py-12 pb-60 md:pb-12">
+    <div className="min-h-screen bg-slate-50/50 py-6 pb-60 sm:py-8 lg:py-12 md:pb-12">
       {isSignedIn ? (
         <Container>
-          {groupedItems?.length ? (
+          {groupedItems.length ? (
             <>
               {/* Cart Header */}
-              <div className="mb-6 sm:mb-8 pb-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="mb-6 flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-5 sm:mb-8 sm:flex-row sm:items-end">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-shop-dark-green shadow-2xs">
-                      <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-shop-dark-green shadow-2xs">
+                      <ShoppingBag className="h-5 w-5 stroke-[1.75]" />
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                       Shopping Cart
                     </h1>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
+
+                  <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">
                     Review your selected items, configure quantities, and proceed to checkout.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs sm:text-sm font-medium text-slate-500 bg-white border border-slate-200/80 px-3 py-1.5 rounded-full shadow-2xs">
-                    <span className="font-bold text-slate-900">{totalItemsCount}</span>{" "}
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-2xs sm:text-sm">
+                    <span className="font-bold text-slate-900">
+                      {totalItemsCount}
+                    </span>{" "}
                     {totalItemsCount === 1 ? "item" : "items"}
                   </span>
+
                   <button
                     type="button"
                     onClick={handleResetCart}
-                    className="text-xs font-semibold text-slate-500 hover:text-rose-600 transition-colors px-2 py-1 cursor-pointer"
+                    className="cursor-pointer px-2 py-1 text-xs font-semibold text-slate-500 transition-colors hover:text-rose-600"
                   >
                     Clear Cart
                   </button>
@@ -164,27 +223,41 @@ const CartPage = () => {
               </div>
 
               {/* Responsive 2-Column Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-                {/* Left Column: Cart Items List */}
-                <div className="lg:col-span-7 xl:col-span-8 space-y-4">
-                  <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs divide-y divide-slate-100">
+              <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+                {/* Left Column: Cart Items */}
+                <div className="space-y-4 lg:col-span-7 xl:col-span-8">
+                  <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
                     {groupedItems.map(({ product }) => {
-                      const itemCount = getItemCount(product?._id);
-                      const isOutOfStock = (product?.stock as number) <= 0;
+                      const itemCount = getItemCount(product._id);
+
+                      const validStock = hasValidStock(product.stock);
+                      const isOutOfStock =
+                        !validStock || product.stock === 0;
+
+                      const originalUnitPrice = getValidPrice(
+                        product.price,
+                      );
+
+                      const discount = getValidDiscount(
+                        product.discount,
+                      );
+
+                      const discountedUnitPrice =
+                        originalUnitPrice *
+                        (1 - discount / 100);
 
                       return (
                         <div
                           key={product._id}
-                          className="p-4 sm:p-6 lg:p-7 flex flex-col sm:flex-row items-start sm:items-stretch justify-between gap-4 sm:gap-6 transition-colors hover:bg-slate-50/40 min-h-[140px] sm:min-h-[160px] lg:min-h-[175px]"
+                          className="flex min-h-[140px] flex-col items-start justify-between gap-4 p-4 transition-colors hover:bg-slate-50/40 sm:min-h-[160px] sm:flex-row sm:items-stretch sm:gap-6 sm:p-6 lg:min-h-[175px] lg:p-7"
                         >
                           {/* Image & Product Info */}
-                          <div className="flex flex-1 min-w-0 items-start gap-4 sm:gap-5 w-full sm:w-auto h-full">
-                            {/* Product Image Stage */}
-                            <div className="w-22 h-22 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-2 sm:p-3 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
-                              {product?.image?.[0] ? (
+                          <div className="flex h-full w-full min-w-0 flex-1 items-start gap-4 sm:w-auto sm:gap-5">
+                            <div className="flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-slate-100/60 p-2 shadow-2xs sm:h-32 sm:w-32 sm:p-3 lg:h-36 lg:w-36">
+                              {product.image?.[0] ? (
                                 <Link
-                                  href={`/product/${product?.slug?.current}`}
-                                  className="w-full h-full flex items-center justify-center"
+                                  href={`/product/${product.slug?.current}`}
+                                  className="flex h-full w-full items-center justify-center"
                                 >
                                   <Image
                                     src={urlFor(product.image[0]).url()}
@@ -192,60 +265,62 @@ const CartPage = () => {
                                     width={180}
                                     height={180}
                                     loading="lazy"
-                                    className={`w-full h-full object-contain transition-transform duration-300 hover:scale-105 ${
-                                      isOutOfStock ? "opacity-40 grayscale-[20%]" : ""
-                                    }`}
+                                    className={cn(
+                                      "h-full w-full object-contain transition-transform duration-300 hover:scale-105",
+                                      isOutOfStock &&
+                                      "opacity-40 grayscale-[20%]",
+                                    )}
                                   />
                                 </Link>
                               ) : (
-                                <Package className="w-10 h-10 text-slate-300 stroke-1" />
+                                <Package className="h-10 w-10 stroke-1 text-slate-300" />
                               )}
                             </div>
 
                             {/* Details Column */}
-                            <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5 space-y-2 h-full">
+                            <div className="flex h-full min-w-0 flex-1 flex-col justify-between space-y-2 py-0.5">
                               <div className="space-y-1.5 sm:space-y-2">
                                 <Link
-                                  href={`/product/${product?.slug?.current}`}
-                                  className="font-bold text-sm sm:text-base lg:text-lg text-slate-900 hover:text-shop-dark-green transition-colors line-clamp-2 leading-snug"
+                                  href={`/product/${product.slug?.current}`}
+                                  className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 transition-colors hover:text-shop-dark-green sm:text-base lg:text-lg"
                                 >
-                                  {product?.title}
+                                  {product.title}
                                 </Link>
 
                                 <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                                  {product?.variant && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-slate-100 font-medium text-slate-700 capitalize text-xs">
+                                  {product.variant && (
+                                    <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-medium capitalize text-slate-700">
                                       {product.variant}
                                     </span>
                                   )}
 
-                                  {product?.status && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-semibold uppercase tracking-wider text-[10px]">
+                                  {product.status && (
+                                    <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-800">
                                       {product.status}
                                     </span>
                                   )}
 
                                   {!isOutOfStock ? (
                                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
                                       In Stock
                                     </span>
                                   ) : (
                                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600">
-                                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                      <span className="h-2 w-2 rounded-full bg-rose-500" />
                                       Out of Stock
                                     </span>
                                   )}
                                 </div>
                               </div>
 
-                              {/* Secondary Actions: Wishlist & Delete */}
-                              <div className="pt-2 flex items-center gap-2.5">
+                              {/* Wishlist & Delete */}
+                              <div className="flex items-center gap-2.5 pt-2">
                                 <div title="Save to Wishlist">
                                   <FavoriteIcon
                                     product={product}
                                     className="static"
-                                    buttonClassName="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-200 bg-white hover:border-rose-200 hover:bg-rose-50/50 shadow-2xs flex items-center justify-center transition-all cursor-pointer"
+                                    buttonClassName="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white shadow-2xs transition-all hover:border-rose-200 hover:bg-rose-50/50 sm:h-9 sm:w-9"
                                     iconSize={15}
                                   />
                                 </div>
@@ -253,29 +328,43 @@ const CartPage = () => {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    deleteCartProduct(product?._id);
+                                    deleteCartProduct(product._id);
                                     toast.success("Item removed from cart");
                                   }}
                                   title="Remove from Cart"
                                   aria-label="Remove item from cart"
-                                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-200 bg-white hover:border-rose-200 hover:bg-rose-50 text-slate-500 hover:text-rose-600 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-2xs transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 sm:h-9 sm:w-9"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
                             </div>
                           </div>
 
                           {/* Price & Quantity Controls */}
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 sm:self-stretch">
+                          <div className="flex w-full items-center justify-between gap-4 border-t border-slate-100 pt-3 sm:w-auto sm:flex-col sm:items-end sm:self-stretch sm:border-t-0 sm:pt-0">
                             <div className="text-left sm:text-right">
                               <PriceFormat
-                                amount={(product?.price as number) * itemCount}
-                                className="text-base sm:text-lg lg:text-xl font-extrabold text-shop-dark-green tracking-tight"
+                                amount={discountedUnitPrice * itemCount}
+                                className="text-base font-extrabold tracking-tight text-shop-dark-green sm:text-lg lg:text-xl"
                               />
+
+                              {discount > 0 && (
+                                <p className="mt-0.5 text-xs text-slate-400 line-through">
+                                  <PriceFormat
+                                    amount={originalUnitPrice * itemCount}
+                                    className="text-xs text-slate-400"
+                                  />
+                                </p>
+                              )}
+
                               {itemCount > 1 && (
-                                <p className="text-xs text-slate-400 mt-0.5">
-                                  <PriceFormat amount={product?.price} className="text-xs text-slate-400" /> each
+                                <p className="mt-0.5 text-xs text-slate-400">
+                                  <PriceFormat
+                                    amount={discountedUnitPrice}
+                                    className="text-xs text-slate-400"
+                                  />{" "}
+                                  each
                                 </p>
                               )}
                             </div>
@@ -289,81 +378,95 @@ const CartPage = () => {
                 </div>
 
                 {/* Right Column: Order Summary & Delivery Address */}
-                <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
-                  {/* Order Summary Card */}
-                  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-                    <h2 className="text-lg font-bold text-slate-900 tracking-tight pb-3 border-b border-slate-100">
+                <div className="space-y-6 lg:sticky lg:top-24 lg:col-span-5 xl:col-span-4">
+                  {/* Order Summary */}
+                  <div className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
+                    <h2 className="border-b border-slate-100 pb-3 text-lg font-bold tracking-tight text-slate-900">
                       Order Summary
                     </h2>
 
                     <div className="space-y-3 text-sm">
-                      {/* Subtotal */}
                       <div className="flex items-center justify-between text-slate-600">
-                        <span>Subtotal</span>
-                        <PriceFormat amount={getSubTotalPrice()} className="font-semibold text-slate-800" />
+                        <span>Original Subtotal</span>
+                        <PriceFormat
+                          amount={originalSubtotal}
+                          className="font-semibold text-slate-800"
+                        />
                       </div>
 
-                      {/* Discount */}
                       {discountAmount > 0 && (
                         <div className="flex items-center justify-between text-emerald-700">
-                          <span className="font-medium">Marketplace Discount</span>
+                          <span className="font-medium">
+                            Product Discounts
+                          </span>
+
                           <span className="font-bold">
-                            -<PriceFormat amount={discountAmount} className="text-emerald-700 font-bold" />
+                            -<PriceFormat
+                              amount={discountAmount}
+                              className="font-bold text-emerald-700"
+                            />
                           </span>
                         </div>
                       )}
 
                       <Separator className="my-2 bg-slate-100" />
 
-                      {/* Total */}
                       <div className="flex items-baseline justify-between pt-1">
                         <div>
-                          <span className="text-base font-bold text-slate-900">Total</span>
-                          <p className="text-[11px] text-slate-400 font-normal">Taxes & fees included</p>
+                          <span className="text-base font-bold text-slate-900">
+                            Total
+                          </span>
+                          <p className="text-[11px] font-normal text-slate-400">
+                            Before delivery charges
+                          </p>
                         </div>
+
                         <PriceFormat
-                          amount={getTotalPrice()}
-                          className="text-xl sm:text-2xl font-black text-shop-dark-green tracking-tight"
+                          amount={discountedSubtotal}
+                          className="text-xl font-black tracking-tight text-shop-dark-green sm:text-2xl"
                         />
                       </div>
                     </div>
 
-                    {/* Checkout CTA */}
                     <Button
-                      className="w-full h-12 rounded-xl bg-shop-dark-green text-white font-semibold text-sm hover:bg-shop-dark-green/90 active:scale-[0.99] transition-all duration-200 shadow-xs cursor-pointer"
+                      className="h-12 w-full cursor-pointer rounded-xl bg-shop-dark-green text-sm font-semibold text-white shadow-xs transition-all duration-200 hover:bg-shop-dark-green/90 active:scale-[0.99]"
                       size="lg"
-                      disabled={loading}
+                      disabled={loading || groupedItems.length === 0}
                       onClick={handleCheckout}
                     >
-                      {loading ? "Processing, please wait..." : "Proceed to Checkout"}
+                      {loading
+                        ? "Loading delivery details..."
+                        : "Proceed to Checkout"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
 
                     {/* Trust Badges */}
-                    <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                    <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
                       <div className="flex items-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
                         <span>Secure Checkout</span>
                       </div>
+
                       <div className="flex items-center gap-1.5">
-                        <RotateCcw className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <RotateCcw className="h-4 w-4 shrink-0 text-emerald-600" />
                         <span>30-Day Returns</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Delivery Address Card */}
+                  {/* Delivery Address */}
                   {addresses && (
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6">
                       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-shop-dark-green" />
-                          <h3 className="font-bold text-sm text-slate-900">
+                          <MapPin className="h-4 w-4 text-shop-dark-green" />
+                          <h3 className="text-sm font-bold text-slate-900">
                             Delivery Address
                           </h3>
                         </div>
+
                         {selectedAddresses && (
-                          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                          <span className="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                             Selected
                           </span>
                         )}
@@ -372,26 +475,29 @@ const CartPage = () => {
                       <RadioGroup
                         value={selectedAddresses?._id}
                         onValueChange={(value) => {
-                          const address = addresses?.find(
+                          const address = addresses.find(
                             (address) => address._id === value,
                           );
-                          if (address) {
-                            setSelectedAddresses(address);
-                          }
+
+                          if (address) setSelectedAddresses(address);
                         }}
                         className="space-y-2.5"
                       >
                         {addresses.map((address) => {
-                          const isSelected = selectedAddresses?._id === address._id;
+                          const isSelected =
+                            selectedAddresses?._id === address._id;
+
                           return (
                             <div
                               key={address._id}
-                              onClick={() => setSelectedAddresses(address)}
+                              onClick={() =>
+                                setSelectedAddresses(address)
+                              }
                               className={cn(
-                                "flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-all duration-200",
+                                "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all duration-200",
                                 isSelected
                                   ? "border-shop-dark-green bg-emerald-50/40 ring-1 ring-shop-dark-green/20"
-                                  : "border-slate-200/80 hover:border-slate-300 bg-white",
+                                  : "border-slate-200/80 bg-white hover:border-slate-300",
                               )}
                             >
                               <RadioGroupItem
@@ -402,24 +508,26 @@ const CartPage = () => {
 
                               <label
                                 htmlFor={address._id}
-                                className="flex-1 cursor-pointer text-xs space-y-0.5"
+                                className="flex-1 cursor-pointer space-y-0.5 text-xs"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="font-bold text-slate-900">
                                     {address.fullName}
                                   </span>
+
                                   {address.label && (
-                                    <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase">
+                                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500">
                                       {address.label}
                                     </span>
                                   )}
                                 </div>
 
-                                <p className="text-slate-600 leading-tight">
-                                  {address.street}, {address.city}, {address.state}
+                                <p className="leading-tight text-slate-600">
+                                  {address.street}, {address.city},{" "}
+                                  {address.state}
                                 </p>
 
-                                <p className="text-slate-400 text-[11px]">
+                                <p className="text-[11px] text-slate-400">
                                   {address.phone}
                                 </p>
                               </label>
@@ -431,9 +539,9 @@ const CartPage = () => {
                       <AddressDialog onSuccess={fetchAddresses}>
                         <Button
                           variant="outline"
-                          className="w-full h-10 rounded-xl text-xs font-semibold border-dashed border-slate-300 hover:border-shop-dark-green hover:bg-emerald-50/30 text-slate-700 cursor-pointer"
+                          className="h-10 w-full cursor-pointer rounded-xl border-dashed border-slate-300 text-xs font-semibold text-slate-700 hover:border-shop-dark-green hover:bg-emerald-50/30"
                         >
-                          <Plus className="w-3.5 h-3.5 mr-1.5" />
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
                           Add New Delivery Address
                         </Button>
                       </AddressDialog>
@@ -442,49 +550,59 @@ const CartPage = () => {
                 </div>
               </div>
 
-              {/* Mobile Sticky Complete Order Summary */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/98 backdrop-blur-md px-4 pt-3.5 pb-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] md:hidden">
+              {/* Mobile Sticky Order Summary */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/90 bg-white/98 px-4 pb-4 pt-3.5 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden">
                 <div className="mx-auto w-full max-w-lg space-y-3">
-                  {/* Collapsible Order Summary Header */}
                   <button
                     type="button"
-                    onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
-                    className="w-full flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                    onClick={() =>
+                      setMobileSummaryOpen(!mobileSummaryOpen)
+                    }
+                    className="flex w-full cursor-pointer items-center justify-between text-xs text-slate-600 transition-colors hover:text-slate-900"
                   >
-                    <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
                       <span>Order Summary</span>
                       <span className="text-xs font-normal text-slate-500">
-                        ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})
+                        ({totalItemsCount}{" "}
+                        {totalItemsCount === 1 ? "item" : "items"})
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-shop-dark-green bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                      <span>{mobileSummaryOpen ? "Hide breakdown" : "View breakdown"}</span>
+
+                    <div className="flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-shop-dark-green">
+                      <span>
+                        {mobileSummaryOpen
+                          ? "Hide breakdown"
+                          : "View breakdown"}
+                      </span>
+
                       {mobileSummaryOpen ? (
-                        <ChevronDown className="w-3.5 h-3.5" />
+                        <ChevronDown className="h-3.5 w-3.5" />
                       ) : (
-                        <ChevronUp className="w-3.5 h-3.5" />
+                        <ChevronUp className="h-3.5 w-3.5" />
                       )}
                     </div>
                   </button>
 
-                  {/* Complete Summary Breakdown */}
                   {mobileSummaryOpen && (
-                    <div className="space-y-2 text-xs pt-2 border-t border-slate-100 animate-in fade-in-50 duration-200">
+                    <div className="animate-in space-y-2 border-t border-slate-100 pt-2 text-xs duration-200 fade-in-50">
                       <div className="flex items-center justify-between text-slate-600">
-                        <span>Subtotal</span>
+                        <span>Original Subtotal</span>
                         <PriceFormat
-                          amount={getSubTotalPrice()}
+                          amount={originalSubtotal}
                           className="font-semibold text-slate-800"
                         />
                       </div>
 
                       {discountAmount > 0 && (
                         <div className="flex items-center justify-between text-emerald-700">
-                          <span className="font-medium">Marketplace Discount</span>
+                          <span className="font-medium">
+                            Product Discounts
+                          </span>
+
                           <span className="font-bold">
                             -<PriceFormat
                               amount={discountAmount}
-                              className="text-emerald-700 font-bold"
+                              className="font-bold text-emerald-700"
                             />
                           </span>
                         </div>
@@ -492,24 +610,24 @@ const CartPage = () => {
                     </div>
                   )}
 
-                  {/* Total Row & Proceed CTA */}
-                  <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
                     <div>
-                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block">
+                      <span className="block text-[10px] font-medium uppercase tracking-wider text-slate-400">
                         Total Payable
                       </span>
+
                       <PriceFormat
-                        amount={getTotalPrice()}
-                        className="text-lg font-black text-shop-dark-green tracking-tight"
+                        amount={discountedSubtotal}
+                        className="text-lg font-black tracking-tight text-shop-dark-green"
                       />
                     </div>
 
                     <Button
-                      className="flex-1 max-w-[200px] h-11 px-5 rounded-xl bg-shop-dark-green font-semibold text-sm text-white hover:bg-shop-dark-green/90 shadow-xs cursor-pointer"
-                      disabled={loading}
+                      className="h-11 max-w-[200px] flex-1 cursor-pointer rounded-xl bg-shop-dark-green px-5 text-sm font-semibold text-white shadow-xs hover:bg-shop-dark-green/90"
+                      disabled={loading || groupedItems.length === 0}
                       onClick={handleCheckout}
                     >
-                      {loading ? "Processing..." : "Proceed to Checkout"}
+                      {loading ? "Loading..." : "Proceed to Checkout"}
                       <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Button>
                   </div>

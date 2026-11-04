@@ -1,5 +1,6 @@
 import React from "react";
-import { Percent, Wallet, DollarSign, AlertCircle, Save } from "lucide-react";
+import Link from "next/link";
+import { Percent, Wallet, DollarSign, AlertCircle, Save, ArrowRight } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
 
@@ -9,7 +10,15 @@ const SuperAdminFeesPage = () => {
       <DashboardHeader
         title="Transaction Fees & Monetization"
         description="Set global marketplace take rates, tiered commission percentages, and merchant payout thresholds."
-      />
+      >
+        <Link
+          href="/super-admin/ledger"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-shop-dark-green px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-shop-light-green transition"
+        >
+          <Wallet className="h-4 w-4" />
+          Vendor Ledger & Settlements <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </DashboardHeader>
 
       {/* Fee KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

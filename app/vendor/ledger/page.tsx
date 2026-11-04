@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { DollarSign, Percent, Wallet, ArrowDownRight, UserCheck } from "lucide-react";
+import { Percent, Wallet, ArrowDownRight, UserCheck, AlertTriangle, XCircle } from "lucide-react";
 import { getCurrentVendor } from "@/lib/vendor";
 import { getVendorLedger } from "@/sanity/queries/vendorQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -48,7 +48,51 @@ const VendorLedgerPage = async () => {
     );
   }
 
+  if (vendor.status === "suspended") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Merchant Financial Ledger"
+          description="Transparent breakdown of your store earnings, platform commission deductions, and pending settlement balances."
+          badge={<StatusBadge status="suspended" />}
+        />
+        <EmptyState
+          icon={AlertTriangle}
+          title="Financial ledger suspended"
+          description="Ledger settlements and earnings payouts are paused while your merchant account is suspended."
+        />
+      </div>
+    );
+  }
+
+  if (vendor.status === "rejected") {
+    return (
+      <div className="space-y-8 pb-12">
+        <DashboardHeader
+          title="Merchant Financial Ledger"
+          description="Transparent breakdown of your store earnings, platform commission deductions, and pending settlement balances."
+          badge={<StatusBadge status="rejected" />}
+        />
+        <EmptyState
+          icon={XCircle}
+          title="Ledger access not available"
+          description="Your merchant store application was not approved. Ledger settlement is disabled."
+          action={
+            <Link
+              href="/vendor/profile"
+              className="inline-flex items-center gap-2 rounded-lg bg-shop-dark-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-shop-light-green transition"
+            >
+              <UserCheck className="h-4 w-4" />
+              View Store Profile
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
   const ledger = await getVendorLedger(vendor._id);
+  
 
   return (
     <div className="space-y-8 pb-12">
@@ -61,12 +105,12 @@ const VendorLedgerPage = async () => {
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <StatsCard
-          title="Total Gross Sales"
-          value={`₦${ledger.totalGross.toLocaleString()}`}
-          icon={DollarSign}
-          color="green"
-          description="Cumulative order item gross"
-        />
+  title="Total Gross Sales"
+  value={`₦${ledger.totalGross.toLocaleString()}`}
+  icon={Wallet}
+  color="green"
+  description="Cumulative order item gross"
+/>
         <StatsCard
           title="Platform Fees (5%)"
           value={`₦${ledger.platformCommission.toLocaleString()}`}

@@ -8,6 +8,11 @@ export const adminNavigation = [
     permission: permissions.products_view,
   },
   {
+    title: "Inventory",
+    href: "/admin/inventory",
+    permission: permissions.inventory_view,
+  },
+  {
     title: "Vendors",
     href: "/admin/vendors",
     permission: permissions.vendors_view,
@@ -111,9 +116,49 @@ export const superAdminNavigation = [
     permission: permissions.platform_fees,
   },
   {
+    title: "Vendor Ledger",
+    href: "/super-admin/ledger",
+    permission: permissions.platform_fees,
+  },
+  {
+    title: "Users",
+    href: "/super-admin/users",
+    permission: permissions.admin_manage,
+  },
+  {
     title: "Admins",
     href: "/super-admin/admins",
     permission: permissions.admin_manage,
+  },
+  {
+    title: "Vendor Approvals",
+    href: "/super-admin/approvals",
+    permission: permissions.approvals_view,
+  },
+  {
+    title: "Products",
+    href: "/admin/products",
+    permission: permissions.products_view,
+  },
+  {
+    title: "Inventory",
+    href: "/admin/inventory",
+    permission: permissions.inventory_view,
+  },
+  {
+    title: "Orders",
+    href: "/admin/orders",
+    permission: permissions.orders_view,
+  },
+  {
+    title: "Transactions",
+    href: "/admin/transactions",
+    permission: permissions.transactions_view,
+  },
+  {
+    title: "Disputes & Claims",
+    href: "/admin/disputes",
+    permission: permissions.disputes_view,
   },
   {
     title: "Role Delegation",

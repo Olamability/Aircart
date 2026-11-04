@@ -6,7 +6,8 @@ import { PermissionGuard } from "@/lib/permissionGuard";
 import { permissions } from "@/lib/permissions";
 
 const AdminApprovalsPage = async () => {
-  const { pendingVendors, suspendedVendors } = await getAdminApprovals();
+  const { pendingVendors, suspendedVendors, rejectedVendors } =
+    await getAdminApprovals();
 
   return (
     <PermissionGuard permission={permissions.approvals_view}>
@@ -17,8 +18,9 @@ const AdminApprovalsPage = async () => {
         />
 
         <ApprovalsHub
-          pendingVendors={pendingVendors}
-          suspendedVendors={suspendedVendors}
+          pendingVendors={pendingVendors ?? []}
+          suspendedVendors={suspendedVendors ?? []}
+          rejectedVendors={rejectedVendors ?? []}
         />
       </div>
     </PermissionGuard>

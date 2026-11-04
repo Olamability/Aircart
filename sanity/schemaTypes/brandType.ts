@@ -47,6 +47,13 @@ export const brandType = defineType({
       type: "boolean",
       initialValue: false,
     }),
+
+    defineField({
+      name: "hidden",
+      title: "Hide from storefront",
+      type: "boolean",
+      initialValue: false,
+    }),
   ],
 
   preview: {

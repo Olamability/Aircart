@@ -92,13 +92,14 @@ const AdminProductsPage = async ({
     },
     {
       key: "vendorId",
-      label: "Vendor",
-      options: vendors.map(
-        (vendor: { _id: string; businessName: string }) => ({
+      label: "Vendor / Ownership",
+      options: [
+        { label: "Platform Owned", value: "platform" },
+        ...vendors.map((vendor: { _id: string; businessName: string }) => ({
           label: vendor.businessName,
           value: vendor._id,
-        })
-      ),
+        })),
+      ],
     },
   ];
 
@@ -318,18 +319,23 @@ const AdminProductsPage = async ({
                         </div>
                       </td>
 
-                      {/* Vendor */}
+                      {/* Vendor / Ownership */}
                       <td className="px-4 py-4">
                         {product.vendor ? (
-                          <Link
-                            href={`/admin/vendors/${product.vendor._id}`}
-                            className="font-medium text-slate-700 transition-colors hover:text-shop-dark-green hover:underline"
-                          >
-                            {product.vendor.businessName}
-                          </Link>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="inline-flex w-fit items-center rounded-md border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800">
+                              Vendor Product
+                            </span>
+                            <Link
+                              href={`/admin/vendors/${product.vendor._id}`}
+                              className="font-medium text-slate-700 transition-colors hover:text-shop-dark-green hover:underline text-xs"
+                            >
+                              {product.vendor.businessName}
+                            </Link>
+                          </div>
                         ) : (
-                          <span className="text-xs italic text-slate-400">
-                            Unassigned
+                          <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                            Platform
                           </span>
                         )}
                       </td>
@@ -384,6 +390,7 @@ const AdminProductsPage = async ({
                           productId={product._id}
                           productSlug={product.slug?.current}
                           productTitle={product.title}
+                          currentStatus={product.status}
                         />
                       </td>
                     </tr>
@@ -501,6 +508,7 @@ const AdminProductsPage = async ({
                       productId={product._id}
                       productSlug={product.slug?.current}
                       productTitle={product.title}
+                      currentStatus={product.status}
                     />
                   </div>
                 </article>

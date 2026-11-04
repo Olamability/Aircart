@@ -60,6 +60,7 @@ const Shop = ({ categories, brands }: Props) => {
       }
       const query = `*[
   _type == "product"
+  && (!defined(vendor) || vendor->status == "approved")
 
   && (
     !defined($selectedCategory)

@@ -18,6 +18,7 @@ const navItems = [
 
 export default function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
 
   const closeMenus = () => {
@@ -25,25 +26,37 @@ export default function LandingHeader() {
     setPartnerOpen(false);
   };
 
-  // Lock background scrolling and support Escape while drawer is open.
+  // Manage drawer visibility, scroll locking and Escape key.
   useEffect(() => {
-    if (!mobileMenuOpen) return;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    const previousOverflow = document.body.style.overflow;
+    if (mobileMenuOpen) {
+      setShouldRender(true);
 
-    document.body.style.overflow = "hidden";
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeMenus();
-      }
-    };
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          closeMenus();
+        }
+      };
 
-    document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = previousOverflow;
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+
+    // Wait for the closing animation before hiding the drawer.
+    timeout = setTimeout(() => {
+      setShouldRender(false);
+    }, 300);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
+      if (timeout) clearTimeout(timeout);
     };
   }, [mobileMenuOpen]);
 
@@ -181,137 +194,136 @@ export default function LandingHeader() {
       </header>
 
       {/* Mobile and tablet overlay drawer */}
-      <div
-        className={`fixed inset-0 z-[100] lg:hidden ${mobileMenuOpen
-            ? "visible pointer-events-auto"
-            : "invisible pointer-events-none"
-          }`}
-        aria-hidden={!mobileMenuOpen}
-      >
-        {/* Blurred backdrop */}
-        <button
-          type="button"
-          tabIndex={mobileMenuOpen ? 0 : -1}
-          aria-label="Close navigation menu"
-          onClick={closeMenus}
-          className={`absolute inset-0 h-full w-full bg-slate-950/45 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "opacity-0"
-            }`}
-        />
-
-        {/* Sliding drawer */}
-        <aside
-          id="landing-mobile-navigation"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Mobile navigation"
-          className={`absolute left-0 top-0 flex h-[100dvh] w-[70vw] max-w-[360px] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+      {shouldRender && (
+        <div
+          className="fixed inset-0 z-[100] lg:hidden"
+          aria-hidden={!mobileMenuOpen}
         >
-          {/* Drawer header */}
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-5">
-            <Logo onClick={closeMenus} />
+          {/* Blurred backdrop */}
+          <button
+            type="button"
+            tabIndex={mobileMenuOpen ? 0 : -1}
+            aria-label="Close navigation menu"
+            onClick={closeMenus}
+            className={`absolute inset-0 h-full w-full bg-slate-950/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${mobileMenuOpen ? "opacity-100" : "opacity-0"
+              }`}
+          />
 
-            <button
-              type="button"
-              onClick={closeMenus}
-              aria-label="Close navigation menu"
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-shop-light-green/20 hover:text-shop-dark-green"
-            >
-              <X size={21} />
-            </button>
-          </div>
+          {/* Sliding drawer */}
+          <aside
+            id="landing-mobile-navigation"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+            className={`absolute left-0 top-0 flex h-[100dvh] w-[85vw] max-w-[420px] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-in-out ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+          >
+            {/* Drawer header */}
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-5">
+              <Logo onClick={closeMenus} />
 
-          {/* Drawer navigation */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5">
-            <nav
-              aria-label="Mobile landing page navigation"
-              className="flex flex-col"
-            >
-              {navItems.slice(0, 3).map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  onClick={closeMenus}
-                  tabIndex={mobileMenuOpen ? 0 : -1}
-                  className="border-b border-slate-100 px-2 py-4 text-sm font-semibold text-slate-700 transition-colors hover:text-shop-dark-green"
-                >
-                  {item.title}
-                </Link>
-              ))}
-
-              {/* Mobile partner dropdown */}
-              <div className="border-b border-slate-100 py-4">
-                <button
-                  type="button"
-                  tabIndex={mobileMenuOpen ? 0 : -1}
-                  aria-expanded={partnerOpen}
-                  onClick={() => setPartnerOpen((open) => !open)}
-                  className="flex w-full items-center justify-between px-2 text-left text-sm font-semibold text-slate-700"
-                >
-                  Become a Partner
-
-                  <ChevronDown
-                    size={17}
-                    className={`transition-transform duration-200 ${partnerOpen ? "rotate-180" : ""
-                      }`}
-                  />
-                </button>
-
-                {partnerOpen && (
-                  <div className="mt-3 space-y-1 pl-3">
-                    <Link
-                      href="/become-a-partner/vendor"
-                      onClick={closeMenus}
-                      tabIndex={mobileMenuOpen ? 0 : -1}
-                      className="block rounded-lg px-3 py-3 text-sm text-slate-600 transition-colors hover:bg-shop-light-green/10 hover:text-shop-dark-green"
-                    >
-                      Become a Vendor
-                    </Link>
-
-                    <Link
-                      href="/become-a-partner/rider"
-                      onClick={closeMenus}
-                      tabIndex={mobileMenuOpen ? 0 : -1}
-                      className="block rounded-lg px-3 py-3 text-sm text-slate-600 transition-colors hover:bg-shop-light-green/10 hover:text-shop-dark-green"
-                    >
-                      Become a Rider
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {navItems.slice(3).map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  onClick={closeMenus}
-                  tabIndex={mobileMenuOpen ? 0 : -1}
-                  className="border-b border-slate-100 px-2 py-4 text-sm font-semibold text-slate-700 transition-colors hover:text-shop-dark-green"
-                >
-                  {item.title}
-                </Link>
-              ))}
-
-              <Link
-                href="/download"
+              <button
+                type="button"
                 onClick={closeMenus}
-                tabIndex={mobileMenuOpen ? 0 : -1}
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-shop-dark-green px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-shop-darkOrange"
+                aria-label="Close navigation menu"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors hover:bg-shop-light-green/20 hover:text-shop-dark-green"
               >
-                Get the App
-                <ArrowUpRight size={16} />
-              </Link>
-            </nav>
-          </div>
+                <X size={21} />
+              </button>
+            </div>
 
-          {/* Drawer footer */}
-          <div className="shrink-0 border-t border-slate-100 px-5 py-4">
-            <p className="text-xs text-slate-400">
-              Shop, explore and move with Spaazr.
-            </p>
-          </div>
-        </aside>
-      </div>
+            {/* Drawer navigation */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5">
+              <nav
+                aria-label="Mobile landing page navigation"
+                className="flex flex-col"
+              >
+                {navItems.slice(0, 3).map((item) => (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    onClick={closeMenus}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    className="border-b border-slate-100 px-2 py-4 text-sm font-semibold text-slate-700 transition-colors hover:text-shop-dark-green"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+
+                {/* Mobile partner dropdown */}
+                <div className="border-b border-slate-100 py-4">
+                  <button
+                    type="button"
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    aria-expanded={partnerOpen}
+                    onClick={() => setPartnerOpen((open) => !open)}
+                    className="flex w-full items-center justify-between px-2 text-left text-sm font-semibold text-slate-700"
+                  >
+                    Become a Partner
+
+                    <ChevronDown
+                      size={17}
+                      className={`transition-transform duration-200 ${partnerOpen ? "rotate-180" : ""
+                        }`}
+                    />
+                  </button>
+
+                  {partnerOpen && (
+                    <div className="mt-3 space-y-1 pl-3">
+                      <Link
+                        href="/become-a-partner/vendor"
+                        onClick={closeMenus}
+                        tabIndex={mobileMenuOpen ? 0 : -1}
+                        className="block rounded-lg px-3 py-3 text-sm text-slate-600 transition-colors hover:bg-shop-light-green/10 hover:text-shop-dark-green"
+                      >
+                        Become a Vendor
+                      </Link>
+
+                      <Link
+                        href="/become-a-partner/rider"
+                        onClick={closeMenus}
+                        tabIndex={mobileMenuOpen ? 0 : -1}
+                        className="block rounded-lg px-3 py-3 text-sm text-slate-600 transition-colors hover:bg-shop-light-green/10 hover:text-shop-dark-green"
+                      >
+                        Become a Rider
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {navItems.slice(3).map((item) => (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    onClick={closeMenus}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    className="border-b border-slate-100 px-2 py-4 text-sm font-semibold text-slate-700 transition-colors hover:text-shop-dark-green"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+
+                <Link
+                  href="/download"
+                  onClick={closeMenus}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-shop-dark-green px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-shop-darkOrange"
+                >
+                  Get the App
+                  <ArrowUpRight size={16} />
+                </Link>
+              </nav>
+            </div>
+
+            {/* Drawer footer */}
+            <div className="shrink-0 border-t border-slate-100 px-5 py-4">
+              <p className="text-xs text-slate-400">
+                Shop, explore and move with Spaazr.
+              </p>
+            </div>
+          </aside>
+        </div>
+      )}
     </>
   );
 }

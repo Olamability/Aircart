@@ -1,6 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { CreditCard, ArrowRight, DollarSign, Percent, Wallet, AlertCircle } from "lucide-react";
+import {
+  CreditCard,
+  ArrowRight,
+  Percent,
+  Wallet,
+  AlertCircle,
+} from "lucide-react";
 import { getAdminTransactions } from "@/sanity/queries/adminQueries";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsCard from "@/components/dashboard/StatsCard";
@@ -18,6 +24,25 @@ interface AdminTransactionsPageProps {
     provider?: string;
   }>;
 }
+const NairaSign = React.forwardRef<
+  SVGSVGElement,
+  React.SVGProps<SVGSVGElement>
+>((props, ref) => (
+  <svg ref={ref} viewBox="0 0 24 24" fill="none" {...props}>
+    <text
+      x="12"
+      y="18"
+      textAnchor="middle"
+      fontSize="19"
+      fontWeight="600"
+      fill="currentColor"
+    >
+      ₦
+    </text>
+  </svg>
+));
+
+NairaSign.displayName = "NairaSign";
 
 const AdminTransactionsPage = async ({ searchParams }: AdminTransactionsPageProps) => {
   const sp = await searchParams;
@@ -72,7 +97,7 @@ const AdminTransactionsPage = async ({ searchParams }: AdminTransactionsPageProp
           <StatsCard
             title="Cleared Volume"
             value={`₦${totalVolume.toLocaleString()}`}
-            icon={DollarSign}
+            icon={NairaSign}
             color="green"
             description={`${paidTransactions.length} settled transaction${paidTransactions.length === 1 ? "" : "s"}`}
           />
@@ -168,10 +193,10 @@ const AdminTransactionsPage = async ({ searchParams }: AdminTransactionsPageProp
                         <td className="px-4 py-4 text-xs text-slate-500 whitespace-nowrap">
                           {tx.createdAt
                             ? new Date(tx.createdAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                             : "—"}
                         </td>
 

@@ -29,6 +29,7 @@ const PriceView = ({
     discount > 0;
 
   const safePrice = hasValidPrice ? price : 0;
+
   const safeDiscount = hasValidDiscount
     ? Math.min(discount, 100)
     : 0;
@@ -45,6 +46,24 @@ const PriceView = ({
         className,
       )}
     >
+      {/* Original price: reserved space keeps selling prices aligned */}
+      <div className="flex min-h-[14px] items-center">
+        {hasDiscount ? (
+          <PriceFormat
+            amount={safePrice}
+            className={cn(
+              "text-[11px] font-medium leading-none text-slate-400 line-through",
+              discountClassName,
+            )}
+          />
+        ) : (
+          <span aria-hidden="true" className="invisible text-[11px] leading-none">
+            ₦0
+          </span>
+        )}
+      </div>
+
+      {/* Main selling price: consistent position across product cards */}
       <PriceFormat
         amount={discountedPrice}
         className={cn(
@@ -52,16 +71,6 @@ const PriceView = ({
           priceClassName,
         )}
       />
-
-      {hasDiscount && (
-        <PriceFormat
-          amount={safePrice}
-          className={cn(
-            "text-[11px] font-medium leading-tight text-slate-400 line-through",
-            discountClassName,
-          )}
-        />
-      )}
     </div>
   );
 };

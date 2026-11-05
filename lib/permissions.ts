@@ -1,3 +1,4 @@
+
 export const roles = {
   customer: "customer",
   vendor: "vendor",
@@ -5,60 +6,84 @@ export const roles = {
   super_admin: "super_admin",
   product_manager: "product_manager",
 } as const;
+
 export const permissions = {
   products_view: "products.view",
   products_create: "products.create",
   products_update: "products.update",
   products_delete: "products.delete",
   products_publish: "products.publish",
+
   vendors_view: "vendors.view",
   vendors_create: "vendors.create",
   vendors_update: "vendors.update",
   vendors_delete: "vendors.delete",
   vendors_approve: "vendors.approve",
   vendors_suspend: "vendors.suspend",
+
   categories_view: "categories.view",
   categories_create: "categories.create",
   categories_update: "categories.update",
   categories_delete: "categories.delete",
+
   brands_view: "brands.view",
   brands_create: "brands.create",
   brands_update: "brands.update",
   brands_delete: "brands.delete",
+
   orders_view: "orders.view",
   orders_update: "orders.update",
+
   customers_view: "customers.view",
   customers_update: "customers.update",
   customers_suspend: "customers.suspend",
+
   services_view: "services.view",
   services_create: "services.create",
   services_update: "services.update",
   services_delete: "services.delete",
+
   inventory_view: "inventory.view",
   inventory_update: "inventory.update",
+
   settings_manage: "settings.manage",
+
   vendor_profile_view: "vendor_profile.view",
   vendor_profile_update: "vendor_profile.update",
+
   approvals_view: "approvals.view",
   approvals_manage: "approvals.manage",
+
+  // Product review moderation
+  reviews_view: "reviews.view",
+  reviews_moderate: "reviews.moderate",
+
   transactions_view: "transactions.view",
+
   compliance_view: "compliance.view",
   compliance_manage: "compliance.manage",
+
   disputes_view: "disputes.view",
   disputes_manage: "disputes.manage",
+
   shipping_view: "shipping.view",
   shipping_manage: "shipping.manage",
+
   telemetry_view: "telemetry.view",
   ledger_view: "ledger.view",
+
   platform_metrics: "platform.metrics",
   platform_fees: "platform.fees",
+
   admin_manage: "admin.manage",
   role_delegation: "role.delegation",
   webhooks_manage: "webhooks.manage",
   platform_settings: "platform.settings",
 } as const;
+
 export const rolePermissions = {
   customer: [],
+
   vendor: [
     permissions.products_view,
     permissions.products_create,
@@ -75,6 +100,7 @@ export const rolePermissions = {
     permissions.telemetry_view,
     permissions.ledger_view,
   ],
+
   product_manager: [
     permissions.products_view,
     permissions.products_create,
@@ -89,45 +115,64 @@ export const rolePermissions = {
     permissions.inventory_view,
     permissions.inventory_update,
   ],
+
   admin: [
     permissions.products_view,
     permissions.products_create,
     permissions.products_update,
     permissions.products_delete,
     permissions.products_publish,
+
     permissions.vendors_view,
     permissions.vendors_create,
     permissions.vendors_update,
     permissions.vendors_delete,
     permissions.vendors_approve,
     permissions.vendors_suspend,
+
     permissions.categories_view,
     permissions.categories_create,
     permissions.categories_update,
     permissions.categories_delete,
+
     permissions.brands_view,
     permissions.brands_create,
     permissions.brands_update,
+
     permissions.orders_view,
     permissions.orders_update,
+
     permissions.customers_view,
     permissions.customers_update,
     permissions.customers_suspend,
+
     permissions.services_view,
     permissions.services_create,
     permissions.services_update,
     permissions.services_delete,
+
     permissions.inventory_view,
     permissions.inventory_update,
+
     permissions.approvals_view,
     permissions.approvals_manage,
+
+    // Product review moderation
+    permissions.reviews_view,
+    permissions.reviews_moderate,
+
     permissions.transactions_view,
+
     permissions.compliance_view,
     permissions.compliance_manage,
+
     permissions.disputes_view,
     permissions.disputes_manage,
+
     permissions.shipping_view,
     permissions.settings_manage,
   ],
+
+  // Super Admin automatically receives every defined permission.
   super_admin: Object.values(permissions),
 } as const;

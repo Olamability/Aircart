@@ -1,12 +1,11 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
-import { Category } from "@/sanity.types";
-import { BRAND_QUERY_RESULT } from "@/sanity.types";
+import { Category, BRAND_QUERY_RESULT, Product } from "@/sanity.types";
 import Container from "@/components/Container";
 import CategoryList from "./shop/CategoryList";
 import BrandList from "./shop/BrandList";
-import { Product } from "@/sanity.types";
 import { useSearchParams } from "next/navigation";
 import PriceList from "./shop/PriceList";
 import { SlidersHorizontal, X, ChevronDown, ChevronUp } from "lucide-react";
@@ -19,11 +18,17 @@ interface Props {
   brands: BRAND_QUERY_RESULT;
 }
 
+type ProductWithReviewSummary = Product & {
+  averageRating: number;
+  reviewCount: number;
+};
+
 const Shop = ({ categories, brands }: Props) => {
   const searchParams = useSearchParams();
   const brandParams = searchParams.get("brand");
   const categoryParams = searchParams.get("category");
-  const [products, setProducts] = useState<Product[]>([]);
+
+  const [products, setProducts] = useState<ProductWithReviewSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -45,6 +50,7 @@ const Shop = ({ categories, brands }: Props) => {
 
   const fetchProducts = async () => {
     setLoading(true);
+
     try {
       let minPrice: number | null = null;
       let maxPrice: number | null = null;
@@ -58,50 +64,75 @@ const Shop = ({ categories, brands }: Props) => {
           maxPrice = max;
         }
       }
+
       const query = `*[
-  _type == "product"
-  && (!defined(vendor) || vendor->status == "approved")
+        _type == "product"
+        && (!defined(vendor) || vendor->status == "approved")
 
-  && (
-    !defined($selectedCategory)
-    || references(
-      *[
-        _type == "category"
-        && slug.current == $selectedCategory
-      ]._id
-    )
-  )
+        && (
+          !defined($selectedCategory)
+          || references(
+            *[
+              _type == "category"
+              && slug.current == $selectedCategory
+            ]._id
+          )
+        )
 
-  && (
-    !defined($selectedBrand)
-    || references(
-      *[
-        _type == "brand"
-        && slug.current == $selectedBrand
-      ]._id
-    )
-  )
+        && (
+          !defined($selectedBrand)
+          || references(
+            *[
+              _type == "brand"
+              && slug.current == $selectedBrand
+            ]._id
+          )
+        )
 
-  && (
-    !defined($minPrice)
-    || price >= $minPrice
-  )
+        && (
+          !defined($minPrice)
+          || price >= $minPrice
+        )
 
-  && (
-    !defined($maxPrice)
-    || price <= $maxPrice
-  )
-]
-| order(title asc) {
-  ...,
-  "categories": categories[]->title
-}`;
+        && (
+          !defined($maxPrice)
+          || price <= $maxPrice
+        )
+      ]
+      | order(title asc) {
+        ...,
+        "categories": categories[]->title,
+
+        "reviewCount": count(*[
+          _type == "review"
+          && product._ref == ^._id
+          && status == "approved"
+        ]),
+
+        "averageRating": coalesce(
+          round(
+            math::avg(*[
+              _type == "review"
+              && product._ref == ^._id
+              && status == "approved"
+            ].rating),
+            1
+          ),
+          0
+        )
+      }`;
 
       const data = await client.fetch(
         query,
-        { selectedCategory: categorySlug, selectedBrand, minPrice, maxPrice },
+        {
+          selectedCategory: categorySlug,
+          selectedBrand,
+          minPrice,
+          maxPrice,
+        },
         { next: { revalidate: 0 } },
       );
+
       setProducts(data);
     } catch (error) {
       console.log("Shop product fetching Error", error);
@@ -137,11 +168,13 @@ const Shop = ({ categories, brands }: Props) => {
             >
               <SlidersHorizontal className="w-4 h-4 text-slate-500" />
               <span>Filters</span>
+
               {activeFilterCount > 0 && (
                 <span className="w-5 h-5 rounded-full bg-shop-dark-green text-white text-[10px] flex items-center justify-center font-bold">
                   {activeFilterCount}
                 </span>
               )}
+
               {showMobileFilters ? (
                 <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
               ) : (
@@ -218,22 +251,23 @@ const Shop = ({ categories, brands }: Props) => {
 
         {/* Main Content Layout */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start pt-6">
-          {/* Filter Sidebar - Desktop & Collapsible Mobile */}
+          {/* Filter Sidebar */}
           <aside
-            className={`w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs lg:sticky lg:top-24 space-y-6 ${
-              showMobileFilters ? "block" : "hidden lg:block"
-            }`}
+            className={`w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs lg:sticky lg:top-24 space-y-6 ${showMobileFilters ? "block" : "hidden lg:block"
+              }`}
           >
             <CategoryList
               categories={categories}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
             />
+
             <BrandList
               brands={brands}
               selectedBrand={selectedBrand}
               setSelectedBrand={setSelectedBrand}
             />
+
             <PriceList
               setSelectedPrice={setSelectedPrice}
               selectedPrice={selectedPrice}
@@ -242,7 +276,6 @@ const Shop = ({ categories, brands }: Props) => {
 
           {/* Product Grid Area */}
           <main className="flex-1 w-full min-w-0">
-            {/* Status bar */}
             <div className="flex items-center justify-between mb-4 text-xs text-slate-500 font-medium">
               <span>
                 {loading
@@ -266,10 +299,10 @@ const Shop = ({ categories, brands }: Props) => {
                   </div>
                 ))}
               </div>
-            ) : products?.length > 0 ? (
+            ) : products.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-                {products?.map((product) => (
-                  <ProductCard key={product?._id} product={product} />
+                {products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
                 ))}
               </div>
             ) : (

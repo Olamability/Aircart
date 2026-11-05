@@ -1,3 +1,4 @@
+
 import { permissions } from "@/lib/permissions";
 
 export const adminNavigation = [
@@ -46,6 +47,11 @@ export const adminNavigation = [
     title: "Approvals",
     href: "/admin/approvals",
     permission: permissions.approvals_view,
+  },
+  {
+    title: "Reviews",
+    href: "/admin/reviews",
+    permission: permissions.reviews_view,
   },
   {
     title: "Transactions",
@@ -149,6 +155,11 @@ export const superAdminNavigation = [
     title: "Orders",
     href: "/admin/orders",
     permission: permissions.orders_view,
+  },
+  {
+    title: "Reviews",
+    href: "/admin/reviews",
+    permission: permissions.reviews_view,
   },
   {
     title: "Transactions",

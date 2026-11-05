@@ -1,11 +1,11 @@
+
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, Product } from "@/sanity.types";
 import { client } from "@/sanity/lib/client";
-import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "motion/react";
-import { Loader2 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import NoProductAvailable from "./NoProductAvailable";
 
@@ -13,34 +13,76 @@ interface Props {
   categories: Category[];
   slug: string;
 }
+
+type ProductWithReviewSummary = Product & {
+  averageRating: number;
+  reviewCount: number;
+};
+
 const CategoryProducts = ({ categories, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<ProductWithReviewSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleCategoryChange = (newSlug: string) => {
     if (newSlug === currentSlug) return;
+
     setCurrentSlug(newSlug);
     router.push(`/category/${newSlug}`, { scroll: false });
   };
 
   const fetchProducts = async (categorySlug: string) => {
     setLoading(true);
+
     try {
-      const query = `*[_type=="product" && (!defined(vendor) || vendor->status == "approved") && references(*[_type == "category" && slug.current == 
-      $categorySlug]._id)] | order(title asc){
-      ...,"categories": categories[]->title}
-      `;
-      const data = await client.fetch(query, { categorySlug });
-      setProducts(data);
+      const query = `*[
+        _type == "product"
+        && (!defined(vendor) || vendor->status == "approved")
+        && references(
+          *[
+            _type == "category"
+            && slug.current == $categorySlug
+          ]._id
+        )
+      ]
+      | order(title asc) {
+        ...,
+        "categories": categories[]->title,
+
+        "reviewCount": count(*[
+          _type == "review"
+          && product._ref == ^._id
+          && status == "approved"
+        ]),
+
+        "averageRating": coalesce(
+          round(
+            math::avg(*[
+              _type == "review"
+              && product._ref == ^._id
+              && status == "approved"
+            ].rating),
+            1
+          ),
+          0
+        )
+      }`;
+
+      const data = await client.fetch<ProductWithReviewSummary[]>(
+        query,
+        { categorySlug },
+      );
+
+      setProducts(data || []);
     } catch (error) {
-      console.error("error fetching products:", error);
+      console.error("Error fetching products:", error);
       setProducts([]);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchProducts(currentSlug);
   }, [currentSlug]);
@@ -51,16 +93,18 @@ const CategoryProducts = ({ categories, slug }: Props) => {
       <div className="w-full md:w-56 shrink-0 bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-xs flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible md:max-h-[calc(100vh-200px)] md:overflow-y-auto scrollbar-hide md:sticky md:top-24">
         {categories?.map((item) => {
           const isActive = item?.slug?.current === currentSlug;
+
           return (
             <button
               type="button"
-              onClick={() => handleCategoryChange(item?.slug?.current as string)}
+              onClick={() =>
+                handleCategoryChange(item?.slug?.current as string)
+              }
               key={item?._id}
-              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap md:whitespace-normal cursor-pointer ${
-                isActive
-                  ? "bg-shop-dark-green text-white shadow-xs"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap md:whitespace-normal cursor-pointer ${isActive
+                ? "bg-shop-dark-green text-white shadow-xs"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
             >
               {item?.title}
             </button>
@@ -87,7 +131,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-            {products.map((product: Product) => (
+            {products.map((product) => (
               <AnimatePresence key={product._id}>
                 <motion.div
                   layout
@@ -96,13 +140,16 @@ const CategoryProducts = ({ categories, slug }: Props) => {
                   exit={{ opacity: 0 }}
                   className="h-full"
                 >
-                  <ProductCard key={product._id} product={product} />
+                  <ProductCard product={product} />
                 </motion.div>
               </AnimatePresence>
             ))}
           </div>
         ) : (
-          <NoProductAvailable selectedTab={currentSlug} className="mt-0 w-full" />
+          <NoProductAvailable
+            selectedTab={currentSlug}
+            className="mt-0 w-full"
+          />
         )}
       </div>
     </div>

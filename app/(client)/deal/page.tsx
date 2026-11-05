@@ -3,7 +3,7 @@ import { getDealProduct } from "@/sanity/queries";
 import Container from "@/components/Container";
 import { FlameIcon } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/sanity.types";
+
 
 const DealPage = async () => {
   const products = await getDealProduct();
@@ -33,7 +33,10 @@ const DealPage = async () => {
         {products && products.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5">
             {products.map((product) => (
-              <ProductCard key={product?._id} product={product as unknown as Product} />
+              <ProductCard
+                key={product._id}
+                product={product}
+              />
             ))}
           </div>
         ) : (

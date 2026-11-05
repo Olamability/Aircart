@@ -1,4 +1,6 @@
+
 "use client";
+
 import NoProductAvailable from "./NoProductAvailable";
 import { useEffect, useState } from "react";
 import HomeTabBar from "@/components/HomeTabBar";
@@ -8,36 +10,96 @@ import { AnimatePresence, motion } from "motion/react";
 import ProductCard from "./ProductCard";
 import type { Product } from "@/sanity.types";
 
-const ProductGrid = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
+type ProductWithReviewSummary = Product & {
+  averageRating: number;
+  reviewCount: number;
+  categoryTitles?: (string | null)[];
+};
 
-  const query = `*[_type == "product" && variant == $variant]
-| order(title desc) {
-  ...,
-  "categories": categories[]->title
-}`;
-  const params = { variant: selectedTab.toLowerCase() };
+// Supports the dynamically constructed GROQ query and its parameters.
+const fetchProductGrid = client.fetch as unknown as (
+  query: string,
+  params: Record<string, string>
+) => Promise<ProductWithReviewSummary[]>;
+
+const ProductGrid = () => {
+  const [products, setProducts] = useState<ProductWithReviewSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(
+    productType[0]?.title || ""
+  );
+
+  const query = `*[
+    _type == "product"
+    && variant == $variant
+    && (!defined(vendor) || vendor->status == "approved")
+  ]
+  | order(title desc) {
+    ...,
+    "categoryTitles": categories[]->title,
+
+    "reviewCount": count(*[
+      _type == "review"
+      && product._ref == ^._id
+      && status == "approved"
+    ]),
+
+    "averageRating": coalesce(
+      round(
+        math::avg(*[
+          _type == "review"
+          && product._ref == ^._id
+          && status == "approved"
+        ].rating),
+        1
+      ),
+      0
+    )
+  }`;
+
+  const params = {
+    variant: selectedTab.toLowerCase(),
+  };
+
   useEffect(() => {
+    let isActive = true;
+
     const fetchData = async () => {
       setLoading(true);
+
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const response = await (client as any).fetch(query, params);
-        setProducts(response || []);
+        const response = await fetchProductGrid(query, params);
+
+        if (isActive) {
+          setProducts(response || []);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
+
+        if (isActive) {
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
+
     fetchData();
+
+    return () => {
+      isActive = false;
+    };
   }, [selectedTab]);
 
   return (
     <div className="w-full">
-      <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+      <HomeTabBar
+        selectedTab={selectedTab}
+        onTabSelect={setSelectedTab}
+      />
+
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 mt-6 sm:mt-8">
           {[...Array(5)].map((_, i) => (
@@ -53,10 +115,10 @@ const ProductGrid = () => {
             </div>
           ))}
         </div>
-      ) : products?.length ? (
+      ) : products.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 mt-6 sm:mt-8">
-          {products?.map((product) => (
-            <AnimatePresence key={product?._id}>
+          {products.map((product) => (
+            <AnimatePresence key={product._id}>
               <motion.div
                 layout
                 initial={{ opacity: 0.2 }}
@@ -70,7 +132,10 @@ const ProductGrid = () => {
           ))}
         </div>
       ) : (
-        <NoProductAvailable selectedTab={selectedTab} className="mt-8" />
+        <NoProductAvailable
+          selectedTab={selectedTab}
+          className="mt-8"
+        />
       )}
     </div>
   );

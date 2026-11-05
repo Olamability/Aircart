@@ -1,27 +1,66 @@
+
 import { defineQuery } from "next-sanity";
+
 const BRAND_QUERY = defineQuery(`
   *[_type == "brand"] | order(title desc)
 `);
 
 const BLOG_QUERY = defineQuery(`
   *[_type == "blog"]
-| order(publishedAt desc) {
-  ...,
-  "category": category->title
-}
+  | order(publishedAt desc) {
+    ...,
+    "category": category->title
+  }
 `);
 
 const DEAL_PRODUCTS = defineQuery(`
-  *[_type == "product" && status == "hot" && (!defined(vendor) || vendor->status == "approved")]
+  *[
+    _type == "product" &&
+    status == "hot" &&
+    (!defined(vendor) || vendor->status == "approved")
+  ]
   | order(_createdAt desc) {
     ...,
-    "categories": categories[]->title,
-    "brand": brand->title
+    "categoryTitles": categories[]->title,
+    "brand": brand->title,
+    "reviewCount": count(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ]),
+    "averageRating": coalesce(round(math::avg(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ].rating), 1), 0)
   }
 `);
 
 const PRODUCT_BY_SLUG_QUERY = defineQuery(
-  ` *[_type == "product" && slug.current == $slug] | order(title asc) [0] { ..., "categories": categories[]->{ _id, title, slug }, "brand": brand->{ _id, title, slug }, "vendor": vendor->{ _id, businessName, slug, logo, description, status } } `,
+  `*[
+    _type == "product" &&
+    slug.current == $slug
+  ] | order(title asc)[0] {
+    ...,
+    "categories": categories[]->{
+      _id,
+      title,
+      slug
+    },
+    "brand": brand->{
+      _id,
+      title,
+      slug
+    },
+    "vendor": vendor->{
+      _id,
+      businessName,
+      slug,
+      logo,
+      description,
+      status
+    }
+  }`,
 );
 
 const BRANDQ = defineQuery(`
@@ -34,6 +73,7 @@ const BRANDQ = defineQuery(`
     slug
   }
 `);
+
 export const PRODUCT_BY_VARIANT_QUERY = defineQuery(`
   *[
     _type == "product" &&
@@ -42,9 +82,20 @@ export const PRODUCT_BY_VARIANT_QUERY = defineQuery(`
   ]
   | order(title desc) {
     ...,
-    "categories": categories[]->title
+    "categoriesTitles": categories[]->title,
+    "reviewCount": count(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ]),
+    "averageRating": coalesce(round(math::avg(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ].rating), 1), 0)
   }
 `);
+
 const FEATURED_PRODUCTS_QUERY = defineQuery(`
   *[
     _type == "product" &&
@@ -54,8 +105,18 @@ const FEATURED_PRODUCTS_QUERY = defineQuery(`
   ]
   | order(_createdAt desc)[0...8] {
     ...,
-    "categories": categories[]->title,
-    "brand": brand->title
+    "categoriesTitles": categories[]->title,
+    "brand": brand->title,
+    "reviewCount": count(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ]),
+    "averageRating": coalesce(round(math::avg(*[
+      _type == "review" &&
+      product._ref == ^._id &&
+      status == "approved"
+    ].rating), 1), 0)
   }
 `);
 
@@ -80,27 +141,87 @@ const ADDRESS_QUERY = defineQuery(`
     clerkUserId
   }
 `);
-const MY_ORDERS_QUERY = defineQuery(
-  `*[_type == "order" && clerkUserId == $userId]
-    | order(orderDate desc) {
+
+const MY_ORDERS_QUERY = defineQuery(`
+  *[
+    _type == "order" &&
+    clerkUserId == $userId
+  ]
+  | order(orderDate desc) {
+    ...,
+    products[] {
       ...,
-      products[] {
-        ...,
-        product-> {
-          _id,
-          title,
-          slug,
-          image
-        }
+      product-> {
+        _id,
+        title,
+        slug,
+        image
       }
-    }`,
-);
+    }
+  }
+`);
+
 const BRAND_SEARCH_QUERY = defineQuery(
-  ` *[ _type == "brand" && lower(title) match $search ] | order(title asc)[0...20] { _id, title, slug } `,
+  `*[
+    _type == "brand" &&
+    lower(title) match $search
+  ] | order(title asc)[0...20] {
+    _id,
+    title,
+    slug
+  }`,
 );
-const VENDOR_BY_SLUG_QUERY = defineQuery(
-  ` *[_type == "vendor" && slug.current == $slug && status == "approved"][0]{ _id, businessName, slug, logo, description, status, createdAt, "products": *[ _type == "product" && vendor._ref == ^._id ]{ _id, _type, _createdAt, _updatedAt, _rev, title, slug, image, description, price, discount, "categories": coalesce(categories, []), stock, brand, status, images, isNew, variant, isfeatured, vendor } } `,
-);
+
+const VENDOR_BY_SLUG_QUERY = defineQuery(`
+  *[
+    _type == "vendor" &&
+    slug.current == $slug &&
+    status == "approved"
+  ][0] {
+    _id,
+    businessName,
+    slug,
+    logo,
+    description,
+    status,
+    createdAt,
+    "products": *[
+      _type == "product" &&
+      vendor._ref == ^._id
+    ] {
+      _id,
+      _type,
+      _createdAt,
+      _updatedAt,
+      _rev,
+      title,
+      slug,
+      image,
+      description,
+      price,
+      discount,
+      "categories": coalesce(categories, []),
+      stock,
+      brand,
+      status,
+      images,
+      isNew,
+      variant,
+      isfeatured,
+      vendor,
+      "reviewCount": count(*[
+        _type == "review" &&
+        product._ref == ^._id &&
+        status == "approved"
+      ]),
+      "averageRating": coalesce(round(math::avg(*[
+        _type == "review" &&
+        product._ref == ^._id &&
+        status == "approved"
+      ].rating), 1), 0)
+    }
+  }
+`);
 
 export {
   BRAND_QUERY,

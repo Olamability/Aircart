@@ -22,6 +22,7 @@ import {
   CreditCard,
   ShieldAlert,
   MessageSquareWarning,
+  MessageSquare,
   Warehouse,
   Truck,
   TrendingUp,
@@ -76,6 +77,7 @@ const iconMap: Record<string, LucideIcon> = {
   Brands: Tag,
   Services: Sparkles,
   Approvals: ShieldCheck,
+  Reviews: MessageSquare,
   Transactions: CreditCard,
   Compliance: ShieldAlert,
   Disputes: MessageSquareWarning,
@@ -192,15 +194,15 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={`group relative flex min-h-11 items-center justify-between rounded-xl px-3.5 py-3 text-sm transition-all duration-200 ${active
-                  ? "bg-[#063C28] font-semibold text-white shadow-sm"
-                  : "text-slate-600 hover:bg-[#F3F7F3] hover:text-[#063C28]"
+                    ? "bg-[#063C28] font-semibold text-white shadow-sm"
+                    : "text-slate-600 hover:bg-[#F3F7F3] hover:text-[#063C28]"
                   }`}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <Icon
                     className={`h-[18px] w-[18px] shrink-0 transition-colors ${active
-                      ? "text-[#F28C28]"
-                      : "text-slate-400 group-hover:text-[#063C28]"
+                        ? "text-[#F28C28]"
+                        : "text-slate-400 group-hover:text-[#063C28]"
                       }`}
                   />
 

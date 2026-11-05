@@ -1,3 +1,4 @@
+
 import { sanityFetch } from "../lib/live";
 import { client } from "../lib/client";
 
@@ -6,11 +7,11 @@ import type {
   Product,
   BRAND_QUERY_RESULT,
   BLOG_QUERY_RESULT,
-  DEAL_PRODUCTS_RESULT,
   PRODUCT_BY_SLUG_QUERY_RESULT,
   ADDRESS_QUERY_RESULT,
   MY_ORDERS_QUERY_RESULT,
 } from "@/sanity.types";
+
 import {
   BRAND_QUERY,
   BLOG_QUERY,
@@ -22,6 +23,7 @@ import {
   BRAND_SEARCH_QUERY,
   VENDOR_BY_SLUG_QUERY,
 } from "./query";
+
 type ProductBySlug = NonNullable<PRODUCT_BY_SLUG_QUERY_RESULT>;
 
 type ProductBySlugWithVendor = Omit<ProductBySlug, "vendor"> & {
@@ -40,6 +42,32 @@ type ProductBySlugWithVendor = Omit<ProductBySlug, "vendor"> & {
     description?: string;
     status?: string;
   };
+};
+
+type ProductWithReviewSummary = Product & {
+  averageRating: number;
+  reviewCount: number;
+  categoryTitles?: (string | null)[];
+};
+
+type DealProduct = ProductWithReviewSummary;
+
+type VendorBySlug = {
+  _id: string;
+  businessName: string;
+  slug?: {
+    current?: string;
+  };
+  logo?: {
+    asset?: {
+      _ref: string;
+      _type: "reference";
+    };
+  };
+  description?: string;
+  status?: string;
+  createdAt?: string;
+  products?: ProductWithReviewSummary[];
 };
 
 const getCategories = async (quantity?: number) => {
@@ -91,13 +119,14 @@ const getBlogs = async () => {
     return [];
   }
 };
-const getDealProduct = async () => {
+
+const getDealProduct = async (): Promise<DealProduct[]> => {
   try {
     const { data } = await sanityFetch({
       query: DEAL_PRODUCTS,
     });
 
-    return (data as DEAL_PRODUCTS_RESULT) ?? [];
+    return (data as unknown as DealProduct[]) ?? [];
   } catch (error) {
     console.log("Error fetching deals:", error);
     return [];
@@ -117,23 +146,17 @@ const getProductBySlug = async (slug: string) => {
     return null;
   }
 };
-type VendorBySlug = {
-  _id: string;
-  businessName: string;
-  slug?: { current?: string };
-  logo?: { asset?: { _ref: string; _type: "reference" } };
-  description?: string;
-  status?: string;
-  createdAt?: string;
-  products?: Product[];
-};
-const getVendorBySlug = async (slug: string): Promise<VendorBySlug | null> => {
+
+const getVendorBySlug = async (
+  slug: string
+): Promise<VendorBySlug | null> => {
   try {
     const { data } = await sanityFetch({
       query: VENDOR_BY_SLUG_QUERY,
       params: { slug },
     });
-    return (data as VendorBySlug) ?? null;
+
+    return (data as unknown as VendorBySlug) ?? null;
   } catch (error) {
     console.log("Error fetching vendor by slug:", error);
     return null;
@@ -164,7 +187,10 @@ const getAddresses = async (userId: string) => {
     return [];
   }
 };
-const getMyOrders = async (userId: string): Promise<MY_ORDERS_QUERY_RESULT> => {
+
+const getMyOrders = async (
+  userId: string
+): Promise<MY_ORDERS_QUERY_RESULT> => {
   try {
     const data = await client.fetch(MY_ORDERS_QUERY, { userId });
 

@@ -1,3 +1,4 @@
+
 import { type SchemaTypeDefinition } from "sanity";
 import { categoryType } from "./categoryType";
 import { addressType } from "./addressType";
@@ -10,6 +11,7 @@ import { orderType } from "./orderType";
 import { productType } from "./productType";
 import { vendorType } from "./vendor";
 import { disputeType } from "./disputeType";
+import { reviewType } from "./reviewType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -24,5 +26,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     productType,
     vendorType,
     disputeType,
+    reviewType,
   ],
 };

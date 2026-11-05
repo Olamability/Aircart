@@ -1,3 +1,4 @@
+
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Title } from "@/components/text";
 import Link from "next/link";
@@ -36,32 +37,32 @@ const HomeBanner = () => {
             </p>
           </div>
 
-          {/* Primary hero CTAs */}
+          {/* Primary shopping action and secondary app-download action */}
           <div className="flex flex-col gap-2.5 pt-1 min-[420px]:flex-row min-[420px]:flex-wrap">
             <Link
+              href="/shop"
+              className="hoverEffect inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-shop-btn-dark-green px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-shop-dark-green/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-shop-dark-green/90 hover:shadow-md"
+            >
+              Shop Now
+              <ArrowRight size={16} className="shrink-0" />
+            </Link>
+
+            <Link
               href="/download"
-              className="hoverEffect inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-shop-btn-dark-green px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-shop-dark-green/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-shop-dark-green/90 hover:shadow-md"
+              className="hoverEffect inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-shop-dark-green/20 bg-white px-5 py-3 text-sm font-semibold text-shop-dark-green transition-all duration-200 hover:-translate-y-0.5 hover:border-shop-dark-green/40 hover:bg-shop-dark-green/5 hover:shadow-md"
             >
               Get the Spaazr App
               <ArrowUpRight size={16} className="shrink-0" />
             </Link>
-
-            <Link
-              href="/become-a-partner"
-              className="hoverEffect inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-shop-dark-green/20 bg-white px-5 py-3 text-sm font-semibold text-shop-dark-green transition-all duration-200 hover:-translate-y-0.5 hover:border-shop-dark-green/40 hover:bg-shop-dark-green/5 hover:shadow-md"
-            >
-              Become a Partner
-              <ArrowRight size={16} className="shrink-0" />
-            </Link>
           </div>
 
-          {/* Secondary action */}
+          {/* Additional partner action */}
           <div className="pt-0.5">
             <Link
-              href="/shop"
+              href="/become-a-partner"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-shop-dark-green underline-offset-4 transition-colors hover:text-shop-darkOrange hover:underline"
             >
-              Shop Now
+              Become a Partner
               <ArrowRight size={15} />
             </Link>
           </div>

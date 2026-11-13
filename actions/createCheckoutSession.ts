@@ -1,7 +1,7 @@
 
 "use server";
 
-import { randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 import stripe from "@/lib/stripe";
 import { urlFor } from "@/sanity/lib/image";
 import { CartItem } from "@/store";
@@ -46,6 +46,19 @@ interface CanonicalAddress {
   zip?: string;
   clerkUserId: string;
 }
+
+const generateOrderNumber = (): string => {
+  const date = new Date()
+    .toISOString()
+    .slice(0, 10)
+    .replace(/-/g, "");
+
+  const uniqueSuffix = randomBytes(6)
+    .toString("hex")
+    .toUpperCase();
+
+  return `SPZ-${date}-${uniqueSuffix}`;
+};
 
 const getValidPrice = (price: unknown): number => {
   if (
@@ -206,7 +219,7 @@ export async function createCheckoutSession(
 
       if (!canonical) {
         throw new Error(
-          `A product in your cart is no longer available. Please review your cart.`,
+          "A product in your cart is no longer available. Please review your cart.",
         );
       }
 
@@ -287,8 +300,8 @@ export async function createCheckoutSession(
 
     const customerName = user.fullName || "Customer";
 
-    // Generate the order number on the server.
-    const orderNumber = randomUUID();
+    // Generate a customer-friendly order number on the server.
+    const orderNumber = generateOrderNumber();
 
     // Look up an existing Stripe customer.
     const customers = await stripe.customers.list({

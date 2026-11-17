@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateMobileRequest } from "@/lib/mobileAuth";
@@ -35,6 +34,10 @@ const ORDERS_QUERY = `*[
       _id,
       title,
       image,
+      "imageUrl": coalesce(
+        image[0].asset->url,
+        images[0].asset->url
+      ),
       "vendorName": vendor->businessName
     }
   }
@@ -51,7 +54,6 @@ export async function GET(request: NextRequest) {
   const headers = getCorsHeaders(request);
 
   try {
-    // Verify the Clerk-issued mobile Bearer token.
     const authenticatedUser =
       await authenticateMobileRequest(request);
 
@@ -62,7 +64,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Only retrieve orders belonging to the authenticated user.
     const orders = await backendClient.fetch(
       ORDERS_QUERY,
       { userId: authenticatedUser.userId },

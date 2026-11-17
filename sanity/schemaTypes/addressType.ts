@@ -1,3 +1,4 @@
+
 import { defineField, defineType } from "sanity";
 import { HomeIcon } from "@sanity/icons/Home";
 
@@ -76,10 +77,10 @@ export const addressType = defineType({
       name: "zip",
       title: "Zip Code",
       type: "string",
-      description: "Format: 12345 or 12345-6789",
+      description: "Format: 12345, 100001, or 12345-6789",
       validation: (Rule) =>
         Rule.required()
-          .regex(/^\d{5}(-\d{4})?$/, {
+          .regex(/^(\d{5,6})(-\d{4})?$/, {
             invert: false,
             name: "zipcode",
           })
@@ -88,8 +89,8 @@ export const addressType = defineType({
               return "ZIP code is required";
             }
 
-            if (!/^\d{5}(-\d{4})?$/.test(zip)) {
-              return "Please enter a valid ZIP code (e.g. 12345 or 12345-6789)";
+            if (!/^(\d{5,6})(-\d{4})?$/.test(zip)) {
+              return "Please enter a valid 5 or 6-digit postal code, or ZIP+4 (e.g. 100001 or 12345-6789)";
             }
 
             return true;
@@ -122,7 +123,7 @@ export const addressType = defineType({
       name: "CreatedAT",
       title: "Created At",
       type: "datetime",
-      description: "Is this the default shipping/delivery address?",
+      description: "Address creation timestamp.",
       initialValue: () => new Date().toISOString(),
     }),
   ],

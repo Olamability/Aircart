@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateMobileRequest } from "@/lib/mobileAuth";
@@ -46,6 +45,10 @@ const ORDER_QUERY = `*[
             _id,
             title,
             image,
+            "imageUrl": coalesce(
+                image[0].asset->url,
+                images[0].asset->url
+            ),
             "vendorName": vendor->businessName
         }
     }
